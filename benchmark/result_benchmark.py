@@ -12,7 +12,7 @@ def run_result_benchmark_cached(circuit_count=100, gate_count=40, qubit_num=4):
     quasim = QuaSim()
 
     cache = SimpleDictCache()
-    quapsim = QuaPSim(SimulatorParams(processes=1, cache_size=1000), cache=cache)  #
+    quapsim = QuaPSim(SimulatorParams(processes=1, cache_size=200), cache=cache)  #
 
     quapsim_circuits = []
     quasim_circuits = []

@@ -46,7 +46,7 @@ def run_time_benchmark_quasim_quapsim_cached(
     quasim = QuaSim()
 
     cache = SimpleDictCache()
-    quapsim = QuaPSim(SimulatorParams(processes=1, cache_size=1000), cache=cache)  #
+    quapsim = QuaPSim(SimulatorParams(processes=1, cache_size=200), cache=cache)  #
 
     quapsim_circuits = []
     quasim_circuits = []
@@ -79,7 +79,7 @@ def run_time_benchmark_quapsim_cached_vs_no_cache(
     circuit_count=1000, gate_count=40, qubit_num=3
 ):
     cache = SimpleDictCache()
-    quapsim_cached = QuaPSim(SimulatorParams(processes=1, cache_size=1000), cache=cache)
+    quapsim_cached = QuaPSim(SimulatorParams(processes=1, cache_size=200), cache=cache)
 
     quapsim_no_cache = QuaPSim(SimulatorParams(processes=1, cache_size=0))
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 @dataclass
 class SimulatorParams:
     processes: int = 1
-    cache_size: float = 0
+    cache_size: int = 0  # For now, measured in # matrices.
 
 
 DEFAULT_PARAMS: SimulatorParams = SimulatorParams(processes=1, cache_size=0)
