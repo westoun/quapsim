@@ -63,7 +63,60 @@ class QuaPSim:
         # highest potential
 
     def _simulate_using_cache(self, circuits: List[Circuit]) -> None:
-        pass
+        for circuit in circuits:
+            if circuit.state is not None:
+                continue
+
+            state = np.zeros(2**circuit.qubit_num, dtype=np.complex128)
+            state[0] = 1
+
+            current_gate_sequence = []
+            for gate in circuit.gates:
+                current_gate_sequence.append(gate)
+
+                cache_value = self.cache.get(current_gate_sequence)
+
+                # Case: gate sequence is in cache
+                if cache_value is not None:
+                    continue
+
+                # Case: gate sequence is not in cache
+                else:
+
+                    # Case: no sequence starting with the current gate is
+                    # in cache.
+                    if len(current_gate_sequence) == 1:
+                        unitary = create_unitary(
+                            current_gate_sequence[0], qubit_num=circuit.qubit_num
+                        )
+                        state = np.matmul(unitary, state)
+                        current_gate_sequence = []
+
+                    # Case: gate sequence with all gates until the current
+                    # gate is in cache. Update state with that sequence and
+                    # let new sequence start with current gate.
+                    else:
+                        unitary = self.cache.get(current_gate_sequence[:-1])
+                        state = np.matmul(unitary, state)
+
+                        current_gate_sequence = current_gate_sequence[-1:]
+
+            # Case: A single gate remains in cache since the
+            # previous n-1 sequence has just been incorporated
+            # in the state.
+            if len(current_gate_sequence) == 1:
+                unitary = create_unitary(
+                    current_gate_sequence[0], qubit_num=circuit.qubit_num
+                )
+                state = np.matmul(unitary, state)
+
+            # Case: The last gates at the end of the sequence are in
+            # cache.
+            elif len(current_gate_sequence) > 1:
+                unitary = self.cache.get(current_gate_sequence[:-1])
+                state = np.matmul(unitary, state)
+
+            circuit.set_state(state)
 
     def _simulate_without_cache(self, circuits: List[Circuit]) -> None:
         for circuit in circuits:
