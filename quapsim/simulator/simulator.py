@@ -37,15 +37,24 @@ class QuaPSim:
 
     def _build_cache(self, circuits: List[Circuit]) -> None:
         # create gate count dict
-        gate_counts = {}
+        gate_frequencies = {}
         for circuit in circuits:
             for gate in circuit.gates:
-                if gate in gate_counts:
-                    gate_counts[gate] += 1
+                if gate in gate_frequencies:
+                    gate_frequencies[gate] += 1
                 else:
-                    gate_counts[gate] = 1
+                    gate_frequencies[gate] = 1
 
-        # permute circuits according to counts
+        inverted_gate_counts = {}
+        for gate in gate_frequencies:
+            count = gate_frequencies[gate]
+
+            if count in inverted_gate_counts:
+                inverted_gate_counts[count].append(gate)
+            else:
+                inverted_gate_counts[count] = [gate]
+
+        # TODO: permute circuits according to counts
 
         # build inverted index
         inverted_index = {}
@@ -59,8 +68,128 @@ class QuaPSim:
                 else:
                     inverted_index[gate] = {i: [j]}
 
-        # until stopping condition is met, select n+1 gram with
-        # highest potential
+        # collect ngram frequencies for cache building
+        gate_frequencies: List[int] = list(inverted_gate_counts.keys())
+        gate_frequencies.sort(reverse=False)
+
+        ngram_dict = {}
+        while len(gate_frequencies) > 0:
+
+            front_threshold = gate_frequencies.pop()
+
+            # If a gate only occurrs once, there is no
+            # gain in caching it.
+            if front_threshold <= 1:
+                break
+
+            if (
+                len(
+                    [
+                        ngram
+                        for ngram in ngram_dict.keys()
+                        if ngram_dict[ngram]["frequency"] >= front_threshold
+                    ]
+                )
+                >= self.params.cache_size
+            ):
+                break
+
+            start_candidate_sequences: List[List[IGate]] = []
+            if front_threshold in inverted_gate_counts:
+                for gate in inverted_gate_counts[front_threshold]:
+                    start_candidate_sequences.append([gate])
+
+            for ngram in ngram_dict.keys():
+                if ngram_dict[ngram]["frequency"] >= front_threshold:
+                    start_candidate_sequences.append(ngram_dict[ngram]["gates"])
+
+            expansion_candidates: List[IGate] = []
+            for key in inverted_gate_counts.keys():
+                if key >= front_threshold:
+                    expansion_candidates.extend(inverted_gate_counts[key])
+
+            for start_candidate_sequence in start_candidate_sequences:
+                for expansion_candidate in expansion_candidates:
+
+                    if start_candidate_sequence[0] == expansion_candidate:
+                        continue
+
+                    gate_sequence: List[IGate] = []
+                    gate_sequence.extend(start_candidate_sequence)
+                    gate_sequence.append(expansion_candidate)
+
+                    frequency = self._calculate_gate_sequence_frequecy(
+                        gate_sequence=gate_sequence, inverted_index=inverted_index
+                    )
+
+                    ngram = "_".join([gate.__repr__() for gate in gate_sequence])
+                    ngram_dict[ngram] = {"frequency": frequency, "gates": gate_sequence}
+
+                    # Add max check to avoid adding the frequency that has just been
+                    # popped.
+                    if (
+                        frequency < max(gate_frequencies)
+                        and frequency not in gate_frequencies
+                    ):
+                        gate_frequencies.append(frequency)
+                        gate_frequencies.sort(reverse=False)
+
+        # TODO: Get all ngrams relevant based on cache size
+        # while ensuring that within the same cache size, 
+        # shorter gate sequences are added first. (needed for
+        # retrieval logic)
+        cleansed_ngram_dict = {}
+        for ngram in ngram_dict:
+            if ngram_dict[ngram]["frequency"] >= front_threshold:
+                cleansed_ngram_dict[ngram] =  ngram_dict[ngram]["frequency"]
+
+        # TODO: actually create the cache
+
+    def _calculate_gate_sequence_frequecy(
+        self, gate_sequence: List[Gate], inverted_index: Dict
+    ) -> int:
+        for gate in gate_sequence:
+            if gate not in inverted_index:
+                return 0
+
+        document_candidates = []
+        for i, gate in enumerate(gate_sequence):
+            if i == 0:
+                document_candidates = list(inverted_index[gate].keys())
+
+            else:
+                documents_of_word = list(inverted_index[gate].keys())
+                document_candidates = [
+                    document
+                    for document in document_candidates
+                    if document in documents_of_word
+                ]
+
+            if len(document_candidates) == 0:
+                return 0
+
+        gate_sequence_frequency = 0
+        for document_candidate in document_candidates:
+            # TODO: refactor variable naming
+            left_pred_occurrences = inverted_index[gate_sequence[0]][document_candidate]
+
+            for succ_word in gate_sequence[1:]:
+                succ_occurrences = inverted_index[succ_word][document_candidate]
+
+                left_succ_occurrences = [
+                    occurrence
+                    for occurrence in succ_occurrences
+                    if (occurrence - 1) in left_pred_occurrences
+                ]
+
+                left_pred_occurrences = left_succ_occurrences
+
+                if len(left_pred_occurrences) == 0:
+                    break
+
+            gate_sequence_frequency += len(left_pred_occurrences)
+
+        return gate_sequence_frequency
 
     def _simulate_using_cache(self, circuits: List[Circuit]) -> None:
         for circuit in circuits:
