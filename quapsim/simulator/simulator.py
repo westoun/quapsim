@@ -48,6 +48,16 @@ class QuaPSim:
         # permute circuits according to counts
 
         # build inverted index
+        inverted_index = {}
+        for i, circuit in enumerate(circuits):
+            for j, gate in enumerate(circuit.gates):
+                if gate in inverted_index:
+                    if i in inverted_index[gate]:
+                        inverted_index[gate][i].append(j)
+                    else:
+                        inverted_index[gate][i] = [j]
+                else:
+                    inverted_index[gate] = {i: [j]}
 
         # until stopping condition is met, select n+1 gram with
         # highest potential
