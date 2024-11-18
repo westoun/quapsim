@@ -29,7 +29,7 @@ class QuaPSim:
             "extra qubits as padding until all circuits have the same qubit count."
         )
 
-        if self.cache is None:
+        if self.cache is None or self.params.cache_size == 0:
             self._simulate_without_cache(circuits)
         else:
             self._build_cache(circuits)
