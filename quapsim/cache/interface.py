@@ -17,7 +17,7 @@ class ICache(ABC):
 
     @abstractmethod
     def retrieve(
-        self, gate_sequence: List[IGate], unitary: np.ndarray
+        self, gate_sequence: List[IGate]
     ) -> Union[None, np.ndarray]:
         """Retrieve the unitary of a sequence of gates from the cache
         if it exists. Else return None."""
