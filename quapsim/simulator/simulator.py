@@ -6,7 +6,7 @@ from typing import List, Dict
 from quapsim.circuit import Circuit
 from quapsim.gates import IGate, Swap, Gate, CGate, CCGate
 from .params import SimulatorParams, DEFAULT_PARAMS
-
+from quapsim.cache import ICache
 
 class QuaPSim:
     def __init__(self, params: SimulatorParams = DEFAULT_PARAMS):

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 
-from quapsim import QuaPSim, SimulatorParams, Circuit
+from quapsim import QuaPSim, SimulatorParams, Circuit, \
+    ICache, SimpleDictCache
 from quapsim.gates import H, CX, X
 
 
