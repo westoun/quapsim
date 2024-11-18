@@ -23,7 +23,7 @@ class SimpleDictCache(ICache):
         key = create_key(gate_sequence)
         self._dict[key] = unitary
 
-    def retrieve(self, gate_sequence: List[IGate]) -> Union[None, np.ndarray]:
+    def get(self, gate_sequence: List[IGate]) -> Union[None, np.ndarray]:
         """Retrieve the unitary of a sequence of gates from the cache
         if it exists. Else return None."""
         key = create_key(gate_sequence)
