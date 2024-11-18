@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
-from quapsim import QuaPSim, SimulatorParams, Circuit, \
-    ICache, SimpleDictCache
-from quapsim.gates import H, CX, X
+from quapsim import QuaPSim, SimulatorParams, Circuit, ICache, \
+    SimpleDictCache
+from quapsim.gates import H, CX, X, Swap, create_unitary
 
 
 if __name__ == "__main__":
