@@ -10,12 +10,19 @@ from .utils import (
     probability_dict_from_state,
     state_dict_from_state,
 )
-from quapsim.gates.utils import (
-    create_double_controlled_matrix,
-    create_controlled_matrix,
-    create_matrix,
-    create_identity,
-)
+from quapsim.gates.utils import create_unitary, create_identity_matrix
+
+
+def get_unitary(circuit: "Circuit") -> np.ndarray:
+    """Computes the unitary matrix of a specified circuit."""
+    assert len(circuit.gates) > 0, "Empty circuit encountered!"
+
+    unitary = create_identity_matrix(dim=2**circuit.qubit_num)
+    for gate in circuit.gates:
+        gate_unitary = create_unitary(gate, circuit.qubit_num)
+        unitary = np.matmul(gate_unitary, unitary)
+
+    return unitary
 
 
 class Circuit:
@@ -115,49 +122,9 @@ class Circuit:
             self._state_dict = state_dict_from_state(self.state)
             return self._state_dict
 
+    @property
+    def unitary(self) -> np.ndarray:
+        return get_unitary(self)
+
     def __repr__(self) -> str:
         return f"[{', '.join([str(gate) for gate in self.gates])}]"
-
-
-def get_unitary(circuit: Circuit) -> np.ndarray:
-    """Computes the unitary matrix of a specified circuit."""
-    assert len(circuit.gates) > 0, "Empty circuit encountered!"
-
-    unitary = create_identity(dim=2**circuit.qubit_num)
-    for gate in circuit.gates:
-        if type(gate) == Swap:
-            cnot1 = create_controlled_matrix(
-                X_MATRIX, gate.qubit1, gate.qubit2, circuit.qubit_num
-            )
-            cnot2 = create_controlled_matrix(
-                X_MATRIX, gate.qubit2, gate.qubit1, circuit.qubit_num
-            )
-
-            unitary = np.matmul(cnot1, unitary)
-            unitary = np.matmul(cnot2, unitary)
-            unitary = np.matmul(cnot1, unitary)
-
-        elif issubclass(gate.__class__, Gate):
-            matrix = create_matrix(gate.matrix, gate.target_qubit, circuit.qubit_num)
-            unitary = np.matmul(matrix, unitary)
-
-        elif issubclass(gate.__class__, CGate):
-            matrix = create_controlled_matrix(
-                gate.matrix, gate.control_qubit, gate.target_qubit, circuit.qubit_num
-            )
-            unitary = np.matmul(matrix, unitary)
-
-        elif issubclass(gate.__class__, CCGate):
-            matrix = create_double_controlled_matrix(
-                gate.matrix,
-                gate.control_qubit1,
-                gate.control_qubit2,
-                gate.target_qubit,
-                circuit.qubit_num,
-            )
-            unitary = np.matmul(matrix, unitary)
-
-        else:
-            raise NotImplementedError(f"Unknown gate type for {gate} ({type(gate)})")
-
-    return unitary
