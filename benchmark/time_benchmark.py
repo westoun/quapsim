@@ -9,7 +9,7 @@ from .utils import create_random_circuits
 
 
 def run_time_benchmark_quasim_quapsim(
-    quasim=QuaSim, quapsim=QuaPSim, circuit_count=1000, gate_count=40, qubit_num=3
+    quasim: QuaSim, quapsim: QuaPSim, circuit_count=1000, gate_count=40, qubit_num=3
 ):
     logging.info("Starting to run time benchmarking, quasim against quapsim.")
 
