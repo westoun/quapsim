@@ -283,7 +283,7 @@ class QuaPSim:
                 state = np.matmul(unitary, state) 
 
             elif len(current_gate_sequence) == 2:
-                unitary = create_unitary(
+                unitary = compute_unitary_of_gate_sequence(
                     current_gate_sequence, qubit_num=circuit.qubit_num
                 )
                 state = np.matmul(unitary, state) 
