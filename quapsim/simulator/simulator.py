@@ -30,7 +30,9 @@ class QuaPSim:
         """Evaluates a list of quantum circuits and stores the
         state at the end of each circuit in circuit.state."""
 
-        logging.info(f"Starting to evaluate {len(circuits)} circuits with params {self.params} and cache of type {type(self.cache)}.")
+        logging.info(
+            f"Starting to evaluate {len(circuits)} circuits with params {self.params} and cache of type {type(self.cache)}."
+        )
 
         if len(circuits) == 0:
             return
@@ -51,6 +53,10 @@ class QuaPSim:
 
     @log_duration
     def build_cache(self, circuits: List[Circuit]) -> None:
+        logging.info(
+            f"Starting to build cache of type {type(self.cache)} with params {self.params}."
+        )
+
         qubit_num = circuits[0].qubit_num
 
         gate_frequency_dict = GateFrequencyDict().index(circuits)
@@ -188,6 +194,8 @@ class QuaPSim:
 
     @log_duration
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:
+        logging.info(f"Starting to simulate {len(circuits)} circuits using the cache.")
+
         for circuit in circuits:
             if circuit.state is not None:
                 continue
@@ -252,6 +260,9 @@ class QuaPSim:
 
     @log_duration
     def simulate_without_cache(self, circuits: List[Circuit]) -> None:
+        logging.info(
+            f"Starting to simulate {len(circuits)} circuits without using the cache."
+        )
         for circuit in circuits:
             if circuit.state is not None:
                 continue
