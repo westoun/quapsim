@@ -4,8 +4,7 @@ import numpy as np
 from typing import List, Dict
 
 from quapsim.circuit import Circuit
-from quapsim.gates import IGate, Swap, Gate, CGate, CCGate, create_unitary, \
-    compute_unitary_of_gate_sequence
+from quapsim.gates import IGate, Swap, Gate, CGate, CCGate, create_unitary
 from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
 
@@ -166,7 +165,7 @@ class QuaPSim:
             if cached_unitaries + len(gate_sequences) < self.params.cache_size:
 
                 for gate_sequence in gate_sequences:
-                    unitary = compute_unitary_of_gate_sequence(gate_sequence, qubit_num) 
+                    unitary = create_unitary(gate_sequence, qubit_num) 
                     self.cache.add(gate_sequence, unitary)
 
                 cached_unitaries += len(gate_sequences)
@@ -183,7 +182,7 @@ class QuaPSim:
                 gate_sequences.sort(key = lambda sequence: len(sequence)) 
 
                 for gate_sequence in gate_sequences[:cache_size_left]:
-                    unitary = compute_unitary_of_gate_sequence(gate_sequence, qubit_num) 
+                    unitary = create_unitary(gate_sequence, qubit_num) 
                     self.cache.add(gate_sequence, unitary) 
 
                 break
@@ -283,7 +282,7 @@ class QuaPSim:
                 state = np.matmul(unitary, state) 
 
             elif len(current_gate_sequence) == 2:
-                unitary = compute_unitary_of_gate_sequence(
+                unitary = create_unitary(
                     current_gate_sequence, qubit_num=circuit.qubit_num
                 )
                 state = np.matmul(unitary, state) 

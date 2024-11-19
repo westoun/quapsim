@@ -10,8 +10,7 @@ from .utils import (
     probability_dict_from_state,
     state_dict_from_state,
 )
-from quapsim.gates.utils import create_unitary, create_identity_matrix, \
-    compute_unitary_of_gate_sequence
+from quapsim.gates.utils import create_unitary, create_identity_matrix
 
 
 class Circuit:
@@ -113,7 +112,7 @@ class Circuit:
 
     @property
     def unitary(self) -> np.ndarray:
-        return compute_unitary_of_gate_sequence(self.gates, self.qubit_num)
+        return create_unitary(self.gates, self.qubit_num)
 
     def __repr__(self) -> str:
         return f"[{', '.join([str(gate) for gate in self.gates])}]"
