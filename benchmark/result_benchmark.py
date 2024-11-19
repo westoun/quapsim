@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 from scipy.spatial import distance
 import warnings
 
@@ -11,6 +12,8 @@ from .utils import create_random_circuits
 def run_result_benchmark(
     quasim: QuaSim, quapsim: QuaPSim, circuit_count=100, gate_count=40, qubit_num=4
 ):
+    logging.info("Starting to run result benchmarking.")
+
     quapsim_circuits = []
     quasim_circuits = []
 

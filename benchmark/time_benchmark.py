@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
+import logging
 
 from quasim import QuaSim
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
@@ -10,6 +11,8 @@ from .utils import create_random_circuits
 def run_time_benchmark_quasim_quapsim(
     quasim=QuaSim, quapsim=QuaPSim, circuit_count=1000, gate_count=40, qubit_num=3
 ):
+    logging.info("Starting to run time benchmarking, quasim against quapsim.")
+
     quapsim_circuits = []
     quasim_circuits = []
 
@@ -44,6 +47,8 @@ def run_time_benchmark_quasim_quapsim(
 def run_time_benchmark_quapsim_quapsim(
     quapsim1: QuaPSim, quapsim2: QuaPSim, circuit_count=1000, gate_count=40, qubit_num=3
 ):
+    logging.info("Starting to run time benchmarking, quapsim against quapsim.")
+
     quapsim_circuits = []
     for _ in range(circuit_count):
         quapsim_circuit, _ = create_random_circuits(

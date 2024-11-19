@@ -22,10 +22,6 @@ from .utils import (
 
 class QuaPSim:
     def __init__(self, params: SimulatorParams = DEFAULT_PARAMS, cache: ICache = None):
-        logging.info(
-            f"Initializing QuaPSim with params {params} and cache of type {type(cache)}"
-        )
-
         self.params = params
         self.cache = cache
 
