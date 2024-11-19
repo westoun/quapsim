@@ -136,9 +136,10 @@ class QuaPSim:
 
             front_threshold = gate_frequencies.pop()
 
-            # If a gate only occurrs once, there is no
-            # gain in caching it.
-            if front_threshold <= 1:
+            # If a gate occurrs once or twice, there is no
+            # gain in caching it, since no operations are 
+            # saved.
+            if front_threshold <= 2:
                 break
 
             if (
@@ -237,9 +238,10 @@ class QuaPSim:
 
             front_threshold = gate_frequencies.pop()
 
-            # If a gate only occurrs once, there is no
-            # gain in caching it.
-            if front_threshold <= 1:
+            # If a gate occurrs once or twice, there is no
+            # gain in caching it, since no operations are 
+            # saved.
+            if front_threshold <= 2:
                 break
 
             if (
