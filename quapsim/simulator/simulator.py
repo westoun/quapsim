@@ -76,14 +76,10 @@ class QuaPSim:
     def _optimize_gate_order(
         self,
         circuits: List[Circuit],
-        gate_frequency_dict: GateFrequencyDict,
-        steps: int = None,
+        gate_frequency_dict: GateFrequencyDict
     ) -> None:
-        if steps is None:
-            steps = len(circuits[0].gates)
-
         for circuit in circuits:
-            for _ in range(steps):
+            for _ in range(self.params.circuit_reordering_steps):
                 current_idx = randint(0, len(circuit.gates) - 1)
                 current_gate = circuit.gates[current_idx]
 
