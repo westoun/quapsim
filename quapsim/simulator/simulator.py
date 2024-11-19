@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
+import logging
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Callable
 
 from quapsim.circuit import Circuit
 from quapsim.gates import IGate, Swap, Gate, CGate, CCGate, create_unitary
@@ -9,14 +11,35 @@ from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
 
 
+def log_duration(func: Callable):
+    def wrapper(*args, **kwargs):
+        start = datetime.now()
+        res = func(*args, **kwargs)
+        end = datetime.now()
+        duration = end - start
+
+        logging.debug(f"Executing {func.__name__} took {duration}.")
+
+        return res
+
+    return wrapper
+
+
 class QuaPSim:
     def __init__(self, params: SimulatorParams = DEFAULT_PARAMS, cache: ICache = None):
+        logging.info(
+            f"Initializing QuaPSim with params {params} and cache of type {type(cache)}"
+        )
+
         self.params = params
         self.cache = cache
 
+    @log_duration
     def evaluate(self, circuits: List[Circuit]) -> None:
         """Evaluates a list of quantum circuits and stores the
         state at the end of each circuit in circuit.state."""
+
+        logging.info(f"Starting to evaluate {len(circuits)} circuits.")
 
         if len(circuits) == 0:
             return
@@ -35,6 +58,7 @@ class QuaPSim:
             self._build_cache(circuits)
             self._simulate_using_cache(circuits)
 
+    @log_duration
     def _build_cache(self, circuits: List[Circuit]) -> None:
         qubit_num = circuits[0].qubit_num
 
@@ -137,7 +161,7 @@ class QuaPSim:
                         gate_frequencies.sort(reverse=False)
 
         # TODO: Get all ngrams relevant based on cache size
-        # while ensuring that within the same cache size, 
+        # while ensuring that within the same cache size,
         # shorter gate sequences are added first. (needed for
         # retrieval logic)
 
@@ -153,7 +177,7 @@ class QuaPSim:
 
         ngram_frequencies: List[int] = list(inverse_ngram_dict.keys())
         ngram_frequencies.sort(reverse=True)
-        
+
         cached_unitaries = 0
         for frequency in ngram_frequencies:
             # If ngram only occurrs once, there is no gain in caching it.
@@ -165,29 +189,27 @@ class QuaPSim:
             if cached_unitaries + len(gate_sequences) < self.params.cache_size:
 
                 for gate_sequence in gate_sequences:
-                    unitary = create_unitary(gate_sequence, qubit_num) 
+                    unitary = create_unitary(gate_sequence, qubit_num)
                     self.cache.add(gate_sequence, unitary)
 
                 cached_unitaries += len(gate_sequences)
 
-            else: 
+            else:
                 cache_size_left = self.params.cache_size - cached_unitaries
 
-                # Sort gate sequences in current front by ngram size from 
-                # smallest to largest. While it would be preferrable to 
+                # Sort gate sequences in current front by ngram size from
+                # smallest to largest. While it would be preferrable to
                 # cache longer sequences first, as these sequences yield a
-                # bigger safe in matrix operations, the current simulation 
+                # bigger safe in matrix operations, the current simulation
                 # logic is built on the assumption that if an n-gram has been
                 # cached, its n-1-gram has also been cached.
-                gate_sequences.sort(key = lambda sequence: len(sequence)) 
+                gate_sequences.sort(key=lambda sequence: len(sequence))
 
                 for gate_sequence in gate_sequences[:cache_size_left]:
-                    unitary = create_unitary(gate_sequence, qubit_num) 
-                    self.cache.add(gate_sequence, unitary) 
+                    unitary = create_unitary(gate_sequence, qubit_num)
+                    self.cache.add(gate_sequence, unitary)
 
                 break
-
-
 
     def _calculate_gate_sequence_frequecy(
         self, gate_sequence: List[Gate], inverted_index: Dict
@@ -235,6 +257,7 @@ class QuaPSim:
 
         return gate_sequence_frequency
 
+    @log_duration
     def _simulate_using_cache(self, circuits: List[Circuit]) -> None:
         for circuit in circuits:
             if circuit.state is not None:
@@ -247,10 +270,10 @@ class QuaPSim:
             for gate in circuit.gates:
                 current_gate_sequence.append(gate)
 
-                # Since cache does not contain single gate 
-                # sequences, checking them does not suffice. 
+                # Since cache does not contain single gate
+                # sequences, checking them does not suffice.
                 if len(current_gate_sequence) == 1:
-                    continue 
+                    continue
 
                 cache_value = self.cache.get(current_gate_sequence)
 
@@ -270,22 +293,22 @@ class QuaPSim:
                     unitary = self.cache.get(current_gate_sequence[:-1])
                     state = np.matmul(unitary, state)
 
-                    current_gate_sequence = current_gate_sequence[-1:] 
+                    current_gate_sequence = current_gate_sequence[-1:]
 
             if len(current_gate_sequence) == 0:
-                pass # do nothing.
+                pass  # do nothing.
 
             if len(current_gate_sequence) == 1:
                 unitary = create_unitary(
                     current_gate_sequence[0], qubit_num=circuit.qubit_num
                 )
-                state = np.matmul(unitary, state) 
+                state = np.matmul(unitary, state)
 
             elif len(current_gate_sequence) == 2:
                 unitary = create_unitary(
                     current_gate_sequence, qubit_num=circuit.qubit_num
                 )
-                state = np.matmul(unitary, state) 
+                state = np.matmul(unitary, state)
 
             else:
                 unitary = self.cache.get(current_gate_sequence[:-1])
@@ -298,6 +321,7 @@ class QuaPSim:
 
             circuit.set_state(state)
 
+    @log_duration
     def _simulate_without_cache(self, circuits: List[Circuit]) -> None:
         for circuit in circuits:
             if circuit.state is not None:

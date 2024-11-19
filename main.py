@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
 
-from quapsim import QuaPSim, SimulatorParams, Circuit, ICache, \
-    SimpleDictCache
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s in %(module)s - %(levelname)s: %(message)s", 
+    filename="main.log", filemode="w"
+)
+
+from quapsim import QuaPSim, SimulatorParams, Circuit, ICache, SimpleDictCache
 from quapsim.gates import H, CX, X, Swap, create_unitary
 
 

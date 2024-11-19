@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s in %(module)s - %(levelname)s: %(message)s", 
+    filename="benchmarking.log", filemode="w"
+)
+
 from quasim import QuaSim
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
 
