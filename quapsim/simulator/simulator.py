@@ -3,12 +3,15 @@
 from datetime import datetime
 import logging
 import numpy as np
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Iterable
 
 from quapsim.circuit import Circuit
-from quapsim.gates import IGate, Swap, Gate, CGate, CCGate, create_unitary
+from quapsim.gates import IGate, create_unitary
 from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
+
+from .utils import GateFrequencyDict, InvertedGateFrequencyDict, \
+    InvertedGateIndex, calculate_gate_sequence_frequecy
 
 
 def log_duration(func: Callable):
@@ -62,40 +65,15 @@ class QuaPSim:
     def _build_cache(self, circuits: List[Circuit]) -> None:
         qubit_num = circuits[0].qubit_num
 
-        # create gate count dict
-        gate_frequencies = {}
-        for circuit in circuits:
-            for gate in circuit.gates:
-                if gate in gate_frequencies:
-                    gate_frequencies[gate] += 1
-                else:
-                    gate_frequencies[gate] = 1
-
-        inverted_gate_counts = {}
-        for gate in gate_frequencies:
-            count = gate_frequencies[gate]
-
-            if count in inverted_gate_counts:
-                inverted_gate_counts[count].append(gate)
-            else:
-                inverted_gate_counts[count] = [gate]
+        gate_frequency_dict = GateFrequencyDict().index(circuits)
+        inverted_gate_frequency_dict = gate_frequency_dict.invert()
 
         # TODO: permute circuits according to counts
 
-        # build inverted index
-        inverted_index = {}
-        for i, circuit in enumerate(circuits):
-            for j, gate in enumerate(circuit.gates):
-                if gate in inverted_index:
-                    if i in inverted_index[gate]:
-                        inverted_index[gate][i].append(j)
-                    else:
-                        inverted_index[gate][i] = [j]
-                else:
-                    inverted_index[gate] = {i: [j]}
+        inverted_gate_index = InvertedGateIndex().index(circuits)
 
         # collect ngram frequencies for cache building
-        gate_frequencies: List[int] = list(inverted_gate_counts.keys())
+        gate_frequencies: List[int] = inverted_gate_frequency_dict.frequencies
         gate_frequencies.sort(reverse=False)
 
         ngram_dict = {}
@@ -121,8 +99,8 @@ class QuaPSim:
                 break
 
             start_candidate_sequences: List[List[IGate]] = []
-            if front_threshold in inverted_gate_counts:
-                for gate in inverted_gate_counts[front_threshold]:
+            if front_threshold in inverted_gate_frequency_dict:
+                for gate in inverted_gate_frequency_dict[front_threshold]:
                     start_candidate_sequences.append([gate])
 
             for ngram in ngram_dict.keys():
@@ -130,9 +108,9 @@ class QuaPSim:
                     start_candidate_sequences.append(ngram_dict[ngram]["gates"])
 
             expansion_candidates: List[IGate] = []
-            for key in inverted_gate_counts.keys():
-                if key >= front_threshold:
-                    expansion_candidates.extend(inverted_gate_counts[key])
+            for frequency in inverted_gate_frequency_dict.frequencies:
+                if frequency >= front_threshold:
+                    expansion_candidates.extend(inverted_gate_frequency_dict[frequency])
 
             for start_candidate_sequence in start_candidate_sequences:
                 for expansion_candidate in expansion_candidates:
@@ -144,8 +122,8 @@ class QuaPSim:
                     gate_sequence.extend(start_candidate_sequence)
                     gate_sequence.append(expansion_candidate)
 
-                    frequency = self._calculate_gate_sequence_frequecy(
-                        gate_sequence=gate_sequence, inverted_index=inverted_index
+                    frequency = calculate_gate_sequence_frequecy(
+                        gate_sequence=gate_sequence, inverted_index=inverted_gate_index
                     )
 
                     ngram = "_".join([gate.__repr__() for gate in gate_sequence])
@@ -210,52 +188,6 @@ class QuaPSim:
                     self.cache.add(gate_sequence, unitary)
 
                 break
-
-    def _calculate_gate_sequence_frequecy(
-        self, gate_sequence: List[Gate], inverted_index: Dict
-    ) -> int:
-        for gate in gate_sequence:
-            if gate not in inverted_index:
-                return 0
-
-        document_candidates = []
-        for i, gate in enumerate(gate_sequence):
-            if i == 0:
-                document_candidates = list(inverted_index[gate].keys())
-
-            else:
-                documents_of_word = list(inverted_index[gate].keys())
-                document_candidates = [
-                    document
-                    for document in document_candidates
-                    if document in documents_of_word
-                ]
-
-            if len(document_candidates) == 0:
-                return 0
-
-        gate_sequence_frequency = 0
-        for document_candidate in document_candidates:
-            # TODO: refactor variable naming
-            left_pred_occurrences = inverted_index[gate_sequence[0]][document_candidate]
-
-            for succ_word in gate_sequence[1:]:
-                succ_occurrences = inverted_index[succ_word][document_candidate]
-
-                left_succ_occurrences = [
-                    occurrence
-                    for occurrence in succ_occurrences
-                    if (occurrence - 1) in left_pred_occurrences
-                ]
-
-                left_pred_occurrences = left_succ_occurrences
-
-                if len(left_pred_occurrences) == 0:
-                    break
-
-            gate_sequence_frequency += len(left_pred_occurrences)
-
-        return gate_sequence_frequency
 
     @log_duration
     def _simulate_using_cache(self, circuits: List[Circuit]) -> None:
