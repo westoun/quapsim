@@ -167,9 +167,11 @@ def calculate_gate_sequence_frequency(
 
 class NgramFrequencyDict:
     _dict: Dict
+    _frequencies: List[int]
 
     def __init__(self):
         self._dict = {}
+        self._frequencies = []
 
     def __contains__(self, ngram: str) -> bool:
         return ngram in self._dict
@@ -193,6 +195,7 @@ class NgramFrequencyDict:
     def add(self, gates: List[IGate], frequency: int):
         ngram = "_".join([gate.__repr__() for gate in gates])
         self._dict[ngram] = {"frequency": frequency, "gates": gates}
+        self._frequencies.append(frequency)
 
     def invert(self) -> "InvertedNgramFrequencyDict":
         inverted_ngram_dict = InvertedGateFrequencyDict()
@@ -204,6 +207,18 @@ class NgramFrequencyDict:
             inverted_ngram_dict.add(frequency, gate_sequence)
 
         return inverted_ngram_dict
+    
+    def __len__(self) -> int:
+        return len(self._dict.keys())
+    
+    def frequency_at(self, idx: int) -> int:
+        """Return the nth largest frequency"""
+        self._frequencies.sort(reverse=True)
+        
+        if len(self._frequencies) >= idx:
+            return self._frequencies[idx] 
+        else:
+            return -1
 
 
 class InvertedNgramFrequencyDict:

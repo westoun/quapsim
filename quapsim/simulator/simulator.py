@@ -132,6 +132,8 @@ class QuaPSim:
         gate_frequencies.sort(reverse=False)
 
         ngram_frequency_dict = NgramFrequencyDict()
+
+        stop_search = False
         while len(gate_frequencies) > 0:
 
             front_threshold = gate_frequencies.pop()
@@ -193,6 +195,31 @@ class QuaPSim:
                     ):
                         gate_frequencies.append(frequency)
                         gate_frequencies.sort(reverse=False)
+
+                    # Stop ngram enumeration if there are more than or equal as many
+                    # ngrams in frequency dict as specified by cache size, so that
+                    # each ngram has a frequency of gte the frequency currently investigated.
+                    if (
+                        len(ngram_frequency_dict) >= self.params.cache_size
+                        and ngram_frequency_dict.frequency_at(
+                            self.params.cache_size - 1
+                        )
+                        >= frequency
+                    ):
+                        logging.debug(
+                            (
+                                f"Stopping construction of ngram frequency dict since {self.params.cache_size}th "
+                                f"has frequency of {ngram_frequency_dict.frequency_at(self.params.cache_size - 1)}"
+                            )
+                        )
+                        stop_search = True
+                        break
+
+                if stop_search:
+                    break
+
+            if stop_search:
+                break
 
         return ngram_frequency_dict
 
