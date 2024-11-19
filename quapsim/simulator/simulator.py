@@ -53,9 +53,7 @@ class QuaPSim:
 
     @log_duration
     def build_cache(self, circuits: List[Circuit]) -> None:
-        logging.info(
-            f"Starting to build cache of type {type(self.cache)} with params {self.params}."
-        )
+        logging.info(f"Starting to build cache.")
 
         qubit_num = circuits[0].qubit_num
 
@@ -97,6 +95,9 @@ class QuaPSim:
 
                 for gate_sequence in gate_sequences:
                     unitary = create_unitary(gate_sequence, qubit_num)
+                    logging.debug(
+                        f"Adding {gate_sequence} (with a frequency of {frequency}) to cache."
+                    )
                     self.cache.add(gate_sequence, unitary)
 
                 cached_unitaries += len(gate_sequences)
@@ -114,6 +115,9 @@ class QuaPSim:
 
                 for gate_sequence in gate_sequences[:cache_size_left]:
                     unitary = create_unitary(gate_sequence, qubit_num)
+                    logging.debug(
+                        f"Adding {gate_sequence} (with a frequency of {frequency}) to cache."
+                    )
                     self.cache.add(gate_sequence, unitary)
 
                 break
@@ -194,7 +198,7 @@ class QuaPSim:
 
     @log_duration
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:
-        logging.info(f"Starting to simulate {len(circuits)} circuits using the cache.")
+        logging.info(f"Starting to simulate using the cache.")
 
         for circuit in circuits:
             if circuit.state is not None:
@@ -228,6 +232,7 @@ class QuaPSim:
 
                 else:
                     unitary = self.cache.get(current_gate_sequence[:-1])
+                    logging.debug(f"Using {current_gate_sequence[:-1]} from cache.")
                     state = np.matmul(unitary, state)
 
                     current_gate_sequence = current_gate_sequence[-1:]
@@ -249,6 +254,7 @@ class QuaPSim:
 
             else:
                 unitary = self.cache.get(current_gate_sequence[:-1])
+                logging.debug(f"Using {current_gate_sequence[:-1]} from cache.")
                 state = np.matmul(unitary, state)
 
                 unitary = create_unitary(
@@ -260,9 +266,7 @@ class QuaPSim:
 
     @log_duration
     def simulate_without_cache(self, circuits: List[Circuit]) -> None:
-        logging.info(
-            f"Starting to simulate {len(circuits)} circuits without using the cache."
-        )
+        logging.info(f"Starting to simulate without using the cache.")
         for circuit in circuits:
             if circuit.state is not None:
                 continue

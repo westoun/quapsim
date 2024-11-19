@@ -15,7 +15,7 @@ def log_duration(func: Callable):
         end = datetime.now()
         duration = end - start
 
-        logging.debug(f"Executing {func.__name__} took {duration}.")
+        logging.info(f"Executing {func.__name__} took {duration}.")
 
         return res
 
