@@ -11,6 +11,20 @@ from ._matrices import X_MATRIX
 from .swap import Swap
 
 
+def compute_unitary_of_gate_sequence(
+    gate_sequence: List[IGate], qubit_num: int
+) -> np.ndarray:
+    """Computes the unitary matrix of a specified gate sequence."""
+    assert len(gate_sequence) > 0, "Empty gate sequence encountered!"
+
+    unitary = create_identity_matrix(dim=2**qubit_num)
+    for gate in gate_sequence:
+        gate_unitary = create_unitary(gate, qubit_num)
+        unitary = np.matmul(gate_unitary, unitary)
+
+    return unitary
+
+
 def create_unitary(gate: IGate, qubit_num: int) -> np.ndarray:
     if type(gate) == Swap:
         return create_swap_unitary(gate.qubit1, gate.qubit2, qubit_num)

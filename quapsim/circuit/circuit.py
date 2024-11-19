@@ -10,19 +10,8 @@ from .utils import (
     probability_dict_from_state,
     state_dict_from_state,
 )
-from quapsim.gates.utils import create_unitary, create_identity_matrix
-
-
-def get_unitary(circuit: "Circuit") -> np.ndarray:
-    """Computes the unitary matrix of a specified circuit."""
-    assert len(circuit.gates) > 0, "Empty circuit encountered!"
-
-    unitary = create_identity_matrix(dim=2**circuit.qubit_num)
-    for gate in circuit.gates:
-        gate_unitary = create_unitary(gate, circuit.qubit_num)
-        unitary = np.matmul(gate_unitary, unitary)
-
-    return unitary
+from quapsim.gates.utils import create_unitary, create_identity_matrix, \
+    compute_unitary_of_gate_sequence
 
 
 class Circuit:
@@ -124,7 +113,7 @@ class Circuit:
 
     @property
     def unitary(self) -> np.ndarray:
-        return get_unitary(self)
+        return compute_unitary_of_gate_sequence(self.gates, self.qubit_num)
 
     def __repr__(self) -> str:
         return f"[{', '.join([str(gate) for gate in self.gates])}]"

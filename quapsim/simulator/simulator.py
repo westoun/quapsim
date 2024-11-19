@@ -4,7 +4,8 @@ import numpy as np
 from typing import List, Dict
 
 from quapsim.circuit import Circuit
-from quapsim.gates import IGate, Swap, Gate, CGate, CCGate, create_unitary
+from quapsim.gates import IGate, Swap, Gate, CGate, CCGate, create_unitary, \
+    compute_unitary_of_gate_sequence
 from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
 
@@ -36,6 +37,8 @@ class QuaPSim:
             self._simulate_using_cache(circuits)
 
     def _build_cache(self, circuits: List[Circuit]) -> None:
+        qubit_num = circuits[0].qubit_num
+
         # create gate count dict
         gate_frequencies = {}
         for circuit in circuits:
@@ -138,12 +141,54 @@ class QuaPSim:
         # while ensuring that within the same cache size, 
         # shorter gate sequences are added first. (needed for
         # retrieval logic)
-        cleansed_ngram_dict = {}
-        for ngram in ngram_dict:
-            if ngram_dict[ngram]["frequency"] >= front_threshold:
-                cleansed_ngram_dict[ngram] =  ngram_dict[ngram]["frequency"]
 
-        # TODO: actually create the cache
+        inverse_ngram_dict = {}
+        for ngram in ngram_dict:
+            frequency = ngram_dict[ngram]["frequency"]
+            gate_sequence = ngram_dict[ngram]["gates"]
+
+            if frequency in inverse_ngram_dict:
+                inverse_ngram_dict[frequency].append(gate_sequence)
+            else:
+                inverse_ngram_dict[frequency] = [gate_sequence]
+
+        ngram_frequencies: List[int] = list(inverse_ngram_dict.keys())
+        ngram_frequencies.sort(reverse=True)
+        
+        cached_unitaries = 0
+        for frequency in ngram_frequencies:
+            # If ngram only occurrs once, there is no gain in caching it.
+            if frequency == 1:
+                break
+
+            gate_sequences: List[List[IGate]] = inverse_ngram_dict[frequency]
+
+            if cached_unitaries + len(gate_sequences) < self.params.cache_size:
+
+                for gate_sequence in gate_sequences:
+                    unitary = compute_unitary_of_gate_sequence(gate_sequence, qubit_num) 
+                    self.cache.add(gate_sequence, unitary)
+
+                cached_unitaries += len(gate_sequences)
+
+            else: 
+                cache_size_left = self.params.cache_size - cached_unitaries
+
+                # Sort gate sequences in current front by ngram size from 
+                # smallest to largest. While it would be preferrable to 
+                # cache longer sequences first, as these sequences yield a
+                # bigger safe in matrix operations, the current simulation 
+                # logic is built on the assumption that if an n-gram has been
+                # cached, its n-1-gram has also been cached.
+                gate_sequences.sort(key = lambda sequence: len(sequence)) 
+
+                for gate_sequence in gate_sequences[:cache_size_left]:
+                    unitary = compute_unitary_of_gate_sequence(gate_sequence, qubit_num) 
+                    self.cache.add(gate_sequence, unitary) 
+
+                break
+
+
 
     def _calculate_gate_sequence_frequecy(
         self, gate_sequence: List[Gate], inverted_index: Dict

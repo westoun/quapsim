@@ -5,4 +5,5 @@ from .controlled_gates import CGate, CX, CY, CZ, CRX, CRY, CRZ, CH, CS, CPhase
 from .double_controlled_gates import CCGate, CCX, CCZ
 from .utils import (
     create_unitary,
+    compute_unitary_of_gate_sequence
 )
