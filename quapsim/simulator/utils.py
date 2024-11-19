@@ -114,7 +114,7 @@ class InvertedGateIndex:
         return self._dict[gate][document]
 
 
-def calculate_gate_sequence_frequecy(
+def calculate_gate_sequence_frequency(
     gate_sequence: List[IGate], inverted_index: InvertedGateIndex
 ) -> int:
     for gate in gate_sequence:

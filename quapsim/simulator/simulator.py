@@ -13,7 +13,7 @@ from .utils import (
     GateFrequencyDict,
     InvertedGateFrequencyDict,
     InvertedGateIndex,
-    calculate_gate_sequence_frequecy,
+    calculate_gate_sequence_frequency,
     NgramFrequencyDict,
     InvertedNgramFrequencyDict,
     log_duration,
@@ -173,7 +173,7 @@ class QuaPSim:
                     gate_sequence.extend(start_candidate_sequence)
                     gate_sequence.append(expansion_candidate)
 
-                    frequency = calculate_gate_sequence_frequecy(
+                    frequency = calculate_gate_sequence_frequency(
                         gate_sequence=gate_sequence, inverted_index=inverted_gate_index
                     )
 
