@@ -34,7 +34,7 @@ class QuaPSim:
         """Evaluates a list of quantum circuits and stores the
         state at the end of each circuit in circuit.state."""
 
-        logging.info(f"Starting to evaluate {len(circuits)} circuits.")
+        logging.info(f"Starting to evaluate {len(circuits)} circuits with params {self.params} and cache of type {type(self.cache)}.")
 
         if len(circuits) == 0:
             return
