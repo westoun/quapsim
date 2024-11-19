@@ -67,7 +67,7 @@ class QuaPSim:
         # ngram_frequency_dict = self._build_ngram_frequency_dict(
         #     inverted_gate_frequency_dict, inverted_gate_index
         # )
-        ngram_frequency_dict = self._build_ngram_frequency_dict_greedy(
+        ngram_frequency_dict = self._build_ngram_frequency_dict(
             inverted_gate_frequency_dict, inverted_gate_index
         )
 
@@ -177,6 +177,25 @@ class QuaPSim:
             for start_candidate_sequence in start_candidate_sequences:
                 for expansion_candidate in expansion_candidates:
 
+                    # Stop ngram enumeration if there are more than or equal as many
+                    # ngrams in frequency dict as specified by cache size, so that
+                    # each ngram has a frequency of gte the frequency currently investigated.
+                    if (
+                        len(ngram_frequency_dict) >= self.params.cache_size
+                        and ngram_frequency_dict.frequency_at(
+                            self.params.cache_size - 1
+                        )
+                        >= frequency
+                    ):
+                        logging.debug(
+                            (
+                                f"Stopping construction of ngram frequency dict since {self.params.cache_size}th "
+                                f"has frequency of {ngram_frequency_dict.frequency_at(self.params.cache_size - 1)}"
+                            )
+                        )
+                        stop_search = True
+                        break
+
                     if start_candidate_sequence[-1] == expansion_candidate:
                         continue
 
@@ -198,25 +217,6 @@ class QuaPSim:
                     ):
                         gate_frequencies.append(frequency)
                         gate_frequencies.sort(reverse=False)
-
-                    # Stop ngram enumeration if there are more than or equal as many
-                    # ngrams in frequency dict as specified by cache size, so that
-                    # each ngram has a frequency of gte the frequency currently investigated.
-                    if (
-                        len(ngram_frequency_dict) >= self.params.cache_size
-                        and ngram_frequency_dict.frequency_at(
-                            self.params.cache_size - 1
-                        )
-                        >= frequency
-                    ):
-                        logging.debug(
-                            (
-                                f"Stopping construction of ngram frequency dict since {self.params.cache_size}th "
-                                f"has frequency of {ngram_frequency_dict.frequency_at(self.params.cache_size - 1)}"
-                            )
-                        )
-                        stop_search = True
-                        break
 
                 if stop_search:
                     break
@@ -278,6 +278,21 @@ class QuaPSim:
             for start_candidate_sequence in start_candidate_sequences:
                 for expansion_candidate in expansion_candidates:
 
+                    # Stop ngram enumeration if there are more than or equal as many
+                    # ngrams in frequency dict as specified by cache size, so that
+                    # each ngram has a frequency of gte the frequency currently investigated.
+                    if (
+                        len(ngram_frequency_dict) >= self.params.cache_size
+                    ):
+                        logging.debug(
+                            (
+                                f"Stopping construction of ngram frequency dict since it contains at least as many "
+                                "entries as the specified cache size."
+                            )
+                        )
+                        stop_search = True
+                        break
+
                     if start_candidate_sequence[-1] == expansion_candidate:
                         continue
 
@@ -299,21 +314,6 @@ class QuaPSim:
                     ):
                         gate_frequencies.append(frequency)
                         gate_frequencies.sort(reverse=False)
-
-                    # Stop ngram enumeration if there are more than or equal as many
-                    # ngrams in frequency dict as specified by cache size, so that
-                    # each ngram has a frequency of gte the frequency currently investigated.
-                    if (
-                        len(ngram_frequency_dict) >= self.params.cache_size
-                    ):
-                        logging.debug(
-                            (
-                                f"Stopping construction of ngram frequency dict since it contains at least as many "
-                                "entries as the specified cache size."
-                            )
-                        )
-                        stop_search = True
-                        break
 
                 if stop_search:
                     break
