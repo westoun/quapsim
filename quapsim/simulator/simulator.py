@@ -65,7 +65,7 @@ class QuaPSim:
 
         inverted_gate_index = InvertedGateIndex().index(circuits)
 
-        ngram_frequency_dict = self._build_ngram_frequency_dict(
+        ngram_frequency_dict = self._build_ngram_frequency_dict_greedy(
             inverted_gate_frequency_dict, inverted_gate_index
         )
 
@@ -79,7 +79,7 @@ class QuaPSim:
         gate_frequency_dict: GateFrequencyDict
     ) -> None:
         for circuit in circuits:
-            for _ in range(self.params.circuit_reordering_steps):
+            for _ in range(self.params.reordering_steps):
                 current_idx = randint(0, len(circuit.gates) - 1)
                 current_gate = circuit.gates[current_idx]
 
