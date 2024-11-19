@@ -71,11 +71,6 @@ class QuaPSim:
             inverted_gate_frequency_dict, inverted_gate_index
         )
 
-        # TODO: Get all ngrams relevant based on cache size
-        # while ensuring that within the same cache size,
-        # shorter gate sequences are added first. (needed for
-        # retrieval logic)
-
         inverse_ngram_frequency_dict = ngram_frequency_dict.invert()
         self._fill_cache(inverse_ngram_frequency_dict, qubit_num)
 
