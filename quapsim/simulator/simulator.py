@@ -44,13 +44,13 @@ class QuaPSim:
         )
 
         if self.cache is None or self.params.cache_size == 0:
-            self._simulate_without_cache(circuits)
+            self.simulate_without_cache(circuits)
         else:
-            self._build_cache(circuits)
-            self._simulate_using_cache(circuits)
+            self.build_cache(circuits)
+            self.simulate_using_cache(circuits)
 
     @log_duration
-    def _build_cache(self, circuits: List[Circuit]) -> None:
+    def build_cache(self, circuits: List[Circuit]) -> None:
         qubit_num = circuits[0].qubit_num
 
         gate_frequency_dict = GateFrequencyDict().index(circuits)
@@ -187,7 +187,7 @@ class QuaPSim:
         return ngram_frequency_dict
 
     @log_duration
-    def _simulate_using_cache(self, circuits: List[Circuit]) -> None:
+    def simulate_using_cache(self, circuits: List[Circuit]) -> None:
         for circuit in circuits:
             if circuit.state is not None:
                 continue
@@ -251,7 +251,7 @@ class QuaPSim:
             circuit.set_state(state)
 
     @log_duration
-    def _simulate_without_cache(self, circuits: List[Circuit]) -> None:
+    def simulate_without_cache(self, circuits: List[Circuit]) -> None:
         for circuit in circuits:
             if circuit.state is not None:
                 continue
