@@ -2,6 +2,7 @@
 
 import logging
 import numpy as np
+from random import randint
 from typing import List, Dict, Callable, Iterable
 
 from quapsim.circuit import Circuit
@@ -60,19 +61,99 @@ class QuaPSim:
         gate_frequency_dict = GateFrequencyDict().index(circuits)
         inverted_gate_frequency_dict = gate_frequency_dict.invert()
 
-        # TODO: permute circuits according to counts
+        self._optimize_gate_order(circuits, gate_frequency_dict)
 
         inverted_gate_index = InvertedGateIndex().index(circuits)
 
-        # ngram_frequency_dict = self._build_ngram_frequency_dict(
-        #     inverted_gate_frequency_dict, inverted_gate_index
-        # )
         ngram_frequency_dict = self._build_ngram_frequency_dict(
             inverted_gate_frequency_dict, inverted_gate_index
         )
 
         inverse_ngram_frequency_dict = ngram_frequency_dict.invert()
         self._fill_cache(inverse_ngram_frequency_dict, qubit_num)
+
+    @log_duration
+    def _optimize_gate_order(
+        self,
+        circuits: List[Circuit],
+        gate_frequency_dict: GateFrequencyDict,
+        steps: int = None,
+    ) -> None:
+        if steps is None:
+            steps = len(circuits[0].gates)
+
+        for circuit in circuits:
+            for _ in range(steps):
+                current_idx = randint(0, len(circuit.gates) - 1)
+                current_gate = circuit.gates[current_idx]
+
+                # determine left index of beam
+                left_beam_idx = 0
+                for left_idx in range(current_idx):
+                    comparison_gate = circuit.gates[left_idx]
+
+                    if (
+                        len(
+                            [
+                                qubit
+                                for qubit in current_gate.qubits
+                                if qubit in comparison_gate.qubits
+                            ]
+                        )
+                        > 0
+                    ):
+                        left_beam_idx = left_idx
+
+                # determine right index of beam
+                right_beam_idx = len(circuit.gates) - 1
+                for j in range(len(circuit.gates) - current_idx - 1):
+                    right_idx = len(circuit.gates) - 1 - j
+
+                    comparison_gate = circuit.gates[right_idx]
+
+                    if (
+                        len(
+                            [
+                                qubit
+                                for qubit in current_gate.qubits
+                                if qubit in comparison_gate.qubits
+                            ]
+                        )
+                        > 0
+                    ):
+                        right_beam_idx = right_idx + 1
+
+                # select next highest frequ gate
+                current_frequency = gate_frequency_dict[current_gate]
+
+                min_frequency_distance = np.inf
+                min_frequency_idx = None
+
+                for i in range(left_beam_idx, right_beam_idx):
+                    if i == current_idx:
+                        continue
+
+                    comparison_gate = circuit.gates[i]
+                    frequency_distance = abs(
+                        current_frequency - gate_frequency_dict[comparison_gate]
+                    )
+
+                    if frequency_distance < min_frequency_distance:
+                        min_frequency_distance = frequency_distance
+                        min_frequency_idx = i
+
+                # update gate order
+                if min_frequency_idx is None:
+                    continue
+
+                if min_frequency_idx < current_idx:
+                    circuit.gates.insert(
+                        min_frequency_idx + 1, circuit.gates.pop(current_idx)
+                    )
+                else:
+                    circuit.gates.insert(
+                        min_frequency_idx - 1, circuit.gates.pop(current_idx)
+                    )
 
     @log_duration
     def _fill_cache(
@@ -137,7 +218,7 @@ class QuaPSim:
             front_threshold = gate_frequencies.pop()
 
             # If a gate occurrs once or twice, there is no
-            # gain in caching it, since no operations are 
+            # gain in caching it, since no operations are
             # saved.
             if front_threshold <= 2:
                 break
@@ -239,7 +320,7 @@ class QuaPSim:
             front_threshold = gate_frequencies.pop()
 
             # If a gate occurrs once or twice, there is no
-            # gain in caching it, since no operations are 
+            # gain in caching it, since no operations are
             # saved.
             if front_threshold <= 2:
                 break
@@ -278,9 +359,7 @@ class QuaPSim:
                     # Stop ngram enumeration if there are more than or equal as many
                     # ngrams in frequency dict as specified by cache size, so that
                     # each ngram has a frequency of gte the frequency currently investigated.
-                    if (
-                        len(ngram_frequency_dict) >= self.params.cache_size
-                    ):
+                    if len(ngram_frequency_dict) >= self.params.cache_size:
                         logging.debug(
                             (
                                 f"Stopping construction of ngram frequency dict since it contains at least as many "

@@ -52,6 +52,12 @@ class GateFrequencyDict:
             inverted_gate_frequency_dict.add(frequency, gate)
         return inverted_gate_frequency_dict
 
+    def __getitem__(self, gate: IGate) -> int:
+        if gate in self._dict:
+            return self._dict[gate]
+        else:
+            return -1
+
 
 class InvertedGateFrequencyDict:
     _dict: Dict
@@ -207,16 +213,16 @@ class NgramFrequencyDict:
             inverted_ngram_dict.add(frequency, gate_sequence)
 
         return inverted_ngram_dict
-    
+
     def __len__(self) -> int:
         return len(self._dict.keys())
-    
+
     def frequency_at(self, idx: int) -> int:
         """Return the nth largest frequency"""
         self._frequencies.sort(reverse=True)
-        
+
         if len(self._frequencies) >= idx:
-            return self._frequencies[idx] 
+            return self._frequencies[idx]
         else:
             return -1
 
