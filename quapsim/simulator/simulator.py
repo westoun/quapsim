@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
 import logging
 import numpy as np
 from typing import List, Dict, Callable, Iterable
@@ -10,22 +9,15 @@ from quapsim.gates import IGate, create_unitary
 from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
 
-from .utils import GateFrequencyDict, InvertedGateFrequencyDict, \
-    InvertedGateIndex, calculate_gate_sequence_frequecy
-
-
-def log_duration(func: Callable):
-    def wrapper(*args, **kwargs):
-        start = datetime.now()
-        res = func(*args, **kwargs)
-        end = datetime.now()
-        duration = end - start
-
-        logging.debug(f"Executing {func.__name__} took {duration}.")
-
-        return res
-
-    return wrapper
+from .utils import (
+    GateFrequencyDict,
+    InvertedGateFrequencyDict,
+    InvertedGateIndex,
+    calculate_gate_sequence_frequecy,
+    NgramFrequencyDict,
+    InvertedNgramFrequencyDict,
+    log_duration,
+)
 
 
 class QuaPSim:
@@ -76,7 +68,7 @@ class QuaPSim:
         gate_frequencies: List[int] = inverted_gate_frequency_dict.frequencies
         gate_frequencies.sort(reverse=False)
 
-        ngram_dict = {}
+        ngram_frequency_dict = NgramFrequencyDict()
         while len(gate_frequencies) > 0:
 
             front_threshold = gate_frequencies.pop()
@@ -90,8 +82,8 @@ class QuaPSim:
                 len(
                     [
                         ngram
-                        for ngram in ngram_dict.keys()
-                        if ngram_dict[ngram]["frequency"] >= front_threshold
+                        for ngram in ngram_frequency_dict.ngrams
+                        if ngram_frequency_dict.get_frequency(ngram) >= front_threshold
                     ]
                 )
                 >= self.params.cache_size
@@ -103,9 +95,11 @@ class QuaPSim:
                 for gate in inverted_gate_frequency_dict[front_threshold]:
                     start_candidate_sequences.append([gate])
 
-            for ngram in ngram_dict.keys():
-                if ngram_dict[ngram]["frequency"] >= front_threshold:
-                    start_candidate_sequences.append(ngram_dict[ngram]["gates"])
+            for ngram in ngram_frequency_dict.ngrams:
+                if ngram_frequency_dict.get_frequency(ngram) >= front_threshold:
+                    start_candidate_sequences.append(
+                        ngram_frequency_dict.get_gates(ngram)
+                    )
 
             expansion_candidates: List[IGate] = []
             for frequency in inverted_gate_frequency_dict.frequencies:
@@ -126,8 +120,7 @@ class QuaPSim:
                         gate_sequence=gate_sequence, inverted_index=inverted_gate_index
                     )
 
-                    ngram = "_".join([gate.__repr__() for gate in gate_sequence])
-                    ngram_dict[ngram] = {"frequency": frequency, "gates": gate_sequence}
+                    ngram_frequency_dict.add(gate_sequence, frequency)
 
                     # Add max check to avoid adding the frequency that has just been
                     # popped.
@@ -143,17 +136,9 @@ class QuaPSim:
         # shorter gate sequences are added first. (needed for
         # retrieval logic)
 
-        inverse_ngram_dict = {}
-        for ngram in ngram_dict:
-            frequency = ngram_dict[ngram]["frequency"]
-            gate_sequence = ngram_dict[ngram]["gates"]
+        inverse_ngram_frequency_dict = ngram_frequency_dict.invert()
 
-            if frequency in inverse_ngram_dict:
-                inverse_ngram_dict[frequency].append(gate_sequence)
-            else:
-                inverse_ngram_dict[frequency] = [gate_sequence]
-
-        ngram_frequencies: List[int] = list(inverse_ngram_dict.keys())
+        ngram_frequencies: List[int] = inverse_ngram_frequency_dict.frequencies
         ngram_frequencies.sort(reverse=True)
 
         cached_unitaries = 0
@@ -162,7 +147,7 @@ class QuaPSim:
             if frequency == 1:
                 break
 
-            gate_sequences: List[List[IGate]] = inverse_ngram_dict[frequency]
+            gate_sequences: List[List[IGate]] = inverse_ngram_frequency_dict[frequency]
 
             if cached_unitaries + len(gate_sequences) < self.params.cache_size:
 
