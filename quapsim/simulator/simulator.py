@@ -172,7 +172,7 @@ class QuaPSim:
             for start_candidate_sequence in start_candidate_sequences:
                 for expansion_candidate in expansion_candidates:
 
-                    if start_candidate_sequence[0] == expansion_candidate:
+                    if start_candidate_sequence[-1] == expansion_candidate:
                         continue
 
                     gate_sequence: List[IGate] = []
@@ -185,7 +185,7 @@ class QuaPSim:
 
                     ngram_frequency_dict.add(gate_sequence, frequency)
 
-                    # Add max check to avoid adding the frequency that has just been
+                    # Add max-check to avoid adding the frequency that has just been
                     # popped.
                     if (
                         frequency < max(gate_frequencies)
