@@ -65,7 +65,7 @@ class QuaPSim:
 
         inverted_gate_index = InvertedGateIndex().index(circuits)
 
-        ngram_frequency_dict = self._build_ngram_frequency_dict_greedy(
+        ngram_frequency_dict = self._build_ngram_frequency_dict(
             inverted_gate_frequency_dict, inverted_gate_index
         )
 
