@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s: %(message)s", 
-    filename="benchmarking.log", filemode="a"
+    filename="benchmarking.log", filemode="w"
 )
 
 from quasim import QuaSim
