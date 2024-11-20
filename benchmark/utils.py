@@ -37,12 +37,25 @@ GATES = [
 
 
 def create_random_circuits(
-    gate_count: int = 10, qubit_num: int = 4
+    gate_count: int = 10, qubit_num: int = 4, entangle_first: bool = False
 ) -> Tuple[QuapsimCircuit, QuasimCircuit]:
     quapsim_circuit = QuapsimCircuit(qubit_num)
     quasim_circuit = QuasimCircuit(qubit_num)
 
-    for _ in range(gate_count):
+    existing_gates: int = 0
+    if entangle_first:
+        for target_qubit in range(qubit_num):
+            quapsim_circuit.apply(QuapsimGates.H(target_qubit))
+            quasim_circuit.apply(QuasimGates.H(target_qubit))
+            existing_gates += 1
+
+        for control_qubit in range(qubit_num - 1):
+            target_qubit = control_qubit + 1
+            quapsim_circuit.apply(QuapsimGates.CX(control_qubit, target_qubit))
+            quasim_circuit.apply(QuasimGates.CX(control_qubit, target_qubit))
+            existing_gates += 1
+
+    for _ in range(gate_count - existing_gates):
         gate_type = choice(GATES)
 
         if gate_type == "H":
