@@ -217,18 +217,22 @@ class QuaPSim:
             # gain in caching it, since no operations are
             # saved.
             if front_threshold <= 2:
+                logging.debug("Breaking ngram frequency dict generation. frequency threshold too low: ", front_threshold)
                 break
 
-            if (
-                len(
+            ngrams_above_threshold: int = len(
                     [
                         ngram
                         for ngram in ngram_frequency_dict.ngrams
                         if ngram_frequency_dict.get_frequency(ngram) >= front_threshold
                     ]
                 )
+            if (
+                ngrams_above_threshold
                 >= self.params.cache_size
             ):
+                logging.debug(f"Breaking ngram frequency dict generation. Already have {ngrams_above_threshold} ngrams above "
+                              "threshold with cache size of {self.params.cache_size}.")
                 break
 
             start_candidate_sequences: List[List[IGate]] = []
@@ -262,7 +266,7 @@ class QuaPSim:
                     ):
                         logging.debug(
                             (
-                                f"Stopping construction of ngram frequency dict since {self.params.cache_size}th "
+                                f"Stopping construction of ngram frequency dict since {self.params.cache_size}th ngram "
                                 f"has frequency of {ngram_frequency_dict.frequency_at(self.params.cache_size - 1)}"
                             )
                         )
@@ -319,18 +323,22 @@ class QuaPSim:
             # gain in caching it, since no operations are
             # saved.
             if front_threshold <= 2:
+                logging.debug("Breaking ngram frequency dict generation. frequency threshold too low: ", front_threshold)
                 break
 
-            if (
-                len(
+            ngrams_above_threshold: int = len(
                     [
                         ngram
                         for ngram in ngram_frequency_dict.ngrams
                         if ngram_frequency_dict.get_frequency(ngram) >= front_threshold
                     ]
                 )
+            if (
+                ngrams_above_threshold
                 >= self.params.cache_size
             ):
+                logging.debug(f"Breaking ngram frequency dict generation. Already have {ngrams_above_threshold} ngrams above "
+                              "threshold with cache size of {self.params.cache_size}.")
                 break
 
             start_candidate_sequences: List[List[IGate]] = []
