@@ -254,6 +254,7 @@ class QuaPSim:
             for start_candidate_sequence in start_candidate_sequences:
                 for expansion_candidate in expansion_candidates:
 
+
                     # Stop ngram enumeration if there are more than or equal as many
                     # ngrams in frequency dict as specified by cache size, so that
                     # each ngram has a frequency of gte the frequency currently investigated.
@@ -262,7 +263,7 @@ class QuaPSim:
                         and ngram_frequency_dict.frequency_at(
                             self.params.cache_size - 1
                         )
-                        >= frequency
+                        >= front_threshold
                     ):
                         logging.debug(
                             (
