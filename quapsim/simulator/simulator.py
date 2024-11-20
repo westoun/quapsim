@@ -58,19 +58,42 @@ class QuaPSim:
 
         qubit_num = circuits[0].qubit_num
 
-        gate_frequency_dict = GateFrequencyDict().index(circuits)
-        inverted_gate_frequency_dict = gate_frequency_dict.invert()
+        gate_frequency_dict = self._build_gate_frequency_dict(circuits)
+        inverted_gate_frequency_dict = self._build_inverted_gate_frequency_dict(
+            gate_frequency_dict
+        )
 
         self._optimize_gate_order(circuits, gate_frequency_dict)
 
-        inverted_gate_index = InvertedGateIndex().index(circuits)
-
+        inverted_gate_index = self._build_inverted_gate_index(circuits)
         ngram_frequency_dict = self._build_ngram_frequency_dict(
             inverted_gate_frequency_dict, inverted_gate_index
         )
 
-        inverse_ngram_frequency_dict = ngram_frequency_dict.invert()
-        self._fill_cache(inverse_ngram_frequency_dict, qubit_num)
+        inverted_ngram_frequency_dict = self._build_inverted_ngram_frequency_dict(
+            ngram_frequency_dict
+        )
+        self._fill_cache(inverted_ngram_frequency_dict, qubit_num)
+
+    @log_duration
+    def _build_gate_frequency_dict(self, circuits: List[Circuit]) -> GateFrequencyDict:
+        return GateFrequencyDict().index(circuits)
+
+    @log_duration
+    def _build_inverted_gate_frequency_dict(
+        self, gate_frequency_dict: GateFrequencyDict
+    ) -> InvertedGateFrequencyDict:
+        return gate_frequency_dict.invert()
+
+    @log_duration
+    def _build_inverted_gate_index(self, circuits: List[Circuit]) -> InvertedGateIndex:
+        return InvertedGateIndex().index(circuits)
+
+    @log_duration
+    def _build_inverted_ngram_frequency_dict(
+        self, ngram_frequency_dict: NgramFrequencyDict
+    ) -> InvertedNgramFrequencyDict:
+        return ngram_frequency_dict.invert()
 
     @log_duration
     def _optimize_gate_order(
