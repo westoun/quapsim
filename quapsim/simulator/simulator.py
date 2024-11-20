@@ -216,8 +216,7 @@ class QuaPSim:
             # saved.
             if front_threshold <= 2:
                 logging.debug(
-                    "Breaking ngram frequency dict generation. frequency threshold too low: ",
-                    front_threshold,
+                    f"Breaking ngram frequency dict generation. frequency threshold too low: {front_threshold}"
                 )
                 break
 
@@ -260,27 +259,34 @@ class QuaPSim:
                         stop_search = True
                         break
 
-                    if start_candidate_sequence[-1] == expansion_candidate:
-                        continue
+                    gate_sequences: List[List[IGate]] = []
 
-                    gate_sequence: List[IGate] = []
-                    gate_sequence.extend(start_candidate_sequence)
-                    gate_sequence.append(expansion_candidate)
+                    if start_candidate_sequence[-1] != expansion_candidate:
+                        gate_sequences.append([])
+                        gate_sequences[-1].extend(start_candidate_sequence)
+                        gate_sequences[-1].append(expansion_candidate)
 
-                    frequency = calculate_gate_sequence_frequency(
-                        gate_sequence=gate_sequence, inverted_index=inverted_gate_index
-                    )
+                    if start_candidate_sequence[0] != expansion_candidate:
+                        gate_sequences.append([])
+                        gate_sequences[-1].append(expansion_candidate)
+                        gate_sequences[-1].extend(start_candidate_sequence)
 
-                    ngram_frequency_dict.add(gate_sequence, frequency)
+                    for gate_sequence in gate_sequences:
+                        frequency = calculate_gate_sequence_frequency(
+                            gate_sequence=gate_sequence,
+                            inverted_index=inverted_gate_index,
+                        )
 
-                    # Add max-check to avoid adding the frequency that has just been
-                    # popped.
-                    if (
-                        frequency < max(gate_frequencies)
-                        and frequency not in gate_frequencies
-                    ):
-                        gate_frequencies.append(frequency)
-                        gate_frequencies.sort(reverse=False)
+                        ngram_frequency_dict.add(gate_sequence, frequency)
+
+                        # Add max-check to avoid adding the frequency that has just been
+                        # popped.
+                        if (
+                            frequency < max(gate_frequencies)
+                            and frequency not in gate_frequencies
+                        ):
+                            gate_frequencies.append(frequency)
+                            gate_frequencies.sort(reverse=False)
 
                 if stop_search:
                     break
