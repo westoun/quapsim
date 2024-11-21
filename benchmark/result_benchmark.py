@@ -6,7 +6,11 @@ import warnings
 
 from quasim import QuaSim
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
-from .utils import create_random_circuits
+from .utils import (
+    create_random_gate_configs,
+    build_quapsim_circuit,
+    build_quasim_circuit,
+)
 
 
 def run_result_benchmark(
@@ -14,15 +18,22 @@ def run_result_benchmark(
 ):
     logging.info("Starting to run result benchmarking.")
 
-    quapsim_circuits = []
     quasim_circuits = []
+    quapsim_circuits = []
 
     for _ in range(circuit_count):
-        quapsim_circuit, quasim_circuit = create_random_circuits(
+        gate_configs = create_random_gate_configs(
             gate_count=gate_count, qubit_num=qubit_num
         )
-        quapsim_circuits.append(quapsim_circuit)
+        quasim_circuit = build_quasim_circuit(
+            gate_configs=gate_configs, qubit_num=qubit_num
+        )
+        quapsim_circuit = build_quapsim_circuit(
+            gate_configs=gate_configs, qubit_num=qubit_num
+        )
+
         quasim_circuits.append(quasim_circuit)
+        quapsim_circuits.append(quapsim_circuit)
 
     quapsim.evaluate(quapsim_circuits)
     quasim.evaluate(quasim_circuits)

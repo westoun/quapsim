@@ -5,7 +5,11 @@ import logging
 
 from quasim import QuaSim
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
-from .utils import create_random_circuits
+from .utils import (
+    create_random_gate_configs,
+    build_quapsim_circuit,
+    build_quasim_circuit,
+)
 
 
 def run_time_benchmark_quasim_quapsim(
@@ -13,15 +17,22 @@ def run_time_benchmark_quasim_quapsim(
 ):
     logging.info("Starting to run time benchmarking, quasim against quapsim.")
 
-    quapsim_circuits = []
     quasim_circuits = []
+    quapsim_circuits = []
 
     for _ in range(circuit_count):
-        quapsim_circuit, quasim_circuit = create_random_circuits(
+        gate_configs = create_random_gate_configs(
             gate_count=gate_count, qubit_num=qubit_num
         )
-        quapsim_circuits.append(quapsim_circuit)
+        quasim_circuit = build_quasim_circuit(
+            gate_configs=gate_configs, qubit_num=qubit_num
+        )
+        quapsim_circuit = build_quapsim_circuit(
+            gate_configs=gate_configs, qubit_num=qubit_num
+        )
+
         quasim_circuits.append(quasim_circuit)
+        quapsim_circuits.append(quapsim_circuit)
 
     start = datetime.now()
     quapsim.evaluate(quapsim_circuits)
@@ -49,25 +60,31 @@ def run_time_benchmark_quapsim_quapsim(
 ):
     logging.info("Starting to run time benchmarking, quapsim against quapsim.")
 
-    quapsim_circuits = []
+    quapsim1_circuits = []
+    quapsim2_circuits = []
     for _ in range(circuit_count):
-        quapsim_circuit, _ = create_random_circuits(
+        # Build quapsim circuits individually, to avoid
+        # accidental side effects by reordering circuit gates.
+        gate_configs = create_random_gate_configs(
             gate_count=gate_count, qubit_num=qubit_num
         )
-        quapsim_circuits.append(quapsim_circuit)
+        quapsim1_circuit = build_quapsim_circuit(
+            gate_configs=gate_configs, qubit_num=qubit_num
+        )
+        quapsim2_circuit = build_quapsim_circuit(
+            gate_configs=gate_configs, qubit_num=qubit_num
+        )
+
+        quapsim1_circuits.append(quapsim1_circuit)
+        quapsim2_circuits.append(quapsim2_circuit)
 
     start = datetime.now()
-    quapsim1.evaluate(quapsim_circuits)
+    quapsim1.evaluate(quapsim1_circuits)
     end = datetime.now()
     quapsim1_duration = end - start
 
-    # Reset circuits, since quapsim does not evaluate circuits
-    # whose states have already been set.
-    for circuit in quapsim_circuits:
-        circuit.set_state(None)
-
     start = datetime.now()
-    quapsim2.evaluate(quapsim_circuits)
+    quapsim2.evaluate(quapsim2_circuits)
     end = datetime.now()
     quapsim2_duration = end - start
 
