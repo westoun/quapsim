@@ -230,54 +230,6 @@ class QuaPSim:
         inverted_gate_frequency_dict: InvertedGateFrequencyDict,
         inverted_gate_index: InvertedGateIndex,
     ) -> NgramFrequencyDict:
-
-        class NGram:
-            gates: List[IGate]
-            frequency: int
-            expanded_by: List[IGate]
-
-            def __init__(self, gates: List[IGate], frequency: int):
-                self.gates = gates
-                self.frequency = frequency
-                self.expanded_by = []
-
-            @property
-            def gain(self) -> int:
-                return (len(self.gates) - 1) * (self.frequency - 1)
-
-            def __len__(self) -> int:
-                return len(self.gates)
-
-        # TODO: Refactor method structure and signature.
-        def get_potential_gain(ngram: NGram, bigrams: Dict) -> Tuple[IGate, int]:
-            last_gate = ngram.gates[-1]
-
-            # TODO: add flag to ngram that no need to expand further.
-            if last_gate not in bigrams:
-                return None, 0
-
-            max_successor_frequency = -1
-            max_successor: IGate = None
-            for successor in bigrams[last_gate]:
-                if successor not in bigrams[last_gate]:
-                    continue
-
-                if successor in ngram.expanded_by:
-                    continue
-
-                successor_frequency = bigrams[last_gate][successor]
-                if successor_frequency > max_successor_frequency:
-                    max_successor_frequency = successor_frequency
-                    max_successor = successor
-
-            if max_successor is None:
-                return None, 0
-
-            potential_gain = (len(ngram) + 1 - 1) * (
-                min(ngram.frequency, max_successor_frequency) - 1
-            )
-            return max_successor, potential_gain
-
         bigrams = {}
         for circuit in circuits:
             for gate, successor_gate in zip(circuit.gates[:-1], circuit.gates[1:]):
@@ -295,80 +247,146 @@ class QuaPSim:
                 else:
                     bigrams[gate] = {successor_gate: 1}
 
-        gate_frequencies: List[int] = inverted_gate_frequency_dict.frequencies
-        gate_frequencies.sort(reverse=True)
+        inverted_bigrams = {}
+        for gate in bigrams:
+            for successor_gate in bigrams[gate]:
+                frequency = bigrams[gate][successor_gate]
+
+                if frequency in inverted_bigrams:
+                    inverted_bigrams[frequency].append((gate, successor_gate))
+                else:
+                    inverted_bigrams[frequency] = [(gate, successor_gate)]
+
+        bigram_frequencies = list(inverted_bigrams.keys())
+        bigram_frequencies.sort(reverse=True)
+
+        class NGram:
+            gates: List[IGate]
+            frequency: int
+            expanded_by: List["NGram"]
+
+            def __init__(self, gates: List[IGate], frequency: int):
+                self.gates = gates
+                self.frequency = frequency
+                self.expanded_by = []
+
+            @property
+            def gain(self) -> int:
+                return (len(self.gates) - 1) * (self.frequency - 1)
 
         ngrams: List[NGram] = []
-        for gate_frequency in gate_frequencies:
-            if gate_frequency < 2:
+        for potential_frequency in bigram_frequencies:
+            if potential_frequency <= 1:
                 break
 
-            gates = inverted_gate_frequency_dict[gate_frequency]
-            for gate in gates:
-                gate_onegram = NGram([gate], gate_frequency)
-                ngrams.append(gate_onegram)
+            current_bigrams = inverted_bigrams[potential_frequency]
 
-        def get_highest_potential_ngram(
-            ngrams: List[NGram], bigrams: Dict
-        ) -> Tuple[NGram, IGate]:
+            # Padding factor
+            padding_factor = 3
+            if (len(ngrams) + len(current_bigrams)) < (
+                self.params.cache_size * padding_factor
+            ):
+                for gate, successor_gate in current_bigrams:
+                    ngram_frequency = calculate_gate_sequence_frequency(
+                        gate_sequence=[gate, successor_gate],
+                        inverted_index=inverted_gate_index,
+                    )
+                    ngram = NGram(
+                        gates=[gate, successor_gate], frequency=ngram_frequency
+                    )
+                    ngrams.append(ngram)
 
-            highest_potential_gain = -1
-            highest_ngram = None
-            highest_expansion_gate = None
+            else:
+                for gate, successor_gate in current_bigrams[
+                    : self.params.cache_size * padding_factor - len(ngrams)
+                ]:
+                    ngram_frequency = calculate_gate_sequence_frequency(
+                        gate_sequence=[gate, successor_gate],
+                        inverted_index=inverted_gate_index,
+                    )
+                    ngram = NGram(
+                        gates=[gate, successor_gate], frequency=ngram_frequency
+                    )
+                    ngrams.append(ngram)
 
-            for ngram in ngrams:
-                expansion_gate, potential_gain = get_potential_gain(ngram, bigrams)
+                break
 
-                if expansion_gate is None:
-                    continue
+        logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
-                if potential_gain > highest_potential_gain:
-                    highest_ngram = ngram
-                    highest_expansion_gate = expansion_gate
-                    highest_potential_gain = potential_gain
+        def get_highest_potential_ngram_pair(
+            ngrams: List[NGram],
+        ) -> Tuple[NGram, NGram]:
 
-            return highest_ngram, highest_expansion_gate
+            highest_potential_gain = 0
+            highest_ngram_pair = None
 
+            # TODO: Sort ngrams and break if existing highest
+            # gain cannot be exceeded anymore.
+            for first_ngram in ngrams:
+                for second_ngram in ngrams:
+                    if first_ngram.gates[-1] != second_ngram.gates[0]:
+                        continue
+
+                    if second_ngram in first_ngram.expanded_by:
+                        continue
+
+                    potential_gain = (
+                        len(first_ngram.gates) + len(second_ngram.gates) - 1
+                    ) * (min(first_ngram.frequency, second_ngram.frequency) - 1)
+
+                    if potential_gain > highest_potential_gain:
+                        highest_potential_gain = potential_gain
+                        highest_ngram_pair = (first_ngram, second_ngram)
+
+            if highest_ngram_pair is None:
+                raise StopIteration()
+            else:
+                return highest_ngram_pair
+
+        i = 0
         while True:
+            i += 1
 
-            ngram, expansion_gate = get_highest_potential_ngram(ngrams, bigrams)
-
-            if ngram is None:
+            if i >= 100:
+                logging.debug(f"Breaking ngram generation after {i} rounds of merging.")
                 break
 
-            gate_sequence = []
-            gate_sequence.extend(ngram.gates)
-            gate_sequence.append(expansion_gate)
-
-            new_ngram_frequency = calculate_gate_sequence_frequency(
-                gate_sequence=gate_sequence,
-                inverted_index=inverted_gate_index,
-            )
-            new_ngram = NGram(gates=gate_sequence, frequency=new_ngram_frequency)
-            ngrams.append(new_ngram)
-
-            ngram.expanded_by.append(expansion_gate)
-            ngram.frequency -= new_ngram_frequency
-
-            bigrams[ngram.gates[-1]][expansion_gate] -= new_ngram_frequency
-
-            logging.debug(
-                f"Adding {new_ngram.gates} with frequency {new_ngram_frequency} to ngram pool."
-            )
-
-            caching_candidates = [
-                ngram for ngram in ngrams if len(ngram) > 1 and ngram.frequency > 1
-            ]
-            if len(caching_candidates) >= self.params.cache_size:
+            try:
+                first_ngram, second_ngram = get_highest_potential_ngram_pair(ngrams)
+            except StopIteration:
                 logging.debug(
-                    f"Breaking ngram generation since cache size of {self.params.cache_size} is met."
+                    f"Breaking ngram generation since no new merging candidates with positive potential gain found."
                 )
                 break
 
+            gate_sequence = []
+            gate_sequence.extend(first_ngram.gates)
+            gate_sequence.extend(second_ngram.gates[1:])
+
+            ngram_frequency = calculate_gate_sequence_frequency(
+                gate_sequence=gate_sequence,
+                inverted_index=inverted_gate_index,
+            )
+
+            new_ngram = NGram(gates=gate_sequence, frequency=ngram_frequency)
+
+            first_ngram.expanded_by.append(second_ngram)
+            first_ngram.frequency -= ngram_frequency
+            second_ngram.frequency -= ngram_frequency
+
+            if ngram_frequency <= 1:
+                continue
+
+            ngrams.append(new_ngram)
+            logging.debug(
+                f"Adding {new_ngram.gates} with frequency {ngram_frequency} to ngram pool."
+            )
+
         ngram_frequency_dict = NgramFrequencyDict()
 
-        for ngram in ngrams:
-            if len(ngram) < 2:
+        ngrams.sort(key=lambda ngram: ngram.gain, reverse=True)
+        for ngram in ngrams[: self.params.cache_size]:
+            if len(ngram.gates) < 2:
                 continue
 
             if ngram.frequency <= 1:
