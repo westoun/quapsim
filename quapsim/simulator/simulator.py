@@ -222,113 +222,6 @@ class QuaPSim:
 
                 break
 
-    # @log_duration
-    # def _build_ngram_frequency_dict(
-    #     self,
-    #     inverted_gate_frequency_dict: InvertedGateFrequencyDict,
-    #     inverted_gate_index: InvertedGateIndex,
-    # ) -> NgramFrequencyDict:
-    #     gate_frequencies: List[int] = inverted_gate_frequency_dict.frequencies
-    #     gate_frequencies.sort(reverse=False)
-
-    #     ngram_frequency_dict = NgramFrequencyDict()
-
-    #     stop_search = False
-    #     while len(gate_frequencies) > 0:
-
-    #         front_threshold = gate_frequencies.pop()
-
-    #         # If a gate occurrs once or twice, there is no
-    #         # gain in caching it, since no operations are
-    #         # saved.
-    #         if front_threshold <= 2:
-    #             logging.debug(
-    #                 f"Breaking ngram frequency dict generation. frequency threshold too low: {front_threshold}"
-    #             )
-    #             break
-
-    #         if len(ngram_frequency_dict) >= self.params.cache_size:
-    #             logging.debug(
-    #                 (
-    #                     f"Stopping construction of ngram frequency dict since it contains {len(ngram_frequency_dict)} entries "
-    #                     f"with a cache size of {self.params.cache_size}."
-    #                 )
-    #             )
-    #             stop_search = True
-    #             break
-
-    #         start_candidate_sequences: List[List[IGate]] = []
-    #         if front_threshold in inverted_gate_frequency_dict:
-    #             for gate in inverted_gate_frequency_dict[front_threshold]:
-    #                 start_candidate_sequences.append([gate])
-
-    #         for ngram in ngram_frequency_dict.ngrams:
-    #             if ngram_frequency_dict.get_frequency(ngram) >= front_threshold:
-    #                 start_candidate_sequences.append(
-    #                     ngram_frequency_dict.get_gates(ngram)
-    #                 )
-
-    #         expansion_candidates: List[IGate] = []
-    #         for frequency in inverted_gate_frequency_dict.frequencies:
-    #             if frequency >= front_threshold:
-    #                 expansion_candidates.extend(inverted_gate_frequency_dict[frequency])
-
-    #         for start_candidate_sequence in start_candidate_sequences:
-    #             for expansion_candidate in expansion_candidates:
-
-    #                 if len(ngram_frequency_dict) >= self.params.cache_size:
-    #                     logging.debug(
-    #                         (
-    #                             f"Stopping construction of ngram frequency dict since it contains {len(ngram_frequency_dict)} entries "
-    #                             f"with a cache size of {self.params.cache_size}."
-    #                         )
-    #                     )
-    #                     stop_search = True
-    #                     break
-
-    #                 gate_sequences: List[List[IGate]] = []
-
-    #                 if start_candidate_sequence[-1] != expansion_candidate:
-    #                     gate_sequences.append([])
-    #                     gate_sequences[-1].extend(start_candidate_sequence)
-    #                     gate_sequences[-1].append(expansion_candidate)
-
-    #                 if start_candidate_sequence[0] != expansion_candidate:
-    #                     gate_sequences.append([])
-    #                     gate_sequences[-1].append(expansion_candidate)
-    #                     gate_sequences[-1].extend(start_candidate_sequence)
-
-    #                 for gate_sequence in gate_sequences:
-    #                     frequency = calculate_gate_sequence_frequency(
-    #                         gate_sequence=gate_sequence,
-    #                         inverted_index=inverted_gate_index,
-    #                     )
-
-    #                     # No point in investigating it as a candidate, since
-    #                     # no gain to be expected here.
-    #                     if frequency <= 1:
-    #                         continue
-
-    #                     ngram_frequency_dict.add(gate_sequence, frequency)
-
-    #                     # Add max-check to avoid adding the frequency that has just been
-    #                     # popped.
-    #                     if (
-    #                         len(gate_frequencies) > 0
-    #                         and frequency < max(gate_frequencies)
-    #                         and frequency not in gate_frequencies
-    #                     ):
-    #                         gate_frequencies.append(frequency)
-    #                         gate_frequencies.sort(reverse=False)
-
-    #             if stop_search:
-    #                 break
-
-    #         if stop_search:
-    #             break
-
-    #     return ngram_frequency_dict
-
     @log_duration
     def _build_ngram_frequency_dict(
         self,
@@ -467,7 +360,9 @@ class QuaPSim:
                 ngram for ngram in ngrams if len(ngram) > 1 and ngram.frequency > 1
             ]
             if len(caching_candidates) >= self.params.cache_size:
-                logging.debug(f"Breaking ngram generation since cache size of {self.params.cache_size} is met.")
+                logging.debug(
+                    f"Breaking ngram generation since cache size of {self.params.cache_size} is met."
+                )
                 break
 
         ngram_frequency_dict = NgramFrequencyDict()
