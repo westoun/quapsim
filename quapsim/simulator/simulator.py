@@ -403,7 +403,7 @@ class QuaPSim:
                     bigrams[gate] = {successor_gate: 1}
 
         gate_frequencies: List[int] = inverted_gate_frequency_dict.frequencies
-        gate_frequencies.sort(reverse=False)
+        gate_frequencies.sort(reverse=True)
 
         ngrams: List[NGram] = []
         for gate_frequency in gate_frequencies:
@@ -475,8 +475,8 @@ class QuaPSim:
             if len(ngram) < 2:
                 continue
 
-            # if ngram.frequency <= 1:
-            #     continue
+            if ngram.frequency <= 1:
+                continue
 
             ngram_frequency_dict.add(ngram.gates, ngram.frequency)
 
