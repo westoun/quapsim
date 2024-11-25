@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from typing import List, Union
+from typing import List, Union, Set
 
 from .interface import ICache
 from quapsim.gates import IGate
@@ -15,13 +15,18 @@ def create_key(gates: List[IGate]) -> str:
 class SimpleDictCache(ICache):
     """Base class for all gate sequence caches."""
 
+    lengths: Set[int]
+
     def __init__(self):
         self._dict = {}
+        self.lengths = set()
 
     def add(self, gate_sequence: List[IGate], unitary: np.ndarray) -> None:
         """Add the unitary of a sequence of gates to the cache."""
         key = create_key(gate_sequence)
         self._dict[key] = unitary
+
+        self.lengths.add(len(gate_sequence))
 
     def get(self, gate_sequence: List[IGate]) -> Union[None, np.ndarray]:
         """Retrieve the unitary of a sequence of gates from the cache

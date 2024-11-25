@@ -67,7 +67,10 @@ class QuaPSim:
 
         inverted_gate_index = self._build_inverted_gate_index(circuits)
         ngram_frequency_dict = self._build_ngram_frequency_dict(
-            circuits, gate_frequency_dict, inverted_gate_frequency_dict, inverted_gate_index
+            circuits,
+            gate_frequency_dict,
+            inverted_gate_frequency_dict,
+            inverted_gate_index,
         )
 
         inverted_ngram_frequency_dict = self._build_inverted_ngram_frequency_dict(
@@ -183,8 +186,8 @@ class QuaPSim:
         for frequency in ngram_frequencies:
             # If ngram only occurrs once or zero times (might still be investigated
             # in previous ngram generation), there is no gain in caching it.
-            # if frequency <= 1:
-            #     break
+            if frequency <= 1:
+                break
 
             gate_sequences: List[List[IGate]] = inverse_ngram_frequency_dict[frequency]
 
@@ -483,6 +486,9 @@ class QuaPSim:
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:
         logging.info(f"Starting to simulate using the cache.")
 
+        cache_entry_lengths: List[int] = list(self.cache.lengths)
+        cache_entry_lengths.sort(reverse=True)
+
         for circuit in circuits:
             if circuit.state is not None:
                 continue
@@ -490,60 +496,32 @@ class QuaPSim:
             state = np.zeros(2**circuit.qubit_num, dtype=np.complex128)
             state[0] = 1
 
-            current_gate_sequence = []
-            for gate in circuit.gates:
-                current_gate_sequence.append(gate)
+            i = 0
+            while True:
+                if i >= len(circuit.gates):
+                    break
 
-                # Since cache does not contain single gate
-                # sequences, checking them does not suffice.
-                if len(current_gate_sequence) == 1:
-                    continue
+                for cache_window in cache_entry_lengths:
+                    if i + cache_window > len(circuit.gates):
+                        continue
 
-                cache_value = self.cache.get(current_gate_sequence)
+                    gate_sequence = circuit.gates[i : i + cache_window]
 
-                # Case: gate sequence is in cache
-                if cache_value is not None:
-                    continue
+                    cached_unitary = self.cache.get(gate_sequence)
 
-                if len(current_gate_sequence) == 2:
-                    unitary = create_unitary(
-                        current_gate_sequence[0], qubit_num=circuit.qubit_num
-                    )
-                    state = np.matmul(unitary, state)
+                    if cached_unitary is not None:
+                        logging.debug(f"Using {gate_sequence} from cache.")
+                        state = np.matmul(cached_unitary, state)
 
-                    current_gate_sequence = current_gate_sequence[1:]
+                        i = i + cache_window
+                        break
 
                 else:
-                    unitary = self.cache.get(current_gate_sequence[:-1])
-                    logging.debug(f"Using {current_gate_sequence[:-1]} from cache.")
+                    unitary = create_unitary(
+                        circuit.gates[i], qubit_num=circuit.qubit_num
+                    )
                     state = np.matmul(unitary, state)
-
-                    current_gate_sequence = current_gate_sequence[-1:]
-
-            if len(current_gate_sequence) == 0:
-                pass  # do nothing.
-
-            if len(current_gate_sequence) == 1:
-                unitary = create_unitary(
-                    current_gate_sequence[0], qubit_num=circuit.qubit_num
-                )
-                state = np.matmul(unitary, state)
-
-            elif len(current_gate_sequence) == 2:
-                unitary = create_unitary(
-                    current_gate_sequence, qubit_num=circuit.qubit_num
-                )
-                state = np.matmul(unitary, state)
-
-            else:
-                unitary = self.cache.get(current_gate_sequence[:-1])
-                logging.debug(f"Using {current_gate_sequence[:-1]} from cache.")
-                state = np.matmul(unitary, state)
-
-                unitary = create_unitary(
-                    current_gate_sequence[-1], qubit_num=circuit.qubit_num
-                )
-                state = np.matmul(unitary, state)
+                    i += 1
 
             circuit.set_state(state)
 
