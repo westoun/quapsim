@@ -415,8 +415,6 @@ class QuaPSim:
                 gate_onegram = NGram([gate], gate_frequency)
                 ngrams.append(gate_onegram)
 
-        onegram_count = len(ngrams)
-
         def get_highest_potential_ngram(
             ngrams: List[NGram], bigrams: Dict
         ) -> Tuple[NGram, IGate]:
@@ -465,8 +463,11 @@ class QuaPSim:
                 f"Adding {new_ngram.gates} with frequency {new_ngram_frequency} to ngram pool."
             )
 
-            if len(ngrams) >= onegram_count + self.params.cache_size:
-                logging.debug(f"Breaking ngram generation since cache size is met.")
+            caching_candidates = [
+                ngram for ngram in ngrams if len(ngram) > 1 and ngram.frequency > 1
+            ]
+            if len(caching_candidates) >= self.params.cache_size:
+                logging.debug(f"Breaking ngram generation since cache size of {self.params.cache_size} is met.")
                 break
 
         ngram_frequency_dict = NgramFrequencyDict()
