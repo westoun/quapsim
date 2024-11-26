@@ -21,6 +21,35 @@ from .utils import (
 )
 
 
+class NGram:
+    gates: List[IGate]
+    frequency: int
+
+    def __init__(self, gates: List[IGate], frequency: int):
+        self.gates = gates
+        self.frequency = frequency
+
+    @property
+    def gain(self) -> int:
+        return (len(self.gates) - 1) * (self.frequency - 1)
+
+
+def compute_potential_gain(first_ngram: NGram, second_ngram: NGram) -> int:
+    if first_ngram.gates[-1] != second_ngram.gates[0]:
+        return 0
+
+    if first_ngram.frequency <= 1:
+        return 0
+
+    if second_ngram.frequency <= 1:
+        return 0
+
+    potential_gain = (len(first_ngram.gates) + len(second_ngram.gates) - 1) * (
+        min(first_ngram.frequency, second_ngram.frequency) - 1
+    )
+    return potential_gain
+
+
 class QuaPSim:
     def __init__(self, params: SimulatorParams = DEFAULT_PARAMS, cache: ICache = None):
         self.params = params
@@ -69,7 +98,6 @@ class QuaPSim:
         ngram_frequency_dict = self._build_ngram_frequency_dict(
             circuits,
             gate_frequency_dict,
-            inverted_gate_frequency_dict,
             inverted_gate_index,
         )
 
@@ -227,7 +255,6 @@ class QuaPSim:
         self,
         circuits: List[Circuit],
         gate_frequency_dict: GateFrequencyDict,
-        inverted_gate_frequency_dict: InvertedGateFrequencyDict,
         inverted_gate_index: InvertedGateIndex,
     ) -> NgramFrequencyDict:
         bigrams = {}
@@ -259,20 +286,6 @@ class QuaPSim:
 
         bigram_frequencies = list(inverted_bigrams.keys())
         bigram_frequencies.sort(reverse=True)
-
-        class NGram:
-            gates: List[IGate]
-            frequency: int
-            expanded_by: List["NGram"]
-
-            def __init__(self, gates: List[IGate], frequency: int):
-                self.gates = gates
-                self.frequency = frequency
-                self.expanded_by = []
-
-            @property
-            def gain(self) -> int:
-                return (len(self.gates) - 1) * (self.frequency - 1)
 
         ngrams: List[NGram] = []
         for potential_frequency in bigram_frequencies:
@@ -313,51 +326,35 @@ class QuaPSim:
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
-        def get_highest_potential_ngram_pair(
-            ngrams: List[NGram],
-        ) -> Tuple[NGram, NGram]:
+        potential_gains: np.ndarray = np.zeros((len(ngrams), len(ngrams)), dtype=int)
+        for i, first_ngram in enumerate(ngrams):
+            for j, second_ngram in enumerate(ngrams):
+                if first_ngram.gates[-1] == second_ngram.gates[0]:
+                    potential_gain = compute_potential_gain(first_ngram, second_ngram)
+                    potential_gains[i, j] = potential_gain
 
-            highest_potential_gain = 0
-            highest_ngram_pair = None
-
-            # TODO: Sort ngrams and break if existing highest
-            # gain cannot be exceeded anymore.
-            for first_ngram in ngrams:
-                for second_ngram in ngrams:
-                    if first_ngram.gates[-1] != second_ngram.gates[0]:
-                        continue
-
-                    if second_ngram in first_ngram.expanded_by:
-                        continue
-
-                    potential_gain = (
-                        len(first_ngram.gates) + len(second_ngram.gates) - 1
-                    ) * (min(first_ngram.frequency, second_ngram.frequency) - 1)
-
-                    if potential_gain > highest_potential_gain:
-                        highest_potential_gain = potential_gain
-                        highest_ngram_pair = (first_ngram, second_ngram)
-
-            if highest_ngram_pair is None:
-                raise StopIteration()
-            else:
-                return highest_ngram_pair
-
-        i = 0
+        merging_round = 0
         while True:
-            i += 1
 
-            if i >= 100:
-                logging.debug(f"Breaking ngram generation after {i} rounds of merging.")
-                break
+            merging_round += 1
 
-            try:
-                first_ngram, second_ngram = get_highest_potential_ngram_pair(ngrams)
-            except StopIteration:
+            if merging_round >= 100:
                 logging.debug(
-                    f"Breaking ngram generation since no new merging candidates with positive potential gain found."
+                    f"Breaking ngram generation after {merging_round} rounds of merging."
                 )
                 break
+
+            first_ngram_idx, second_ngram_idx = np.unravel_index(
+                np.argmax(potential_gains, axis=None), potential_gains.shape
+            )
+            if potential_gains[first_ngram_idx, second_ngram_idx] < 1:
+                logging.debug(
+                    f"Breaking ngram generation since no more potential gains."
+                )
+                break
+
+            first_ngram = ngrams[first_ngram_idx]
+            second_ngram = ngrams[second_ngram_idx]
 
             gate_sequence = []
             gate_sequence.extend(first_ngram.gates)
@@ -370,17 +367,65 @@ class QuaPSim:
 
             new_ngram = NGram(gates=gate_sequence, frequency=ngram_frequency)
 
-            first_ngram.expanded_by.append(second_ngram)
-            first_ngram.frequency -= ngram_frequency
-            second_ngram.frequency -= ngram_frequency
-
-            if ngram_frequency <= 1:
-                continue
-
             ngrams.append(new_ngram)
             logging.debug(
                 f"Adding {new_ngram.gates} with frequency {ngram_frequency} to ngram pool."
             )
+
+            # Update potential gains array
+
+            # Avoid evaluating the same ngram pair again
+            potential_gains[first_ngram_idx, second_ngram_idx] = 0
+
+            # Add new rows and columns to gains arr
+            new_col = np.zeros((len(ngrams) - 1, 1), dtype=int)
+            potential_gains = np.hstack([potential_gains, new_col])
+
+            new_row = np.zeros((len(ngrams) - 1 + 1), dtype=int)
+            potential_gains = np.vstack([potential_gains, new_row])
+
+            # No need to compute potential gain or update
+            # affected rows and columns.
+            if ngram_frequency == 0:
+                continue
+
+            first_ngram.frequency -= ngram_frequency
+            second_ngram.frequency -= ngram_frequency
+
+            for i, ngram in enumerate(ngrams):
+                if ngram.gates[-1] == new_ngram.gates[0]:
+                    potential_gain = compute_potential_gain(ngram, new_ngram)
+                    potential_gains[i, len(ngrams) - 1] = potential_gain
+
+                if new_ngram.gates[-1] == ngram.gates[0]:
+                    potential_gain = compute_potential_gain(ngram, new_ngram)
+                    potential_gains[len(ngrams) - 1, i] = potential_gain
+
+                # Else: keep potential gain as 0
+
+            # Reevaluate the rows and columns that contained one of
+            # the affected ngrams and have potential gain > 0.
+            row = potential_gains[first_ngram_idx, :]
+            for column_idx in np.where(row > 0)[0]:  # np.where returns a tuple.
+                potential_gain = compute_potential_gain(first_ngram, ngrams[column_idx])
+                potential_gains[first_ngram_idx, column_idx]
+
+            column = potential_gains[:, first_ngram_idx]
+            for row_idx in np.where(column > 0)[0]:
+                potential_gain = compute_potential_gain(ngrams[row_idx], first_ngram)
+                potential_gains[row_idx, first_ngram_idx]
+
+            row = potential_gains[second_ngram_idx, :]
+            for column_idx in np.where(row > 0)[0]:
+                potential_gain = compute_potential_gain(
+                    second_ngram, ngrams[column_idx]
+                )
+                potential_gains[second_ngram_idx, column_idx]
+
+            column = potential_gains[:, second_ngram_idx]
+            for row_idx in np.where(column > 0)[0]:
+                potential_gain = compute_potential_gain(ngrams[row_idx], second_ngram)
+                potential_gains[row_idx, second_ngram_idx]
 
         ngram_frequency_dict = NgramFrequencyDict()
 
