@@ -18,6 +18,9 @@ class NGram:
 
     @property
     def gain(self) -> int:
+        if self.frequency == 0:
+            return 0
+
         return (len(self.gates) - 1) * (self.frequency - 1)
 
 
