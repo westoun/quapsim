@@ -15,6 +15,8 @@ from .utils import (
     InvertedGateIndex,
     calculate_gate_sequence_frequency,
     log_duration,
+    NGram,
+    compute_potential_gain
 )
 
 
