@@ -16,7 +16,7 @@ from .utils import (
     calculate_gate_sequence_frequency,
     log_duration,
     NGram,
-    compute_potential_gain
+    compute_potential_gain,
 )
 
 
@@ -62,13 +62,95 @@ class QuaPSim:
         self._optimize_gate_order(circuits, gate_frequency_dict)
 
         inverted_gate_index = self._build_inverted_gate_index(circuits)
-        ngrams = self._collect_ngrams_to_cache(
-            circuits,
-            gate_frequency_dict,
-            inverted_gate_index,
-        )
 
+        ngrams = self._generate_seed_bigrams(
+            circuits, gate_frequency_dict, inverted_gate_index
+        )
+        ngrams = self._consolidate_ngrams(ngrams, inverted_gate_index)
+        ngrams = self._select_ngrams_to_cache(ngrams)
         self._fill_cache(ngrams, qubit_num)
+
+    @log_duration
+    def _select_ngrams_to_cache(self, ngrams: List[NGram]) -> List[NGram]:
+        ngrams = [ngram for ngram in ngrams if ngram.frequency > 1]
+        ngrams.sort(key=lambda ngram: ngram.gain, reverse=True)
+        return ngrams[: self.params.cache_size]
+
+    @log_duration
+    def _generate_seed_bigrams(
+        self,
+        circuits: List[Circuit],
+        gate_frequency_dict: GateFrequencyDict,
+        inverted_gate_index: InvertedGateIndex,
+    ) -> List[NGram]:
+        bigrams = {}
+        for circuit in circuits:
+            for gate, successor_gate in zip(circuit.gates[:-1], circuit.gates[1:]):
+                if (
+                    gate_frequency_dict[gate] < 2
+                    or gate_frequency_dict[successor_gate] < 2
+                ):
+                    continue
+
+                if gate in bigrams:
+                    if successor_gate in bigrams[gate]:
+                        bigrams[gate][successor_gate] += 1
+                    else:
+                        bigrams[gate][successor_gate] = 1
+                else:
+                    bigrams[gate] = {successor_gate: 1}
+
+        inverted_bigrams = {}
+        for gate in bigrams:
+            for successor_gate in bigrams[gate]:
+                frequency = bigrams[gate][successor_gate]
+
+                if frequency in inverted_bigrams:
+                    inverted_bigrams[frequency].append((gate, successor_gate))
+                else:
+                    inverted_bigrams[frequency] = [(gate, successor_gate)]
+
+        bigram_frequencies = list(inverted_bigrams.keys())
+        bigram_frequencies.sort(reverse=True)
+
+        ngrams: List[NGram] = []
+        for potential_frequency in bigram_frequencies:
+            if potential_frequency <= 1:
+                break
+
+            current_bigrams = inverted_bigrams[potential_frequency]
+
+            # Padding factor
+            padding_factor = 3
+            if (len(ngrams) + len(current_bigrams)) < (
+                self.params.cache_size * padding_factor
+            ):
+                for gate, successor_gate in current_bigrams:
+                    ngram_frequency = calculate_gate_sequence_frequency(
+                        gate_sequence=[gate, successor_gate],
+                        inverted_index=inverted_gate_index,
+                    )
+                    ngram = NGram(
+                        gates=[gate, successor_gate], frequency=ngram_frequency
+                    )
+                    ngrams.append(ngram)
+
+            else:
+                for gate, successor_gate in current_bigrams[
+                    : self.params.cache_size * padding_factor - len(ngrams)
+                ]:
+                    ngram_frequency = calculate_gate_sequence_frequency(
+                        gate_sequence=[gate, successor_gate],
+                        inverted_index=inverted_gate_index,
+                    )
+                    ngram = NGram(
+                        gates=[gate, successor_gate], frequency=ngram_frequency
+                    )
+                    ngrams.append(ngram)
+
+                break
+
+        return ngrams
 
     @log_duration
     def _build_gate_frequency_dict(self, circuits: List[Circuit]) -> GateFrequencyDict:
@@ -165,78 +247,11 @@ class QuaPSim:
             self.cache.add(ngram.gates, unitary)
 
     @log_duration
-    def _collect_ngrams_to_cache(
+    def _consolidate_ngrams(
         self,
-        circuits: List[Circuit],
-        gate_frequency_dict: GateFrequencyDict,
+        ngrams: List[NGram],
         inverted_gate_index: InvertedGateIndex,
     ) -> List[NGram]:
-        bigrams = {}
-        for circuit in circuits:
-            for gate, successor_gate in zip(circuit.gates[:-1], circuit.gates[1:]):
-                if (
-                    gate_frequency_dict[gate] < 2
-                    or gate_frequency_dict[successor_gate] < 2
-                ):
-                    continue
-
-                if gate in bigrams:
-                    if successor_gate in bigrams[gate]:
-                        bigrams[gate][successor_gate] += 1
-                    else:
-                        bigrams[gate][successor_gate] = 1
-                else:
-                    bigrams[gate] = {successor_gate: 1}
-
-        inverted_bigrams = {}
-        for gate in bigrams:
-            for successor_gate in bigrams[gate]:
-                frequency = bigrams[gate][successor_gate]
-
-                if frequency in inverted_bigrams:
-                    inverted_bigrams[frequency].append((gate, successor_gate))
-                else:
-                    inverted_bigrams[frequency] = [(gate, successor_gate)]
-
-        bigram_frequencies = list(inverted_bigrams.keys())
-        bigram_frequencies.sort(reverse=True)
-
-        ngrams: List[NGram] = []
-        for potential_frequency in bigram_frequencies:
-            if potential_frequency <= 1:
-                break
-
-            current_bigrams = inverted_bigrams[potential_frequency]
-
-            # Padding factor
-            padding_factor = 3
-            if (len(ngrams) + len(current_bigrams)) < (
-                self.params.cache_size * padding_factor
-            ):
-                for gate, successor_gate in current_bigrams:
-                    ngram_frequency = calculate_gate_sequence_frequency(
-                        gate_sequence=[gate, successor_gate],
-                        inverted_index=inverted_gate_index,
-                    )
-                    ngram = NGram(
-                        gates=[gate, successor_gate], frequency=ngram_frequency
-                    )
-                    ngrams.append(ngram)
-
-            else:
-                for gate, successor_gate in current_bigrams[
-                    : self.params.cache_size * padding_factor - len(ngrams)
-                ]:
-                    ngram_frequency = calculate_gate_sequence_frequency(
-                        gate_sequence=[gate, successor_gate],
-                        inverted_index=inverted_gate_index,
-                    )
-                    ngram = NGram(
-                        gates=[gate, successor_gate], frequency=ngram_frequency
-                    )
-                    ngrams.append(ngram)
-
-                break
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
@@ -341,9 +356,7 @@ class QuaPSim:
                 potential_gain = compute_potential_gain(ngrams[row_idx], second_ngram)
                 potential_gains[row_idx, second_ngram_idx]
 
-        ngrams = [ngram for ngram in ngrams if ngram.frequency > 1]
-        ngrams.sort(key=lambda ngram: ngram.gain, reverse=True)
-        return ngrams[: self.params.cache_size]
+        return ngrams
 
     @log_duration
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:
