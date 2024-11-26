@@ -18,35 +18,6 @@ from .utils import (
 )
 
 
-class NGram:
-    gates: List[IGate]
-    frequency: int
-
-    def __init__(self, gates: List[IGate], frequency: int):
-        self.gates = gates
-        self.frequency = frequency
-
-    @property
-    def gain(self) -> int:
-        return (len(self.gates) - 1) * (self.frequency - 1)
-
-
-def compute_potential_gain(first_ngram: NGram, second_ngram: NGram) -> int:
-    if first_ngram.gates[-1] != second_ngram.gates[0]:
-        return 0
-
-    if first_ngram.frequency <= 1:
-        return 0
-
-    if second_ngram.frequency <= 1:
-        return 0
-
-    potential_gain = (len(first_ngram.gates) + len(second_ngram.gates) - 1) * (
-        min(first_ngram.frequency, second_ngram.frequency) - 1
-    )
-    return potential_gain
-
-
 class QuaPSim:
     def __init__(self, params: SimulatorParams = DEFAULT_PARAMS, cache: ICache = None):
         self.params = params
