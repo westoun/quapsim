@@ -12,11 +12,8 @@ from quapsim.cache import ICache
 
 from .utils import (
     GateFrequencyDict,
-    InvertedGateFrequencyDict,
     InvertedGateIndex,
     calculate_gate_sequence_frequency,
-    NgramFrequencyDict,
-    InvertedNgramFrequencyDict,
     log_duration,
 )
 
@@ -88,43 +85,25 @@ class QuaPSim:
         qubit_num = circuits[0].qubit_num
 
         gate_frequency_dict = self._build_gate_frequency_dict(circuits)
-        inverted_gate_frequency_dict = self._build_inverted_gate_frequency_dict(
-            gate_frequency_dict
-        )
 
         self._optimize_gate_order(circuits, gate_frequency_dict)
 
         inverted_gate_index = self._build_inverted_gate_index(circuits)
-        ngram_frequency_dict = self._build_ngram_frequency_dict(
+        ngrams = self._collect_ngrams_to_cache(
             circuits,
             gate_frequency_dict,
             inverted_gate_index,
         )
 
-        inverted_ngram_frequency_dict = self._build_inverted_ngram_frequency_dict(
-            ngram_frequency_dict
-        )
-        self._fill_cache(inverted_ngram_frequency_dict, qubit_num)
+        self._fill_cache(ngrams, qubit_num)
 
     @log_duration
     def _build_gate_frequency_dict(self, circuits: List[Circuit]) -> GateFrequencyDict:
         return GateFrequencyDict().index(circuits)
 
     @log_duration
-    def _build_inverted_gate_frequency_dict(
-        self, gate_frequency_dict: GateFrequencyDict
-    ) -> InvertedGateFrequencyDict:
-        return gate_frequency_dict.invert()
-
-    @log_duration
     def _build_inverted_gate_index(self, circuits: List[Circuit]) -> InvertedGateIndex:
         return InvertedGateIndex().index(circuits)
-
-    @log_duration
-    def _build_inverted_ngram_frequency_dict(
-        self, ngram_frequency_dict: NgramFrequencyDict
-    ) -> InvertedNgramFrequencyDict:
-        return ngram_frequency_dict.invert()
 
     @log_duration
     def _optimize_gate_order(
@@ -204,59 +183,21 @@ class QuaPSim:
                     )
 
     @log_duration
-    def _fill_cache(
-        self, inverse_ngram_frequency_dict: InvertedNgramFrequencyDict, qubit_num: int
-    ) -> None:
-        ngram_frequencies: List[int] = inverse_ngram_frequency_dict.frequencies
-        ngram_frequencies.sort(reverse=True)
-
-        cached_unitaries = 0
-        for frequency in ngram_frequencies:
-            # If ngram only occurrs once or zero times (might still be investigated
-            # in previous ngram generation), there is no gain in caching it.
-            if frequency <= 1:
-                break
-
-            gate_sequences: List[List[IGate]] = inverse_ngram_frequency_dict[frequency]
-
-            if cached_unitaries + len(gate_sequences) < self.params.cache_size:
-
-                for gate_sequence in gate_sequences:
-                    unitary = create_unitary(gate_sequence, qubit_num)
-                    logging.debug(
-                        f"Adding {gate_sequence} (with a frequency of {frequency}) to cache."
-                    )
-                    self.cache.add(gate_sequence, unitary)
-
-                cached_unitaries += len(gate_sequences)
-
-            else:
-                cache_size_left = self.params.cache_size - cached_unitaries
-
-                # Sort gate sequences in current front by ngram size from
-                # smallest to largest. While it would be preferrable to
-                # cache longer sequences first, as these sequences yield a
-                # bigger safe in matrix operations, the current simulation
-                # logic is built on the assumption that if an n-gram has been
-                # cached, its n-1-gram has also been cached.
-                gate_sequences.sort(key=lambda sequence: len(sequence))
-
-                for gate_sequence in gate_sequences[:cache_size_left]:
-                    unitary = create_unitary(gate_sequence, qubit_num)
-                    logging.debug(
-                        f"Adding {gate_sequence} (with a frequency of {frequency}) to cache."
-                    )
-                    self.cache.add(gate_sequence, unitary)
-
-                break
+    def _fill_cache(self, ngrams: List[NGram], qubit_num: int) -> None:
+        for ngram in ngrams:
+            unitary = create_unitary(ngram.gates, qubit_num)
+            logging.debug(
+                f"Adding {ngram.gates} (with a frequency of {ngram.frequency}) to cache."
+            )
+            self.cache.add(ngram.gates, unitary)
 
     @log_duration
-    def _build_ngram_frequency_dict(
+    def _collect_ngrams_to_cache(
         self,
         circuits: List[Circuit],
         gate_frequency_dict: GateFrequencyDict,
         inverted_gate_index: InvertedGateIndex,
-    ) -> NgramFrequencyDict:
+    ) -> List[NGram]:
         bigrams = {}
         for circuit in circuits:
             for gate, successor_gate in zip(circuit.gates[:-1], circuit.gates[1:]):
@@ -427,19 +368,9 @@ class QuaPSim:
                 potential_gain = compute_potential_gain(ngrams[row_idx], second_ngram)
                 potential_gains[row_idx, second_ngram_idx]
 
-        ngram_frequency_dict = NgramFrequencyDict()
-
+        ngrams = [ngram for ngram in ngrams if ngram.frequency > 1]
         ngrams.sort(key=lambda ngram: ngram.gain, reverse=True)
-        for ngram in ngrams[: self.params.cache_size]:
-            if len(ngram.gates) < 2:
-                continue
-
-            if ngram.frequency <= 1:
-                continue
-
-            ngram_frequency_dict.add(ngram.gates, ngram.frequency)
-
-        return ngram_frequency_dict
+        return ngrams[: self.params.cache_size]
 
     @log_duration
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:

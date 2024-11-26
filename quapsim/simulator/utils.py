@@ -41,48 +41,11 @@ class GateFrequencyDict:
                     self._dict[gate] = 1
         return self
 
-    def invert(self) -> "InvertedGateFrequencyDict":
-        inverted_gate_frequency_dict = InvertedGateFrequencyDict()
-        for gate in self._dict:
-            if gate in self._dict:
-                frequency = self._dict[gate]
-            else:
-                frequency = 0
-
-            inverted_gate_frequency_dict.add(frequency, gate)
-        return inverted_gate_frequency_dict
-
     def __getitem__(self, gate: IGate) -> int:
         if gate in self._dict:
             return self._dict[gate]
         else:
             return -1
-
-
-class InvertedGateFrequencyDict:
-    _dict: Dict
-
-    def __init__(self):
-        self._dict = {}
-
-    def add(self, frequency: int, gate: IGate) -> None:
-        if frequency in self._dict:
-            self._dict[frequency].append(gate)
-        else:
-            self._dict[frequency] = [gate]
-
-    @property
-    def frequencies(self) -> List[int]:
-        return list(self._dict.keys())
-
-    def __contains__(self, frequency: int) -> bool:
-        return frequency in self._dict
-
-    def __getitem__(self, frequency: int) -> List[IGate]:
-        if frequency in self._dict:
-            return self._dict[frequency]
-        else:
-            return None
 
 
 class InvertedGateIndex:
@@ -169,82 +132,3 @@ def calculate_gate_sequence_frequency(
         gate_sequence_frequency += len(left_pred_occurrences)
 
     return gate_sequence_frequency
-
-
-class NgramFrequencyDict:
-    _dict: Dict
-    _frequencies: List[int]
-
-    def __init__(self):
-        self._dict = {}
-        self._frequencies = []
-
-    def __contains__(self, ngram: str) -> bool:
-        return ngram in self._dict
-
-    def get_frequency(self, ngram: str) -> int:
-        if ngram not in self._dict:
-            return 0
-        else:
-            return self._dict[ngram]["frequency"]
-
-    def get_gates(self, ngram: str) -> List[IGate]:
-        if ngram not in self._dict:
-            return []
-        else:
-            return self._dict[ngram]["gates"]
-
-    @property
-    def ngrams(self) -> List[str]:
-        return list(self._dict.keys())
-
-    def add(self, gates: List[IGate], frequency: int):
-        ngram = "_".join([gate.__repr__() for gate in gates])
-        self._dict[ngram] = {"frequency": frequency, "gates": gates}
-        self._frequencies.append(frequency)
-
-    def invert(self) -> "InvertedNgramFrequencyDict":
-        inverted_ngram_dict = InvertedGateFrequencyDict()
-
-        for ngram in self._dict:
-            frequency = self.get_frequency(ngram)
-            gate_sequence = self.get_gates(ngram)
-
-            inverted_ngram_dict.add(frequency, gate_sequence)
-
-        return inverted_ngram_dict
-
-    def __len__(self) -> int:
-        return len(self._dict.keys())
-
-    def frequency_at(self, idx: int) -> int:
-        """Return the nth largest frequency"""
-        self._frequencies.sort(reverse=True)
-
-        if len(self._frequencies) >= idx:
-            return self._frequencies[idx]
-        else:
-            return -1
-
-
-class InvertedNgramFrequencyDict:
-    _dict: Dict
-
-    def __init__(self):
-        self._dict = {}
-
-    def add(self, frequency: int, gates: List[IGate]) -> None:
-        if frequency in self._dict:
-            self._dict[frequency].append(gates)
-        else:
-            self._dict[frequency] = [gates]
-
-    @property
-    def frequencies(self) -> List[int]:
-        return list(self._dict.keys())
-
-    def __getitem__(self, frequency: int) -> List[IGate]:
-        if frequency in self._dict:
-            return self._dict[frequency]
-        else:
-            return []
