@@ -8,6 +8,8 @@ class SimulatorParams:
     processes: int = 1
     cache_size: int = 0  # For now, measured in # matrices.
     reordering_steps: int = 0
+    merging_rounds: int = 50
+    merging_pool_size: int = 50
 
 
 DEFAULT_PARAMS: SimulatorParams = SimulatorParams(

@@ -200,11 +200,7 @@ class QuaPSim:
 
             current_bigrams = inverted_bigrams[potential_frequency]
 
-            # Padding factor
-            padding_factor = 3
-            if (len(ngrams) + len(current_bigrams)) < (
-                self.params.cache_size * padding_factor
-            ):
+            if (len(ngrams) + len(current_bigrams)) < (self.params.merging_pool_size):
                 for gate, successor_gate in current_bigrams:
                     ngram_frequency = calculate_gate_sequence_frequency(
                         gate_sequence=[gate, successor_gate],
@@ -217,7 +213,7 @@ class QuaPSim:
 
             else:
                 for gate, successor_gate in current_bigrams[
-                    : self.params.cache_size * padding_factor - len(ngrams)
+                    : self.params.merging_pool_size - len(ngrams)
                 ]:
                     ngram_frequency = calculate_gate_sequence_frequency(
                         gate_sequence=[gate, successor_gate],
@@ -253,7 +249,7 @@ class QuaPSim:
 
             merging_round += 1
 
-            if merging_round >= 100:
+            if merging_round >= self.params.merging_rounds:
                 logging.debug(
                     f"Breaking ngram generation after {merging_round} rounds of merging."
                 )
