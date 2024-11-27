@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 import logging
 import numpy as np
 from random import randint
@@ -194,20 +195,16 @@ class QuaPSim:
         bigram_frequencies.sort(reverse=True)
 
         ngrams: List[NGram] = []
-        for potential_frequency in bigram_frequencies:
-            if potential_frequency <= 1:
+        for bigram_frequency in bigram_frequencies:
+            if bigram_frequency <= 1:
                 break
 
-            current_bigrams = inverted_bigrams[potential_frequency]
+            current_bigrams = inverted_bigrams[bigram_frequency]
 
             if (len(ngrams) + len(current_bigrams)) < (self.params.merging_pool_size):
                 for gate, successor_gate in current_bigrams:
-                    ngram_frequency = calculate_gate_sequence_frequency(
-                        gate_sequence=[gate, successor_gate],
-                        inverted_index=inverted_gate_index,
-                    )
                     ngram = NGram(
-                        gates=[gate, successor_gate], frequency=ngram_frequency
+                        gates=[gate, successor_gate], frequency=bigram_frequency
                     )
                     ngrams.append(ngram)
 
@@ -215,12 +212,8 @@ class QuaPSim:
                 for gate, successor_gate in current_bigrams[
                     : self.params.merging_pool_size - len(ngrams)
                 ]:
-                    ngram_frequency = calculate_gate_sequence_frequency(
-                        gate_sequence=[gate, successor_gate],
-                        inverted_index=inverted_gate_index,
-                    )
                     ngram = NGram(
-                        gates=[gate, successor_gate], frequency=ngram_frequency
+                        gates=[gate, successor_gate], frequency=bigram_frequency
                     )
                     ngrams.append(ngram)
 
@@ -243,6 +236,8 @@ class QuaPSim:
                 if first_ngram.gates[-1] == second_ngram.gates[0]:
                     potential_gain = compute_potential_gain(first_ngram, second_ngram)
                     potential_gains[i, j] = potential_gain
+
+        lookup_duration = datetime.now() - datetime.now()
 
         merging_round = 0
         while True:
@@ -271,10 +266,12 @@ class QuaPSim:
             gate_sequence.extend(first_ngram.gates)
             gate_sequence.extend(second_ngram.gates[1:])
 
+            start = datetime.now()
             ngram_frequency = calculate_gate_sequence_frequency(
                 gate_sequence=gate_sequence,
                 inverted_index=inverted_gate_index,
             )
+            lookup_duration += datetime.now() - start
 
             new_ngram = NGram(gates=gate_sequence, frequency=ngram_frequency)
 
@@ -338,6 +335,9 @@ class QuaPSim:
                 potential_gain = compute_potential_gain(ngrams[row_idx], second_ngram)
                 potential_gains[row_idx, second_ngram_idx]
 
+        logging.info(
+            f"Time during merging spent on frequency lookup: {lookup_duration}"
+        )
         return ngrams
 
     @log_duration
