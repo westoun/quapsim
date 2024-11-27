@@ -10,9 +10,12 @@ from quapsim.gates import IGate
 class ICache(ABC):
     """Base class for all gate sequence caches."""
 
-    lengths: Set[int]
-    """Return a set containing the unique lengths of all cache entries.
-        Can be used to guide cache lookups."""
+    @abstractmethod
+    def could_be_in_cache(self, gate_sequence: List[IGate]) -> bool:
+        """Return if a gate sequence or its children could be in
+        the cache (based on internal trie structure).
+        """
+        ...
 
     @abstractmethod
     def add(self, gate_sequence: List[IGate], unitary: np.ndarray) -> None:
@@ -23,9 +26,4 @@ class ICache(ABC):
     def get(self, gate_sequence: List[IGate]) -> Union[None, np.ndarray]:
         """Retrieve the unitary of a sequence of gates from the cache
         if it exists. Else return None."""
-        ...
-
-    @abstractmethod
-    def reset(self) -> None:
-        """Clear the cache."""
         ...
