@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import List, Union, Set
+from typing import List, Union, Set, Tuple
 
 from quapsim.gates import IGate
 
@@ -11,10 +11,10 @@ class ICache(ABC):
     """Base class for all gate sequence caches."""
 
     @abstractmethod
-    def could_be_in_cache(self, gate_sequence: List[IGate]) -> bool:
-        """Return if a gate sequence or its children could be in
-        the cache (based on internal trie structure).
-        """
+    def get_cache_potential(self, gate_sequence: List[IGate]) -> Tuple[bool, bool]:
+        """The first boolean of the returned tuple answers whether the
+        any child sequences could be contained in the cache.
+        The second one answers if it actually is."""
         ...
 
     @abstractmethod

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from typing import List, Union, Set
+from typing import List, Union, Set, Tuple
 
 from .interface import ICache
 from quapsim.gates import IGate
@@ -14,11 +14,13 @@ def create_key(gates: List[IGate]) -> str:
 
 class TrieNode:
     gate: IGate
+    is_sequence_end: bool
     children: List["TrieNode"]
 
     def __init__(self, gate: IGate):
         self.gate = gate
         self.children = []
+        self.is_sequence_end = False
 
     def get_child(self, gate: IGate) -> Union["TrieNode", None]:
         for child in self.children:
@@ -46,18 +48,23 @@ class TrieNode:
 
 
 def is_in_trie(gate_sequence: List[IGate], node: TrieNode) -> bool:
+    """The first boolean of the returned tuple answers whether the
+    sequence is contained in the trie. The second one answers if
+    the final node is a sequence end."""
+
     if len(gate_sequence) == 0:
-        return True
+        return True, node.is_sequence_end
 
     child_node = node.get_child(gate_sequence[0])
     if child_node is None:
-        return False
+        return False, False
 
     return is_in_trie(gate_sequence[1:], child_node)
 
 
 def add_to_trie(gate_sequence: List[IGate], node: TrieNode) -> None:
     if len(gate_sequence) == 0:
+        node.is_sequence_end = True
         return
 
     child_node = node.get_child(gate_sequence[0])
@@ -69,33 +76,18 @@ def add_to_trie(gate_sequence: List[IGate], node: TrieNode) -> None:
     add_to_trie(gate_sequence[1:], child_node)
 
 
-class Trie:
-
-    def __init__(self):
-        self._trie_root = TrieNode(gate=None)
-
-    def contains(self, gate_sequence: List[IGate]) -> bool:
-        return is_in_trie(gate_sequence, self._trie_root)
-
-    def add(self, gate_sequence: List[IGate]) -> bool:
-        add_to_trie(gate_sequence, self._trie_root)
-
-    def __repr__(self) -> str:
-        return self._trie_root.__repr__()
-
-
 class SimpleDictCache(ICache):
     """Base class for all gate sequence caches."""
 
     def __init__(self):
         self._dict = {}
-        self._trie = Trie()
+        self._trie_root = TrieNode(gate=None)
 
-    def could_be_in_cache(self, gate_sequence: List[IGate]) -> bool:
-        """Return if a gate sequence or its children could be in
-        the cache (based on internal trie structure).
-        """
-        return self._trie.contains(gate_sequence)
+    def get_cache_potential(self, gate_sequence: List[IGate]) -> Tuple[bool, bool]:
+        """The first boolean of the returned tuple answers whether the
+        any child sequences could be contained in the cache.
+        The second one answers if it actually is."""
+        return is_in_trie(gate_sequence, self._trie_root)
 
     def add(self, gate_sequence: List[IGate], unitary: np.ndarray) -> None:
         """Add the unitary of a sequence of gates to the cache."""
@@ -103,7 +95,7 @@ class SimpleDictCache(ICache):
         self._add_to_cache(gate_sequence, unitary)
 
     def _add_to_trie(self, gate_sequence: List[IGate]) -> None:
-        self._trie.add(gate_sequence)
+        add_to_trie(gate_sequence, self._trie_root)
 
     def _add_to_cache(self, gate_sequence: List[IGate], unitary: np.ndarray) -> None:
         key = create_key(gate_sequence)

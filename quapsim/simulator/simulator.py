@@ -368,35 +368,37 @@ class QuaPSim:
                 if i >= len(circuit.gates):
                     break
 
-                j = 0  # j + 1 is length of window from ith gate forwards where cache
-                # hit could occurr.
-                for j in range(len(circuit.gates) - i - 1):
-                    if not self.cache.could_be_in_cache(circuit.gates[i : i + j + 1]):
+                retrievable_sequence_length = 0
+                for j in range(2, len(circuit.gates) - i):
+
+                    gate_sequence = circuit.gates[i : i + j]
+
+                    potential_hit, actual_hit = self.cache.get_cache_potential(
+                        gate_sequence
+                    )
+
+                    if actual_hit:
+                        retrievable_sequence_length = j
+
+                    if not potential_hit:
                         break
-                else:  # case: full window until end of circuit could be in cache.
-                    j += 1
 
-                k = 0  # k + 1 is length of window from ith gate forwards where cache
-                # hit actually occurred.
-                for k in reversed(range(j)):
-                    if k == 0:  # Skip evaluation of single gate sequence
-                        continue
-
-                    cached_unitary = self.cache.get(circuit.gates[i : i + k + 1])
-
-                    if cached_unitary is not None:
-                        logging.debug(
-                            f"Using {circuit.gates[i: i + k + 1]} from cache."
-                        )
-                        state = np.matmul(cached_unitary, state)
-                        break
-                else: # Also applies if j == 0
+                if retrievable_sequence_length == 0:
                     unitary = create_unitary(
                         circuit.gates[i], qubit_num=circuit.qubit_num
                     )
                     state = np.matmul(unitary, state)
 
-                i += k + 1
+                else:
+                    logging.debug(
+                        f"Using {circuit.gates[i: i + retrievable_sequence_length]} from cache."
+                    )
+                    cached_unitary = self.cache.get(
+                        circuit.gates[i : i + retrievable_sequence_length]
+                    )
+                    state = np.matmul(cached_unitary, state)
+
+                i += retrievable_sequence_length + 1
 
             circuit.set_state(state)
 
