@@ -65,7 +65,7 @@ class QuaPSim:
         inverted_gate_index = self._build_inverted_gate_index(circuits)
 
         ngrams = self._generate_seed_bigrams(
-            circuits, gate_frequency_dict, inverted_gate_index
+            circuits, gate_frequency_dict
         )
         ngrams = self._consolidate_ngrams(ngrams, inverted_gate_index)
         ngrams = self._select_ngrams_to_cache(ngrams)
@@ -162,7 +162,6 @@ class QuaPSim:
         self,
         circuits: List[Circuit],
         gate_frequency_dict: GateFrequencyDict,
-        inverted_gate_index: InvertedGateIndex,
     ) -> List[NGram]:
         bigrams = {}
         for circuit in circuits:
