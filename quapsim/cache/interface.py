@@ -10,13 +10,16 @@ from quapsim.gates import IGate
 class ICache(ABC):
     """Base class for all gate sequence caches."""
 
-    lengths: Set[int]
-    """Return a set containing the unique lengths of all cache entries.
-        Can be used to guide cache lookups."""
-
     @abstractmethod
     def add(self, gate_sequence: List[IGate], unitary: np.ndarray) -> None:
         """Add the unitary of a sequence of gates to the cache."""
+        ...
+
+    @abstractmethod
+    def get_prefix_in_cache_length(self, gate_sequence: List[IGate]) -> int:
+        """Return the maximum sequence length that is in the cache,
+        measured from the beginning of the sequence. This method is
+        use full for performing cache lookup."""
         ...
 
     @abstractmethod

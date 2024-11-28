@@ -356,9 +356,6 @@ class QuaPSim:
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:
         logging.info(f"Starting to simulate using the cache.")
 
-        cache_entry_lengths: List[int] = list(self.cache.lengths)
-        cache_entry_lengths.sort(reverse=True)
-
         for circuit in circuits:
             if circuit.state is not None:
                 continue
@@ -371,27 +368,25 @@ class QuaPSim:
                 if i >= len(circuit.gates):
                     break
 
-                for cache_window in cache_entry_lengths:
-                    if i + cache_window > len(circuit.gates):
-                        continue
+                cache_window = self.cache.get_prefix_in_cache_length(circuit.gates[i:])
 
-                    gate_sequence = circuit.gates[i : i + cache_window]
-
-                    cached_unitary = self.cache.get(gate_sequence)
-
-                    if cached_unitary is not None:
-                        logging.debug(f"Using {gate_sequence} from cache.")
-                        state = np.matmul(cached_unitary, state)
-
-                        i = i + cache_window
-                        break
-
-                else:
+                if cache_window == 0:
                     unitary = create_unitary(
                         circuit.gates[i], qubit_num=circuit.qubit_num
                     )
                     state = np.matmul(unitary, state)
-                    i += 1
+
+                    i = i + 1
+
+                else:
+                    cached_unitary = self.cache.get(circuit.gates[i : i + cache_window])
+                    state = np.matmul(cached_unitary, state)
+
+                    logging.debug(
+                        f"Using {circuit.gates[i : i + cache_window]} from cache."
+                    )
+
+                    i = i + cache_window
 
             circuit.set_state(state)
 
