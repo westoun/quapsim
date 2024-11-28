@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from typing import List, Union, Set
+from typing import List, Union, Set, Dict
 
 from .interface import ICache
 from quapsim.gates import IGate
@@ -15,22 +15,21 @@ def create_key(gates: List[IGate]) -> str:
 class TrieNode:
     gate: IGate
     is_sequence_end: bool
-    children: List["TrieNode"]
+    children: Dict
 
     def __init__(self, gate: IGate):
         self.gate = gate
-        self.children = []
+        self.children = {}
         self.is_sequence_end = False
 
     def get_child(self, gate: IGate) -> Union["TrieNode", None]:
-        for child in self.children:
-            if child.gate == gate:
-                return child
+        if gate in self.children:
+            return self.children[gate]
 
         return None
 
     def add_child(self, node: "TrieNode") -> None:
-        self.children.append(node)
+        self.children[node.gate] = node
 
     def __repr__(self, tabs: int = 0) -> str:
         representation: str = ""
@@ -40,8 +39,10 @@ class TrieNode:
                 representation += "\t"
 
             representation += self.gate.__repr__()
+        else:
+            representation += "ROOT"
 
-        for child in self.children:
+        for child in self.children.values():
             representation += "\n" + child.__repr__(tabs=tabs + 1)
 
         return representation
@@ -89,18 +90,17 @@ class SimpleDictCache(ICache):
         current_node = self._trie_root
         for i, gate in enumerate(gate_sequence):
 
-            for child in current_node.children:
-                if child.gate == gate:
-                    if child.is_sequence_end:
-                        prefix_length = i + 1
+            child = current_node.get_child(gate)
 
-                    current_node = child
-                    break
-            
-            # Case: current node has no children corresponding to 
+            # Case: current node has no children corresponding to
             # the gate currently under investigation.
-            else: 
+            if child is None:
                 break
+
+            if child.is_sequence_end:
+                prefix_length = i + 1
+
+            current_node = child
 
         return prefix_length
 
