@@ -34,7 +34,7 @@ def compute_potential_gain(first_ngram: NGram, second_ngram: NGram) -> int:
     if second_ngram.frequency <= 1:
         return 0
 
-    potential_gain = (len(first_ngram.gates) + len(second_ngram.gates) - 1) * (
+    potential_gain = (len(first_ngram.gates) + len(second_ngram.gates) - 2) * (
         min(first_ngram.frequency, second_ngram.frequency) - 1
     )
     return potential_gain
