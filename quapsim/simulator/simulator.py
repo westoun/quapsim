@@ -13,7 +13,6 @@ from quapsim.cache import ICache
 
 from .utils import (
     GateFrequencyDict,
-    InvertedGateIndex,
     log_duration,
     NGram,
     compute_potential_gain,
@@ -148,10 +147,6 @@ class QuaPSim:
                     circuit.gates.insert(
                         min_frequency_idx - 1, circuit.gates.pop(current_idx)
                     )
-
-    @log_duration
-    def _build_inverted_gate_index(self, circuits: List[Circuit]) -> InvertedGateIndex:
-        return InvertedGateIndex().index(circuits)
 
     @log_duration
     def _generate_seed_bigrams(
