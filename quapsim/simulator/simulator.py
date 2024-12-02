@@ -14,10 +14,10 @@ from quapsim.cache import ICache
 from .utils import (
     GateFrequencyDict,
     InvertedGateIndex,
-    calculate_gate_sequence_frequency,
     log_duration,
     NGram,
     compute_potential_gain,
+    create_merged_ngram,
 )
 
 
@@ -62,10 +62,8 @@ class QuaPSim:
 
         self._optimize_gate_order(circuits, gate_frequency_dict)
 
-        inverted_gate_index = self._build_inverted_gate_index(circuits)
-
         ngrams = self._generate_seed_bigrams(circuits, gate_frequency_dict)
-        ngrams = self._consolidate_ngrams(ngrams, inverted_gate_index)
+        ngrams = self._consolidate_ngrams(ngrams)
         ngrams = self._select_ngrams_to_cache(ngrams)
 
         self._fill_cache(ngrams, qubit_num)
@@ -161,68 +159,36 @@ class QuaPSim:
         circuits: List[Circuit],
         gate_frequency_dict: GateFrequencyDict,
     ) -> List[NGram]:
-        bigrams = {}
-        for circuit in circuits:
-            for gate, successor_gate in zip(circuit.gates[:-1], circuit.gates[1:]):
+        bigrams: Dict = {}
+        for document_id, circuit in enumerate(circuits):
+            for location in range(len(circuit.gates) - 1):
+                gate = circuit.gates[location]
+                successor_gate = circuit.gates[location + 1]
                 if (
                     gate_frequency_dict[gate] < 2
                     or gate_frequency_dict[successor_gate] < 2
                 ):
                     continue
 
-                if gate in bigrams:
-                    if successor_gate in bigrams[gate]:
-                        bigrams[gate][successor_gate] += 1
-                    else:
-                        bigrams[gate][successor_gate] = 1
+                key = f"{gate.__repr__()}_{successor_gate.__repr__()}"
+
+                if key in bigrams:
+                    bigrams[key].add_location(document_id, location)
+                    bigrams[key].frequency += 1
                 else:
-                    bigrams[gate] = {successor_gate: 1}
+                    bigrams[key] = NGram(gates=[gate, successor_gate], frequency=1)
+                    bigrams[key].add_location(document_id, location)
 
-        inverted_bigrams = {}
-        for gate in bigrams:
-            for successor_gate in bigrams[gate]:
-                frequency = bigrams[gate][successor_gate]
+        bigrams: List[NGram] = list(bigrams.values())
+        bigrams = [bigram for bigram in bigrams if bigram.frequency > 1]
+        bigrams.sort(key=lambda bigram: bigram.frequency, reverse=True)
 
-                if frequency in inverted_bigrams:
-                    inverted_bigrams[frequency].append((gate, successor_gate))
-                else:
-                    inverted_bigrams[frequency] = [(gate, successor_gate)]
-
-        bigram_frequencies = list(inverted_bigrams.keys())
-        bigram_frequencies.sort(reverse=True)
-
-        ngrams: List[NGram] = []
-        for bigram_frequency in bigram_frequencies:
-            if bigram_frequency <= 1:
-                break
-
-            current_bigrams = inverted_bigrams[bigram_frequency]
-
-            if (len(ngrams) + len(current_bigrams)) < (self.params.merging_pool_size):
-                for gate, successor_gate in current_bigrams:
-                    ngram = NGram(
-                        gates=[gate, successor_gate], frequency=bigram_frequency
-                    )
-                    ngrams.append(ngram)
-
-            else:
-                for gate, successor_gate in current_bigrams[
-                    : self.params.merging_pool_size - len(ngrams)
-                ]:
-                    ngram = NGram(
-                        gates=[gate, successor_gate], frequency=bigram_frequency
-                    )
-                    ngrams.append(ngram)
-
-                break
-
-        return ngrams
+        return bigrams[: self.params.merging_pool_size]
 
     @log_duration
     def _consolidate_ngrams(
         self,
         ngrams: List[NGram],
-        inverted_gate_index: InvertedGateIndex,
     ) -> List[NGram]:
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
@@ -264,17 +230,13 @@ class QuaPSim:
             gate_sequence.extend(second_ngram.gates[1:])
 
             start = datetime.now()
-            ngram_frequency = calculate_gate_sequence_frequency(
-                gate_sequence=gate_sequence,
-                inverted_index=inverted_gate_index,
-            )
+            new_ngram = create_merged_ngram(first_ngram, second_ngram)
             lookup_duration += datetime.now() - start
 
-            new_ngram = NGram(gates=gate_sequence, frequency=ngram_frequency)
-
             ngrams.append(new_ngram)
+
             logging.debug(
-                f"Adding {new_ngram.gates} with frequency {ngram_frequency} to ngram pool."
+                f"Adding {new_ngram.gates} with frequency {new_ngram.frequency} to ngram pool."
             )
 
             # Update potential gains array
@@ -291,11 +253,11 @@ class QuaPSim:
 
             # No need to compute potential gain or update
             # affected rows and columns.
-            if ngram_frequency == 0:
+            if new_ngram.frequency == 0:
                 continue
 
-            first_ngram.frequency -= ngram_frequency
-            second_ngram.frequency -= ngram_frequency
+            first_ngram.frequency -= new_ngram.frequency
+            second_ngram.frequency -= new_ngram.frequency
 
             for i, ngram in enumerate(ngrams):
                 if ngram.gates[-1] == new_ngram.gates[0]:

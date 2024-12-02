@@ -11,10 +11,12 @@ from quapsim.gates import IGate
 class NGram:
     gates: List[IGate]
     frequency: int
+    locations: Dict
 
     def __init__(self, gates: List[IGate], frequency: int):
         self.gates = gates
         self.frequency = frequency
+        self.locations = {}
 
     @property
     def gain(self) -> int:
@@ -22,6 +24,51 @@ class NGram:
             return 0
 
         return (len(self.gates) - 1) * (self.frequency - 1)
+
+    @property
+    def length(self) -> int:
+        return len(self.gates)
+
+    @property
+    def documents(self) -> List[int]:
+        return list(self.locations.keys())
+
+    def add_location(self, document_id: int, location: int) -> None:
+        if document_id not in self.locations:
+            self.locations[document_id] = [location]
+        else:
+            if location not in self.locations[document_id]:
+                self.locations[document_id].append(location)
+
+
+def create_merged_ngram(ngram1: NGram, ngram2: NGram) -> NGram:
+    document_candidates = [
+        document for document in ngram1.documents if document in ngram2.documents
+    ]
+
+    merged_locations = {}
+    sequence_frequency = 0
+
+    for document_id in document_candidates:
+        ngram1_locations = ngram1.locations[document_id]
+        ngram2_locations = ngram2.locations[document_id]
+
+        overlapping_locations = [
+            location
+            for location in ngram1_locations
+            if (location + ngram1.length - 1) in ngram2_locations
+        ]
+
+        merged_locations[document_id] = overlapping_locations
+        sequence_frequency += len(overlapping_locations)
+
+    combined_gates = []
+    combined_gates.extend(ngram1.gates)
+    combined_gates.extend(ngram2.gates[1:])
+
+    new_ngram = NGram(gates=combined_gates, frequency=sequence_frequency)
+    new_ngram.locations = merged_locations
+    return new_ngram
 
 
 def compute_potential_gain(first_ngram: NGram, second_ngram: NGram) -> int:
