@@ -76,8 +76,20 @@ class QuaPSim:
         self, circuits: List[Circuit], gate_frequency_dict: GateFrequencyDict
     ) -> None:
         for circuit in circuits:
-            for _ in range(self.params.reordering_steps):
-                current_idx = randint(0, len(circuit.gates) - 1)
+            frequency_values = np.array(
+                [gate_frequency_dict[gate] for gate in circuit.gates]
+            )
+            order = frequency_values.argsort()
+            ranks = order.argsort()
+
+            # Cast back to list to simplify reordering operations
+            # later on.
+            frequency_values: List = frequency_values.tolist()
+            ranks: List = ranks.tolist()
+
+            for i in range(self.params.reordering_steps):
+
+                current_idx = ranks.index(len(circuit.gates) - 1 - i)
                 current_gate = circuit.gates[current_idx]
 
                 # determine left index of beam
@@ -122,18 +134,17 @@ class QuaPSim:
                 min_frequency_distance = np.inf
                 min_frequency_idx = None
 
-                for i in range(left_beam_idx, right_beam_idx):
-                    if i == current_idx:
+                for comparison_idx in range(left_beam_idx, right_beam_idx):
+                    if comparison_idx == current_idx:
                         continue
 
-                    comparison_gate = circuit.gates[i]
                     frequency_distance = abs(
-                        current_frequency - gate_frequency_dict[comparison_gate]
+                        current_frequency - frequency_values[comparison_idx]
                     )
 
                     if frequency_distance < min_frequency_distance:
                         min_frequency_distance = frequency_distance
-                        min_frequency_idx = i
+                        min_frequency_idx = comparison_idx
 
                 # update gate order
                 if min_frequency_idx is None:
@@ -143,10 +154,18 @@ class QuaPSim:
                     circuit.gates.insert(
                         min_frequency_idx + 1, circuit.gates.pop(current_idx)
                     )
+                    frequency_values.insert(
+                        min_frequency_idx + 1, frequency_values.pop(current_idx)
+                    )
+                    ranks.insert(min_frequency_idx + 1, ranks.pop(current_idx))
                 else:
                     circuit.gates.insert(
                         min_frequency_idx - 1, circuit.gates.pop(current_idx)
                     )
+                    frequency_values.insert(
+                        min_frequency_idx - 1, frequency_values.pop(current_idx)
+                    )
+                    ranks.insert(min_frequency_idx - 1, ranks.pop(current_idx))
 
     @log_duration
     def _generate_seed_bigrams(
