@@ -89,6 +89,14 @@ class QuaPSim:
 
             for i in range(self.params.reordering_steps):
 
+                if i > len(circuit.gates) - 1:
+                    logging.warning(
+                        f"More reordering steps have been specified than "
+                        f"gates contained in the current circuit ({self.params.reordering_steps} vs {len(circuit.gates)}). "
+                        "Skipping remaining steps."
+                    )
+                    break
+
                 current_idx = ranks.index(len(circuit.gates) - 1 - i)
                 current_gate = circuit.gates[current_idx]
 
@@ -108,7 +116,7 @@ class QuaPSim:
                         > 0
                     ):
                         left_beam_idx = left_idx
-                        break 
+                        break
 
                 # determine right index of beam
                 right_beam_idx = len(circuit.gates) - 1
