@@ -94,7 +94,7 @@ class QuaPSim:
 
                 # determine left index of beam
                 left_beam_idx = 0
-                for left_idx in range(current_idx):
+                for left_idx in reversed(range(current_idx)):
                     comparison_gate = circuit.gates[left_idx]
 
                     if (
@@ -108,10 +108,11 @@ class QuaPSim:
                         > 0
                     ):
                         left_beam_idx = left_idx
+                        break 
 
                 # determine right index of beam
                 right_beam_idx = len(circuit.gates) - 1
-                for j in range(len(circuit.gates) - current_idx - 1):
+                for j in reversed(range(len(circuit.gates) - current_idx - 1)):
                     right_idx = len(circuit.gates) - 1 - j
 
                     comparison_gate = circuit.gates[right_idx]
@@ -127,6 +128,7 @@ class QuaPSim:
                         > 0
                     ):
                         right_beam_idx = right_idx + 1
+                        break
 
                 # select next highest frequ gate
                 current_frequency = gate_frequency_dict[current_gate]
