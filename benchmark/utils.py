@@ -43,9 +43,8 @@ def create_random_gate_configs(
 
     existing_gates: int = 0
     if entangle_first:
-        for target_qubit in range(qubit_num):
-            gate_configs.append(("H", target_qubit))
-            existing_gates += 1
+        gate_configs.append(("H", 0))
+        existing_gates += 1
 
         for control_qubit in range(qubit_num - 1):
             target_qubit = control_qubit + 1
