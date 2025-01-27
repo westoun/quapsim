@@ -172,49 +172,49 @@ def create_random_gate_configs(
         elif gate_type == "RX":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
         elif gate_type == "RY":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
         elif gate_type == "RZ":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
         elif gate_type == "CRX":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CRY":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CPhase":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CRZ":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, control_qubit, target_qubit, theta))
 
@@ -239,7 +239,7 @@ def create_random_gate_configs(
         elif gate_type == "PHASE":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, parameter_amount - 1) * (2 * np.pi) / (parameter_amount)
+            theta = randint(0, parameter_amount - 1) * (4 * np.pi) / (parameter_amount)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
