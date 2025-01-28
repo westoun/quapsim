@@ -8,6 +8,8 @@ from uuid import uuid4
 from benchmark.utils import (
     create_random_gate_configs,
     build_quapsim_circuit,
+    compute_redundancy,
+    adjust_redundancy,
 )
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
 
@@ -119,9 +121,18 @@ def run_experiment(
         circuit = build_quapsim_circuit(gate_configs, qubit_num=qubit_num)
         circuits.append(circuit)
 
-    simulator.evaluate(circuits)
+    logging.info(
+        f"Population redundancy before adjustment: {compute_redundancy(circuits)}"
+    )
 
-    # log experiment config
+    if redundancy is not None:
+        adjust_redundancy(circuits, target=redundancy)
+
+    logging.info(
+        f"Population redundancy after adjustment: {compute_redundancy(circuits)}"
+    )
+
+    simulator.evaluate(circuits)
 
 
 if __name__ == "__main__":
