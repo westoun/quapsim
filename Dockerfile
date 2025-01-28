@@ -2,7 +2,7 @@ FROM python:3.11.3-slim
 
 WORKDIR /app 
 
-COPY benchmark/requirements.txt ./requirements.txt
+COPY experiment_requirements.txt ./requirements.txt
 
 RUN buildDeps='gcc ' \
     && apt-get update \
