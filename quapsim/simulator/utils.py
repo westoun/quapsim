@@ -8,6 +8,29 @@ from quapsim.circuit import Circuit
 from quapsim.gates import IGate
 
 
+def compute_redundancy(circuits: List[Circuit]) -> float:
+    all_bigrams = count_all_bigrams(circuits)
+    unique_bigrams = count_unique_bigrams(circuits)
+
+    return 1 - (unique_bigrams - 1) / (all_bigrams - 1)
+
+
+def count_all_bigrams(circuits: List[Circuit]) -> float:
+    return len(circuits) * (len(circuits[0].gates) - 1)
+
+
+def count_unique_bigrams(circuits: List[Circuit]) -> float:
+    unique_bigrams = set()
+    for circuit in circuits:
+        for i in range(len(circuit.gates) - 1):
+            gate = circuit.gates[i]
+            succ_gate = circuit.gates[i + 1]
+
+            bigram = f"{gate.__repr__()}_{succ_gate.__repr__()}"
+            unique_bigrams.add(bigram)
+    return len(unique_bigrams)
+
+
 class NGram:
     gates: List[IGate]
     frequency: int

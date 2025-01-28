@@ -7,6 +7,7 @@ from typing import Tuple, List
 
 from quapsim import Circuit as QuapsimCircuit
 import quapsim.gates as QuapsimGates
+from quapsim.simulator import compute_redundancy
 
 from quasim import Circuit as QuasimCircuit
 import quasim.gates as QuasimGates
@@ -55,16 +56,6 @@ def adjust_redundancy(
             f"The specified target redundancy ({target}) is lower than the current redundancy in the population ({current}). Skipping redundancy adjustment."
         )
 
-    all_bigrams = count_all_bigrams(circuits)
-    unique_bigrams = count_unique_bigrams(circuits)
-
-    required_uniques = (1 - target) * (all_bigrams - 1) + 1
-
-    copy_rounds = (required_uniques - unique_bigrams) / (
-        -1 + unique_bigrams / all_bigrams
-    )
-    copy_rounds = int(copy_rounds)
-
     adjustment_rounds = 100000
     targets_per_round = 9
     for i in range(adjustment_rounds):
@@ -83,7 +74,7 @@ def adjust_redundancy(
                 source_start_position + 1
             ]
 
-        if i % 1000 == 0:
+        if i % 1000 == 0 and i > 0:
             current = compute_redundancy(circuits)
 
         if current > target:
@@ -100,29 +91,6 @@ def adjust_redundancy(
         )
 
     return circuits
-
-
-def compute_redundancy(circuits: List[QuapsimCircuit]) -> float:
-    all_bigrams = count_all_bigrams(circuits)
-    unique_bigrams = count_unique_bigrams(circuits)
-
-    return 1 - (unique_bigrams - 1) / (all_bigrams - 1)
-
-
-def count_all_bigrams(circuits: List[QuapsimCircuit]) -> float:
-    return len(circuits) * (len(circuits[0].gates) - 1)
-
-
-def count_unique_bigrams(circuits: List[QuapsimCircuit]) -> float:
-    unique_bigrams = set()
-    for circuit in circuits:
-        for i in range(len(circuit.gates) - 1):
-            gate = circuit.gates[i]
-            succ_gate = circuit.gates[i + 1]
-
-            bigram = f"{gate.__repr__()}_{succ_gate.__repr__()}"
-            unique_bigrams.add(bigram)
-    return len(unique_bigrams)
 
 
 def create_random_gate_configs(
