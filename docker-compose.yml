@@ -1,0 +1,9 @@
+version: '3.4'
+services:
+  quapsim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: python3 run_experiment.py -c 4000 -g 100 -q 6 -r 0.2 -cs 100 -rs 10 -mps 100 -mr 100 -s 0
+    volumes:
+      - ./:/app/
