@@ -5,6 +5,15 @@ from os import listdir
 import re
 from typing import List, Dict
 
+
+def duration_to_seconds(duration: str) -> float:
+    hours = int(duration.split(":")[0])
+    minutes = int(duration.split(":")[1])
+    seconds = float(duration.split(":")[2])
+
+    return seconds + minutes * 60 + hours * 60 * 60
+
+
 log_file_paths = [
     path
     for path in listdir(".")
@@ -16,6 +25,7 @@ experiment_data: List[Dict] = []
 for log_file_path in log_file_paths:
     experiment = {
         "file_path": log_file_path,
+        "duration_in": "seconds",
         "started_at": None,
         "params": {
             "circuit_count": None,
@@ -125,7 +135,7 @@ for log_file_path in log_file_paths:
             )
             if build_gate_frequency_dict_duration is not None:
                 experiment["build_gate_frequency_dict"]["duration"] = (
-                    build_gate_frequency_dict_duration.group(1)
+                    duration_to_seconds(build_gate_frequency_dict_duration.group(1))
                 )
                 continue
 
@@ -133,7 +143,7 @@ for log_file_path in log_file_paths:
                 r"Executing _optimize_gate_order took ([0-9\.\:]+).", line
             )
             if optimize_gate_order_duration is not None:
-                experiment["optimize_gate_order"]["duration"] = (
+                experiment["optimize_gate_order"]["duration"] = duration_to_seconds(
                     optimize_gate_order_duration.group(1)
                 )
                 continue
@@ -160,7 +170,7 @@ for log_file_path in log_file_paths:
                 r"Executing _generate_seed_bigrams took ([0-9\.\:]+).", line
             )
             if generate_seed_bigrams_duration is not None:
-                experiment["generate_seed_bigrams"]["duration"] = (
+                experiment["generate_seed_bigrams"]["duration"] = duration_to_seconds(
                     generate_seed_bigrams_duration.group(1)
                 )
                 continue
@@ -169,7 +179,7 @@ for log_file_path in log_file_paths:
                 r"Executing _consolidate_ngrams took ([0-9\.\:]+).", line
             )
             if consolidate_ngrams_duration is not None:
-                experiment["consolidate_ngrams"]["duration"] = (
+                experiment["consolidate_ngrams"]["duration"] = duration_to_seconds(
                     consolidate_ngrams_duration.group(1)
                 )
                 continue
@@ -190,7 +200,7 @@ for log_file_path in log_file_paths:
                 r"Executing _select_ngrams_to_cache took ([0-9\.\:]+).", line
             )
             if select_ngrams_to_cache_duration is not None:
-                experiment["select_ngrams_to_cache"]["duration"] = (
+                experiment["select_ngrams_to_cache"]["duration"] = duration_to_seconds(
                     select_ngrams_to_cache_duration.group(1)
                 )
                 continue
@@ -199,7 +209,9 @@ for log_file_path in log_file_paths:
                 r"Executing _fill_cache took ([0-9\.\:]+).", line
             )
             if fill_cache_duration is not None:
-                experiment["fill_cache"]["duration"] = fill_cache_duration.group(1)
+                experiment["fill_cache"]["duration"] = duration_to_seconds(
+                    fill_cache_duration.group(1)
+                )
                 continue
 
             fill_cache_step = re.search(
@@ -218,7 +230,7 @@ for log_file_path in log_file_paths:
                 r"Executing simulate_using_cache took ([0-9\.\:]+).", line
             )
             if simulate_using_cache_duration is not None:
-                experiment["simulate_using_cache"]["duration"] = (
+                experiment["simulate_using_cache"]["duration"] = duration_to_seconds(
                     simulate_using_cache_duration.group(1)
                 )
                 continue
@@ -235,7 +247,9 @@ for log_file_path in log_file_paths:
 
             total_duration = re.search(r"Executing evaluate took ([0-9\.\:]+).", line)
             if total_duration is not None:
-                experiment["total_duration"] = total_duration.group(1)
+                experiment["total_duration"] = duration_to_seconds(
+                    total_duration.group(1)
+                )
                 continue
 
     # research how to serialize datetime/duration
