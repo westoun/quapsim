@@ -17,6 +17,7 @@ from .utils import (
     NGram,
     compute_potential_gain,
     create_merged_ngram,
+    compute_redundancy,
 )
 
 
@@ -75,6 +76,10 @@ class QuaPSim:
     def _optimize_gate_order(
         self, circuits: List[Circuit], gate_frequency_dict: GateFrequencyDict
     ) -> None:
+        logging.debug(
+            f"Population redundancy before optimization {compute_redundancy(circuits)}."
+        )
+
         for circuit in circuits:
             frequency_values = np.array(
                 [gate_frequency_dict[gate] for gate in circuit.gates]
@@ -176,6 +181,10 @@ class QuaPSim:
                         min_frequency_idx - 1, frequency_values.pop(current_idx)
                     )
                     ranks.insert(min_frequency_idx - 1, ranks.pop(current_idx))
+
+        logging.debug(
+            f"Population redundancy after optimization {compute_redundancy(circuits)}."
+        )
 
     @log_duration
     def _generate_seed_bigrams(
