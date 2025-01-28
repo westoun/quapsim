@@ -45,6 +45,21 @@ DOUBLE_CONTROLLED_GATES = [
 ]
 
 
+def compute_redundancy(circuits: List[QuapsimCircuit]) -> float:
+    all_bigram_count = len(circuits) * (len(circuits[0].gates) - 1)
+
+    unique_bigrams = set()
+    for circuit in circuits:
+        for i in range(len(circuit.gates) - 1):
+            gate = circuit.gates[i]
+            succ_gate = circuit.gates[i + 1]
+
+            bigram = f"{gate.__repr__()}_{succ_gate.__repr__()}"
+            unique_bigrams.add(bigram)
+
+    return 1 - (len(unique_bigrams) - 1) / (all_bigram_count - 1)
+
+
 def create_random_gate_configs(
     gate_count: int = 10,
     qubit_num: int = 4,
