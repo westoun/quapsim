@@ -56,30 +56,28 @@ def adjust_redundancy(
             f"The specified target redundancy ({target}) is lower than the current redundancy in the population ({current}). Skipping redundancy adjustment."
         )
 
-    adjustment_rounds = 100000
-    targets_per_round = 9
-    for i in range(adjustment_rounds):
-        circuits_to_change = sample(circuits, k=targets_per_round + 1)
+    adjustment_rounds = 1000000
+    for round in range(adjustment_rounds):
+        source_circuit, target_circuit = sample(circuits, k=2)
 
-        source_circuit = circuits_to_change[0]
-        source_start_position = randint(0, len(source_circuit.gates) - 2)
+        source_start_i = randint(0, len(source_circuit.gates) - 2)
+        source_end_i = randint(source_start_i + 1, len(source_circuit.gates) - 1) + 1
 
-        for target_circuit in circuits_to_change[1:]:
-            target_start_position = randint(0, len(target_circuit.gates) - 2)
+        sequence_length = source_end_i - source_start_i
 
-            target_circuit.gates[target_start_position] = source_circuit.gates[
-                source_start_position
-            ]
-            target_circuit.gates[target_start_position + 1] = source_circuit.gates[
-                source_start_position + 1
-            ]
+        target_start_i = randint(0, len(target_circuit.gates) - sequence_length)
+        target_end_i = target_start_i + sequence_length
 
-        if i % 1000 == 0 and i > 0:
+        target_circuit.gates[target_start_i:target_end_i] = source_circuit.gates[
+            source_start_i:source_end_i
+        ]
+
+        if round % 2000 == 0 and round > 0:
             current = compute_redundancy(circuits)
 
         if current > target:
             logging.debug(
-                f"Reached the specified target redundancy ({target}) within {i} adjustment rounds."
+                f"Reached the specified target redundancy ({target}) within {round} adjustment rounds."
             )
             break
     else:
