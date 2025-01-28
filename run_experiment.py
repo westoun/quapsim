@@ -71,7 +71,7 @@ from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
     "--seed",
     "-s",
     type=click.INT,
-    default=None,
+    default=0,
     help="The seed value used for pythons random module.",
 )
 def run_experiment(
