@@ -37,6 +37,7 @@ for log_file_path in log_file_paths:
             "merging_pool_size": None,
             "merging_rounds": None,
             "seed": None,
+            "tag": None,
         },
         "stats": {
             "unique_gate_configs": None,
@@ -69,7 +70,7 @@ for log_file_path in log_file_paths:
                 timestamp = " ".join(line.split(" ")[:2])
 
                 experiment_setup = re.search(
-                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_pool_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None)",
+                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_pool_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]|None)",
                     line,
                 )
 
@@ -82,6 +83,7 @@ for log_file_path in log_file_paths:
                 merging_pool_size = experiment_setup.group(7)
                 merging_rounds = experiment_setup.group(8)
                 seed = experiment_setup.group(9)
+                tag = experiment_setup.group(10)
 
                 experiment["started_at"] = timestamp
 
@@ -99,6 +101,9 @@ for log_file_path in log_file_paths:
 
                 if seed != "None":
                     experiment["params"]["seed"] = int(seed)
+
+                if tag != "None":
+                    experiment["params"]["tag"] = tag
 
                 continue
 

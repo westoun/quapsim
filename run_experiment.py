@@ -74,6 +74,13 @@ from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
     default=0,
     help="The seed value used for pythons random module.",
 )
+@click.option(
+    "--tag",
+    "-t",
+    type=click.STRING,
+    default=None,
+    help="An optional tag that is logged alongside the experiment config for later identification.",
+)
 def run_experiment(
     circuit_count,
     gate_count,
@@ -84,6 +91,7 @@ def run_experiment(
     merging_pool_size,
     merging_rounds,
     seed,
+    tag,
 ):
     logging.basicConfig(
         level=logging.DEBUG,
@@ -96,7 +104,8 @@ def run_experiment(
         (
             f"Starting experiment with circuit_count={circuit_count}, gate_count={gate_count}, qubit_num={qubit_num}, "
             f"redundancy={redundancy}, cache_size={cache_size}, reordering_steps={reordering_steps}, "
-            f"merging_pool_size={merging_pool_size}, merging_rounds={merging_rounds}, seed={seed}"
+            f"merging_pool_size={merging_pool_size}, merging_rounds={merging_rounds}, seed={seed}, "
+            f"tag={tag}"
         )
     )
 
