@@ -351,6 +351,8 @@ class QuaPSim:
     def simulate_using_cache(self, circuits: List[Circuit]) -> None:
         logging.info(f"Starting to simulate using the cache.")
 
+        lookup_duration = datetime.now() - datetime.now()
+
         for circuit in circuits:
             if circuit.state is not None:
                 continue
@@ -363,7 +365,9 @@ class QuaPSim:
                 if i >= len(circuit.gates):
                     break
 
+                start = datetime.now()
                 cache_window = self.cache.get_prefix_in_cache_length(circuit.gates[i:])
+                lookup_duration += datetime.now() - start
 
                 if cache_window == 0:
                     unitary = create_unitary(
@@ -384,6 +388,8 @@ class QuaPSim:
                     i = i + cache_window
 
             circuit.set_state(state)
+
+        logging.info(f"Time during merging spent on trie lookup: {lookup_duration}")
 
     @log_duration
     def simulate_without_cache(self, circuits: List[Circuit]) -> None:
