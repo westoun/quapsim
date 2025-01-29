@@ -76,6 +76,9 @@ class QuaPSim:
     def _optimize_gate_order(
         self, circuits: List[Circuit], gate_frequency_dict: GateFrequencyDict
     ) -> None:
+        if self.params.reordering_steps == 0:
+            return
+
         logging.debug(
             f"Population redundancy before optimization {compute_redundancy(circuits)}."
         )
