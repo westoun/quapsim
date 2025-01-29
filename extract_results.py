@@ -15,8 +15,8 @@ def duration_to_seconds(duration: str) -> float:
 
 
 log_file_paths = [
-    path
-    for path in listdir(".")
+    "./results/" + path
+    for path in listdir("./results")
     if path.startswith("experiment") and path.endswith(".log")
 ]
 
@@ -61,6 +61,7 @@ for log_file_path in log_file_paths:
         "select_ngrams_to_cache": {"duration": None},
         "fill_cache": {"duration": None, "ngram_lengths": [], "ngram_frequencies": []},
         "simulate_using_cache": {"duration": None, "hit_ngram_lenghts": []},
+        "simulate_without_cache": {"duration": None},
         "total_duration": None,
     }
 
@@ -229,6 +230,15 @@ for log_file_path in log_file_paths:
 
                 frequency = int(fill_cache_step.group(2))
                 experiment["fill_cache"]["ngram_frequencies"].append(frequency)
+                continue
+
+            simulate_without_cache_duration = re.search(
+                r"Executing simulate_without_cache took ([0-9\.\:]+).", line
+            )
+            if simulate_without_cache_duration is not None:
+                experiment["simulate_without_cache"]["duration"] = duration_to_seconds(
+                    simulate_without_cache_duration.group(1)
+                )
                 continue
 
             simulate_using_cache_duration = re.search(
