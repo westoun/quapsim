@@ -70,7 +70,7 @@ for log_file_path in log_file_paths:
                 timestamp = " ".join(line.split(" ")[:2])
 
                 experiment_setup = re.search(
-                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_pool_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]|None)",
+                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_pool_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None)",
                     line,
                 )
 
