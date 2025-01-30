@@ -96,7 +96,7 @@ def run_experiment(
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)s: %(message)s",
-        filename=f"experiment_{circuit_count}c_{gate_count}g_{qubit_num}q_{redundancy}r_{str(uuid4())}.log",
+        filename=f"experiment_{tag}_{circuit_count}c_{gate_count}g_{qubit_num}q_{redundancy}r_{str(uuid4())}.log",
         filemode="w",
     )
 
