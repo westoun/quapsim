@@ -62,7 +62,11 @@ for log_file_path in log_file_paths:
         },
         "select_ngrams_to_cache": {"duration": None},
         "fill_cache": {"duration": None, "ngram_lengths": [], "ngram_frequencies": []},
-        "simulate_using_cache": {"duration": None, "hit_ngram_lenghts": []},
+        "simulate_using_cache": {
+            "duration": None,
+            "hit_ngram_lenghts": [],
+            "trie_lookup_duration": None,
+        },
         "simulate_without_cache": {"duration": None},
         "total_duration": None,
     }
@@ -259,6 +263,15 @@ for log_file_path in log_file_paths:
 
                 experiment["simulate_using_cache"]["hit_ngram_lenghts"].append(
                     ngram_length
+                )
+                continue
+
+            trie_lookup_duration = re.search(
+                r"Time during merging spent on trie lookup: ([0-9\.\:]+)", line
+            )
+            if trie_lookup_duration is not None:
+                experiment["simulate_using_cache"]["trie_lookup_duration"] = (
+                    duration_to_seconds(trie_lookup_duration.group(1))
                 )
                 continue
 
