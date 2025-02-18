@@ -14,9 +14,11 @@ def duration_to_seconds(duration: str) -> float:
     return seconds + minutes * 60 + hours * 60 * 60
 
 
+log_file_folder = "results"
+
 log_file_paths = [
-    "./results/" + path
-    for path in listdir("./results")
+    log_file_folder + "/" + path
+    for path in listdir(log_file_folder)
     if path.startswith("experiment") and path.endswith(".log")
 ]
 
