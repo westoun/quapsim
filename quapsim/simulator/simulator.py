@@ -382,6 +382,7 @@ class QuaPSim:
 
                 else:
                     cached_unitary = self.cache.get(circuit.gates[i : i + cache_window])
+
                     state = np.matmul(cached_unitary, state)
 
                     logging.debug(
@@ -404,6 +405,10 @@ class QuaPSim:
             state = np.zeros(2**circuit.qubit_num, dtype=np.complex128)
             state[0] = 1
 
-            state = np.matmul(circuit.unitary, state)
+            for gate in circuit.gates:
+                unitary = create_unitary(
+                    gate, qubit_num=circuit.qubit_num
+                )
+                state = np.matmul(unitary, state)
 
             circuit.set_state(state)
