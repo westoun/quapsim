@@ -222,10 +222,7 @@ class QuaPSim:
                     bigrams[key].add_location(document_id, location)
 
         bigrams: List[NGram] = list(bigrams.values())
-        bigrams = [bigram for bigram in bigrams if bigram.frequency > 1]
-        bigrams.sort(key=lambda bigram: bigram.frequency, reverse=True)
-
-        return bigrams[: self.params.merging_pool_size]
+        return bigrams
 
     @log_duration
     def _consolidate_ngrams(
@@ -235,128 +232,110 @@ class QuaPSim:
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
-        start = datetime.now()
-        potential_gains: np.ndarray = np.zeros(
-            (len(ngrams), len(ngrams)), dtype=int)
-        for i, first_ngram in enumerate(ngrams):
-            for j, second_ngram in enumerate(ngrams):
-                if first_ngram.gates[-1] == second_ngram.gates[0]:
-                    potential_gain = compute_potential_gain(
-                        first_ngram, second_ngram)
-                    potential_gains[i, j] = potential_gain
-        initial_potential_duration = datetime.now() - start
+        ngrams.sort(key=lambda ngram: ngram.frequency, reverse=True)
 
-        lookup_duration = datetime.now() - datetime.now()
-        np_argmax_duration = datetime.now() - datetime.now()
+        start_gate_dict = {}
+        end_gate_dict = {}
 
-        merging_round = 0
-        while True:
-
-            merging_round += 1
-
-            if merging_round >= self.params.merging_rounds:
-                logging.debug(
-                    f"Breaking ngram generation after {merging_round} rounds of merging."
-                )
+        # Because ngrams have been sorted before, the original entries of each
+        # dict are automatically sorted.
+        for ngram in ngrams:
+            if ngram.frequency <= 1:
                 break
 
-            start = datetime.now()
-            first_ngram_idx, second_ngram_idx = np.unravel_index(
-                np.argmax(potential_gains, axis=None), potential_gains.shape
-            )
-            np_argmax_duration += datetime.now() - start
+            start_gate = ngram.gates[0]
+            if start_gate in start_gate_dict:
+                start_gate_dict[start_gate].append(ngram)
+            else:
+                start_gate_dict[start_gate] = [ngram]
 
-            if potential_gains[first_ngram_idx, second_ngram_idx] < 1:
+            end_gate = ngram.gates[-1]
+            if end_gate in end_gate_dict:
+                end_gate_dict[end_gate].append(ngram)
+            else:
+                end_gate_dict[end_gate] = [ngram]
+
+        checked_ngrams = []
+        for i in range(self.params.merging_rounds):
+
+            top_ngram = None
+            for ngram in ngrams:
+                if ngram.frequency < 2:
+                    break
+
+                if ngram not in checked_ngrams:
+                    top_ngram = ngram
+                    break
+
+            # No more ngrams to check
+            if top_ngram is None:
                 logging.debug(
                     f"Breaking ngram generation since no more potential gains."
                 )
                 break
 
-            first_ngram = ngrams[first_ngram_idx]
-            second_ngram = ngrams[second_ngram_idx]
+            start_gate = top_ngram.gates[0]
+            end_gate = top_ngram.gates[-1]
 
-            gate_sequence = []
-            gate_sequence.extend(first_ngram.gates)
-            gate_sequence.extend(second_ngram.gates[1:])
+            if start_gate in end_gate_dict:
+                left_candidates: List[NGram] = end_gate_dict[start_gate]
 
-            start = datetime.now()
-            new_ngram = create_merged_ngram(first_ngram, second_ngram)
-            lookup_duration += datetime.now() - start
+                for left_candidate in left_candidates:
+                    potential_gain = compute_potential_gain(
+                        left_candidate, top_ngram)
 
-            ngrams.append(new_ngram)
+                    # Since end_gate_dict only includes bigrams sorted by frequency,
+                    # any further bigrams cannot have a higher potential gain than the
+                    # current one.
+                    if potential_gain < 1:
+                        break
 
-            logging.debug(
-                f"Adding {new_ngram.gates} with frequency {new_ngram.frequency} to ngram pool."
-            )
+                    new_ngram = create_merged_ngram(left_candidate, top_ngram)
+                    ngrams.append(new_ngram)
 
-            # Update potential gains array
+                    logging.debug(
+                        f"Adding {new_ngram.gates} with frequency {new_ngram.frequency} to ngram pool."
+                    )
 
-            # Avoid evaluating the same ngram pair again
-            potential_gains[first_ngram_idx, second_ngram_idx] = 0
+                    left_candidate.frequency -= new_ngram.frequency
+                    top_ngram.frequency -= new_ngram.frequency
 
-            # Add new rows and columns to gains arr
-            new_col = np.zeros((len(ngrams) - 1, 1), dtype=int)
-            potential_gains = np.hstack([potential_gains, new_col])
+                end_gate_dict[start_gate].sort(
+                    key=lambda ngram: ngram.frequency, reverse=True)
 
-            new_row = np.zeros((len(ngrams) - 1 + 1), dtype=int)
-            potential_gains = np.vstack([potential_gains, new_row])
+            if end_gate in start_gate_dict:
+                right_candidates: List[NGram] = start_gate_dict[end_gate]
 
-            # No need to compute potential gain or update
-            # affected rows and columns.
-            if new_ngram.frequency == 0:
-                continue
+                for right_candidate in right_candidates:
+                    potential_gain = compute_potential_gain(
+                        top_ngram, right_candidate)
 
-            first_ngram.frequency -= new_ngram.frequency
-            second_ngram.frequency -= new_ngram.frequency
+                    # Since end_gate_dict only includes bigrams sorted by frequency,
+                    # any further bigrams cannot have a higher potential gain than the
+                    # current one.
+                    if potential_gain < 1:
+                        break
 
-            for i, ngram in enumerate(ngrams):
-                if ngram.gates[-1] == new_ngram.gates[0]:
-                    potential_gain = compute_potential_gain(ngram, new_ngram)
-                    potential_gains[i, len(ngrams) - 1] = potential_gain
+                    new_ngram = create_merged_ngram(top_ngram, right_candidate)
+                    ngrams.append(new_ngram)
 
-                if new_ngram.gates[-1] == ngram.gates[0]:
-                    potential_gain = compute_potential_gain(ngram, new_ngram)
-                    potential_gains[len(ngrams) - 1, i] = potential_gain
+                    logging.debug(
+                        f"Adding {new_ngram.gates} with frequency {new_ngram.frequency} to ngram pool."
+                    )
 
-                # Else: keep potential gain as 0
+                    right_candidate.frequency -= new_ngram.frequency
+                    top_ngram.frequency -= new_ngram.frequency
 
-            # Reevaluate the rows and columns that contained one of
-            # the affected ngrams and have potential gain > 0.
-            row = potential_gains[first_ngram_idx, :]
-            # np.where returns a tuple.
-            for column_idx in np.where(row > 0)[0]:
-                potential_gain = compute_potential_gain(
-                    first_ngram, ngrams[column_idx])
-                potential_gains[first_ngram_idx, column_idx]
+                    if top_ngram.frequency == 1:
+                        break
 
-            column = potential_gains[:, first_ngram_idx]
-            for row_idx in np.where(column > 0)[0]:
-                potential_gain = compute_potential_gain(
-                    ngrams[row_idx], first_ngram)
-                potential_gains[row_idx, first_ngram_idx]
+                start_gate_dict[end_gate].sort(
+                    key=lambda ngram: ngram.frequency, reverse=True)
 
-            row = potential_gains[second_ngram_idx, :]
-            for column_idx in np.where(row > 0)[0]:
-                potential_gain = compute_potential_gain(
-                    second_ngram, ngrams[column_idx]
-                )
-                potential_gains[second_ngram_idx, column_idx]
+            checked_ngrams.append(top_ngram)
 
-            column = potential_gains[:, second_ngram_idx]
-            for row_idx in np.where(column > 0)[0]:
-                potential_gain = compute_potential_gain(
-                    ngrams[row_idx], second_ngram)
-                potential_gains[row_idx, second_ngram_idx]
+            ngrams.sort(key=lambda ngram: ngram.gain, reverse=True)
 
-        logging.info(
-            f"Time during merging spent on initial computation: {initial_potential_duration}"
-        )
-        logging.info(
-            f"Time during merging spent on frequency lookup: {lookup_duration}"
-        )
-        logging.info(
-            f"Time during merging spent on np argmax computation: {np_argmax_duration}"
-        )
         return ngrams
 
     @log_duration

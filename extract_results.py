@@ -14,7 +14,7 @@ def duration_to_seconds(duration: str) -> float:
     return seconds + minutes * 60 + hours * 60 * 60
 
 
-log_file_folder = "results"
+log_file_folder = "tmp/results"
 
 log_file_paths = [
     log_file_folder + "/" + path
@@ -36,7 +36,6 @@ for log_file_path in log_file_paths:
             "redundancy": None,
             "cache_size": None,
             "reordering_steps": None,
-            "merging_pool_size": None,
             "merging_rounds": None,
             "seed": None,
             "tag": None,
@@ -77,7 +76,7 @@ for log_file_path in log_file_paths:
                 timestamp = " ".join(line.split(" ")[:2])
 
                 experiment_setup = re.search(
-                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_pool_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None)",
+                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None)",
                     line,
                 )
 
@@ -87,10 +86,9 @@ for log_file_path in log_file_paths:
                 redundancy = experiment_setup.group(4)
                 cache_size = experiment_setup.group(5)
                 reordering_steps = experiment_setup.group(6)
-                merging_pool_size = experiment_setup.group(7)
-                merging_rounds = experiment_setup.group(8)
-                seed = experiment_setup.group(9)
-                tag = experiment_setup.group(10)
+                merging_rounds = experiment_setup.group(7)
+                seed = experiment_setup.group(8)
+                tag = experiment_setup.group(9)
 
                 experiment["started_at"] = timestamp
 
@@ -102,8 +100,8 @@ for log_file_path in log_file_paths:
                     experiment["params"]["redundancy"] = float(redundancy)
 
                 experiment["params"]["cache_size"] = int(cache_size)
-                experiment["params"]["reordering_steps"] = int(reordering_steps)
-                experiment["params"]["merging_pool_size"] = int(merging_pool_size)
+                experiment["params"]["reordering_steps"] = int(
+                    reordering_steps)
                 experiment["params"]["merging_rounds"] = int(merging_rounds)
 
                 if seed != "None":
@@ -147,7 +145,8 @@ for log_file_path in log_file_paths:
             )
             if build_gate_frequency_dict_duration is not None:
                 experiment["build_gate_frequency_dict"]["duration"] = (
-                    duration_to_seconds(build_gate_frequency_dict_duration.group(1))
+                    duration_to_seconds(
+                        build_gate_frequency_dict_duration.group(1))
                 )
                 continue
 
@@ -202,10 +201,12 @@ for log_file_path in log_file_paths:
             if consolidate_ngrams_step is not None:
                 ngram = consolidate_ngrams_step.group(1)
                 ngram_length = ngram.count(")")
-                experiment["consolidate_ngrams"]["ngram_lengths"].append(ngram_length)
+                experiment["consolidate_ngrams"]["ngram_lengths"].append(
+                    ngram_length)
 
                 frequency = int(consolidate_ngrams_step.group(2))
-                experiment["consolidate_ngrams"]["ngram_frequencies"].append(frequency)
+                experiment["consolidate_ngrams"]["ngram_frequencies"].append(
+                    frequency)
                 continue
 
             select_ngrams_to_cache_duration = re.search(
@@ -256,7 +257,8 @@ for log_file_path in log_file_paths:
                 )
                 continue
 
-            simulate_using_cache_step = re.search(r"Using (\[.+\]) from cache.", line)
+            simulate_using_cache_step = re.search(
+                r"Using (\[.+\]) from cache.", line)
             if simulate_using_cache_step is not None:
                 ngram = simulate_using_cache_step.group(1)
                 ngram_length = ngram.count(")")
@@ -275,7 +277,8 @@ for log_file_path in log_file_paths:
                 )
                 continue
 
-            total_duration = re.search(r"Executing evaluate took ([0-9\.\:]+).", line)
+            total_duration = re.search(
+                r"Executing evaluate took ([0-9\.\:]+).", line)
             if total_duration is not None:
                 experiment["total_duration"] = duration_to_seconds(
                     total_duration.group(1)

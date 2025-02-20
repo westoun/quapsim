@@ -56,12 +56,6 @@ from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
     help="The amount of reordering steps used per circuit.",
 )
 @click.option(
-    "--merging-pool-size",
-    "-mps",
-    type=click.INT,
-    help="The amount of bigrams used as basis for cache building.",
-)
-@click.option(
     "--merging-rounds",
     "-mr",
     type=click.INT,
@@ -88,7 +82,6 @@ def run_experiment(
     redundancy,
     cache_size,
     reordering_steps,
-    merging_pool_size,
     merging_rounds,
     seed,
     tag,
@@ -104,8 +97,7 @@ def run_experiment(
         (
             f"Starting experiment with circuit_count={circuit_count}, gate_count={gate_count}, qubit_num={qubit_num}, "
             f"redundancy={redundancy}, cache_size={cache_size}, reordering_steps={reordering_steps}, "
-            f"merging_pool_size={merging_pool_size}, merging_rounds={merging_rounds}, seed={seed}, "
-            f"tag={tag}"
+            f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}"
         )
     )
 
@@ -118,7 +110,6 @@ def run_experiment(
         cache_size=cache_size,
         reordering_steps=reordering_steps,
         merging_rounds=merging_rounds,
-        merging_pool_size=merging_pool_size,
     )
     simulator = QuaPSim(params, cache)
 
