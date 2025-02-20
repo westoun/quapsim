@@ -34,11 +34,15 @@ def count_unique_bigrams(circuits: List[Circuit]) -> float:
 class NGram:
     gates: List[IGate]
     frequency: int
+    # The amount of occurrences not yet bound in other 
+    # ngrams.
+    frequency_potential: int 
     locations: Dict
 
     def __init__(self, gates: List[IGate], frequency: int):
         self.gates = gates
         self.frequency = frequency
+        self.frequency_potential = frequency
         self.locations = {}
 
     @property
@@ -98,14 +102,14 @@ def compute_potential_gain(first_ngram: NGram, second_ngram: NGram) -> int:
     if first_ngram.gates[-1] != second_ngram.gates[0]:
         return 0
 
-    if first_ngram.frequency <= 1:
+    if first_ngram.frequency_potential <= 1:
         return 0
 
-    if second_ngram.frequency <= 1:
+    if second_ngram.frequency_potential <= 1:
         return 0
 
     potential_gain = (len(first_ngram.gates) + len(second_ngram.gates) - 2) * (
-        min(first_ngram.frequency, second_ngram.frequency) - 1
+        min(first_ngram.frequency_potential, second_ngram.frequency_potential) - 1
     )
     return potential_gain
 

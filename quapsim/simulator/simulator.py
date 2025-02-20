@@ -216,6 +216,7 @@ class QuaPSim:
                 if key in bigrams:
                     bigrams[key].add_location(document_id, location)
                     bigrams[key].frequency += 1
+                    bigrams[key].frequency_potential += 1
                 else:
                     bigrams[key] = NGram(
                         gates=[gate, successor_gate], frequency=1)
@@ -260,7 +261,7 @@ class QuaPSim:
 
             top_ngram = None
             for ngram in ngrams:
-                if ngram.frequency < 2:
+                if ngram.frequency_potential < 2:
                     break
 
                 if ngram not in checked_ngrams:
@@ -297,11 +298,11 @@ class QuaPSim:
                         f"Adding {new_ngram.gates} with frequency {new_ngram.frequency} to ngram pool."
                     )
 
-                    left_candidate.frequency -= new_ngram.frequency
-                    top_ngram.frequency -= new_ngram.frequency
+                    left_candidate.frequency_potential -= new_ngram.frequency
+                    top_ngram.frequency_potential -= new_ngram.frequency
 
                 end_gate_dict[start_gate].sort(
-                    key=lambda ngram: ngram.frequency, reverse=True)
+                    key=lambda ngram: ngram.frequency_potential, reverse=True)
 
             if end_gate in start_gate_dict:
                 right_candidates: List[NGram] = start_gate_dict[end_gate]
@@ -323,14 +324,11 @@ class QuaPSim:
                         f"Adding {new_ngram.gates} with frequency {new_ngram.frequency} to ngram pool."
                     )
 
-                    right_candidate.frequency -= new_ngram.frequency
-                    top_ngram.frequency -= new_ngram.frequency
-
-                    if top_ngram.frequency == 1:
-                        break
+                    right_candidate.frequency_potential -= new_ngram.frequency
+                    top_ngram.frequency_potential -= new_ngram.frequency
 
                 start_gate_dict[end_gate].sort(
-                    key=lambda ngram: ngram.frequency, reverse=True)
+                    key=lambda ngram: ngram.frequency_potential, reverse=True)
 
             checked_ngrams.append(top_ngram)
 
