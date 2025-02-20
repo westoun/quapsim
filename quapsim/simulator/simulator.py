@@ -235,6 +235,7 @@ class QuaPSim:
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
+        start = datetime.now()
         potential_gains: np.ndarray = np.zeros(
             (len(ngrams), len(ngrams)), dtype=int)
         for i, first_ngram in enumerate(ngrams):
@@ -243,8 +244,10 @@ class QuaPSim:
                     potential_gain = compute_potential_gain(
                         first_ngram, second_ngram)
                     potential_gains[i, j] = potential_gain
+        initial_potential_duration = datetime.now() - start
 
         lookup_duration = datetime.now() - datetime.now()
+        np_argmax_duration = datetime.now() - datetime.now()
 
         merging_round = 0
         while True:
@@ -257,9 +260,12 @@ class QuaPSim:
                 )
                 break
 
+            start = datetime.now()
             first_ngram_idx, second_ngram_idx = np.unravel_index(
                 np.argmax(potential_gains, axis=None), potential_gains.shape
             )
+            np_argmax_duration += datetime.now() - start
+
             if potential_gains[first_ngram_idx, second_ngram_idx] < 1:
                 logging.debug(
                     f"Breaking ngram generation since no more potential gains."
@@ -343,7 +349,13 @@ class QuaPSim:
                 potential_gains[row_idx, second_ngram_idx]
 
         logging.info(
+            f"Time during merging spent on initial computation: {initial_potential_duration}"
+        )
+        logging.info(
             f"Time during merging spent on frequency lookup: {lookup_duration}"
+        )
+        logging.info(
+            f"Time during merging spent on np argmax computation: {np_argmax_duration}"
         )
         return ngrams
 
@@ -364,16 +376,13 @@ class QuaPSim:
 
     @log_duration
     def simulate_using_cache(self, circuits: List[Circuit], state: np.ndarray = None, set_unitary: bool = False) -> None:
-        logging.info(f"Starting to simulate using the cache.")
-
         if not set_unitary:
             logging.info(
-                f"Starting to simulate using the cache, mode: set state.")
+                f"Starting to simulate using the cache, mode: set_state.")
             self._simulate_using_cache_set_state(circuits, state)
         else:
             logging.info(
-                f"Starting to simulate using the cache, mode: set unitary.")
-            logging.info("Ignoring any provided states.")
+                f"Starting to simulate using the cache, mode: set_unitary. Ignoring any provided states.")
             self._simulate_using_cache_set_unitary(circuits)
 
     def _simulate_using_cache_set_state(self, circuits: List[Circuit], state: np.ndarray = None) -> None:
@@ -463,16 +472,13 @@ class QuaPSim:
 
     @log_duration
     def simulate_without_cache(self, circuits: List[Circuit], state: np.ndarray = None, set_unitary: bool = False) -> None:
-        logging.info(f"Starting to simulate without using the cache.")
-
         if not set_unitary:
             logging.info(
-                f"Starting to simulate without using the cache, mode: set state.")
+                f"Starting to simulate without using the cache, mode: set_state.")
             self._simulate_without_cache_set_state(circuits, state)
         else:
             logging.info(
-                f"Starting to simulate without using the cache, mode: set unitary.")
-            logging.info("Ignoring any provided states.")
+                f"Starting to simulate without using the cache, mode: set_unitary. Ignoring any provided states.")
             self._simulate_without_cache_set_unitary(circuits)
 
     def _simulate_without_cache_set_state(self, circuits: List[Circuit], state: np.ndarray = None) -> None:
