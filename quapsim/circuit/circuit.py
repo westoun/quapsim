@@ -25,6 +25,7 @@ class Circuit:
     _probabilities: np.ndarray = None
     _probability_dict: Dict = None
     _state_dict: Dict = None
+    _unitary: np.ndarray = None
 
     def __init__(self, qubit_num: int) -> None:
         self.gates = []
@@ -112,7 +113,13 @@ class Circuit:
 
     @property
     def unitary(self) -> np.ndarray:
-        return create_unitary(self.gates, self.qubit_num)
+        if self._unitary is None:
+            self._unitary = create_unitary(self.gates, self.qubit_num)
+
+        return self._unitary
+
+    def set_unitary(self, unitary: np.ndarray) -> None:
+        self._unitary = unitary
 
     def __repr__(self) -> str:
         return f"[{', '.join([str(gate) for gate in self.gates])}]"

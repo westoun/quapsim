@@ -7,7 +7,7 @@ from random import randint
 from typing import List, Dict, Callable, Iterable, Tuple
 
 from quapsim.circuit import Circuit
-from quapsim.gates import IGate, create_unitary
+from quapsim.gates import IGate, create_unitary, create_identity_matrix
 from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
 
@@ -27,9 +27,12 @@ class QuaPSim:
         self.cache = cache
 
     @log_duration
-    def evaluate(self, circuits: List[Circuit]) -> None:
-        """Evaluates a list of quantum circuits and stores the
-        state at the end of each circuit in circuit.state."""
+    def evaluate(self, circuits: List[Circuit], state: np.ndarray = None, set_unitary: bool = True) -> None:
+        """Evaluates a list of quantum circuits. If set_unitary is 
+        True, it computes the unitary of the circuit and stores said 
+        unitary in circuit.unitary. If set_unitary is false, it computes
+        the action performed by the circuit for a single state. If no 
+        state is provided by the user, |0...0> is used as default."""
 
         logging.info(
             f"Starting to evaluate {len(circuits)} circuits with params {self.params} and cache of type {type(self.cache)}."
@@ -47,10 +50,10 @@ class QuaPSim:
         )
 
         if self.cache is None or self.params.cache_size == 0:
-            self.simulate_without_cache(circuits)
+            self.simulate_without_cache(circuits, state, set_unitary)
         else:
             self.build_cache(circuits)
-            self.simulate_using_cache(circuits)
+            self.simulate_using_cache(circuits, state, set_unitary)
 
     @log_duration
     def build_cache(self, circuits: List[Circuit]) -> None:
@@ -173,7 +176,8 @@ class QuaPSim:
                         min_frequency_idx + 1, circuit.gates.pop(current_idx)
                     )
                     frequency_values.insert(
-                        min_frequency_idx + 1, frequency_values.pop(current_idx)
+                        min_frequency_idx +
+                        1, frequency_values.pop(current_idx)
                     )
                     ranks.insert(min_frequency_idx + 1, ranks.pop(current_idx))
                 else:
@@ -181,7 +185,8 @@ class QuaPSim:
                         min_frequency_idx - 1, circuit.gates.pop(current_idx)
                     )
                     frequency_values.insert(
-                        min_frequency_idx - 1, frequency_values.pop(current_idx)
+                        min_frequency_idx -
+                        1, frequency_values.pop(current_idx)
                     )
                     ranks.insert(min_frequency_idx - 1, ranks.pop(current_idx))
 
@@ -212,7 +217,8 @@ class QuaPSim:
                     bigrams[key].add_location(document_id, location)
                     bigrams[key].frequency += 1
                 else:
-                    bigrams[key] = NGram(gates=[gate, successor_gate], frequency=1)
+                    bigrams[key] = NGram(
+                        gates=[gate, successor_gate], frequency=1)
                     bigrams[key].add_location(document_id, location)
 
         bigrams: List[NGram] = list(bigrams.values())
@@ -229,11 +235,13 @@ class QuaPSim:
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
-        potential_gains: np.ndarray = np.zeros((len(ngrams), len(ngrams)), dtype=int)
+        potential_gains: np.ndarray = np.zeros(
+            (len(ngrams), len(ngrams)), dtype=int)
         for i, first_ngram in enumerate(ngrams):
             for j, second_ngram in enumerate(ngrams):
                 if first_ngram.gates[-1] == second_ngram.gates[0]:
-                    potential_gain = compute_potential_gain(first_ngram, second_ngram)
+                    potential_gain = compute_potential_gain(
+                        first_ngram, second_ngram)
                     potential_gains[i, j] = potential_gain
 
         lookup_duration = datetime.now() - datetime.now()
@@ -309,13 +317,16 @@ class QuaPSim:
             # Reevaluate the rows and columns that contained one of
             # the affected ngrams and have potential gain > 0.
             row = potential_gains[first_ngram_idx, :]
-            for column_idx in np.where(row > 0)[0]:  # np.where returns a tuple.
-                potential_gain = compute_potential_gain(first_ngram, ngrams[column_idx])
+            # np.where returns a tuple.
+            for column_idx in np.where(row > 0)[0]:
+                potential_gain = compute_potential_gain(
+                    first_ngram, ngrams[column_idx])
                 potential_gains[first_ngram_idx, column_idx]
 
             column = potential_gains[:, first_ngram_idx]
             for row_idx in np.where(column > 0)[0]:
-                potential_gain = compute_potential_gain(ngrams[row_idx], first_ngram)
+                potential_gain = compute_potential_gain(
+                    ngrams[row_idx], first_ngram)
                 potential_gains[row_idx, first_ngram_idx]
 
             row = potential_gains[second_ngram_idx, :]
@@ -327,7 +338,8 @@ class QuaPSim:
 
             column = potential_gains[:, second_ngram_idx]
             for row_idx in np.where(column > 0)[0]:
-                potential_gain = compute_potential_gain(ngrams[row_idx], second_ngram)
+                potential_gain = compute_potential_gain(
+                    ngrams[row_idx], second_ngram)
                 potential_gains[row_idx, second_ngram_idx]
 
         logging.info(
@@ -351,17 +363,26 @@ class QuaPSim:
             self.cache.add(ngram.gates, unitary)
 
     @log_duration
-    def simulate_using_cache(self, circuits: List[Circuit]) -> None:
+    def simulate_using_cache(self, circuits: List[Circuit], state: np.ndarray = None, set_unitary: bool = False) -> None:
         logging.info(f"Starting to simulate using the cache.")
 
+        if not set_unitary:
+            logging.info(
+                f"Starting to simulate using the cache, mode: set state.")
+            self._simulate_using_cache_set_state(circuits, state)
+        else:
+            logging.info(
+                f"Starting to simulate using the cache, mode: set unitary.")
+            logging.info("Ignoring any provided states.")
+            self._simulate_using_cache_set_unitary(circuits)
+
+    def _simulate_using_cache_set_state(self, circuits: List[Circuit], state: np.ndarray = None) -> None:
         lookup_duration = datetime.now() - datetime.now()
 
         for circuit in circuits:
-            if circuit.state is not None:
-                continue
 
-            state = np.zeros(2**circuit.qubit_num, dtype=np.complex128)
-            state[0] = 1
+            circuit_state = self._init_circuit_state(
+                qubit_num=circuit.qubit_num, default_state=state)
 
             i = 0
             while True:
@@ -369,46 +390,121 @@ class QuaPSim:
                     break
 
                 start = datetime.now()
-                cache_window = self.cache.get_prefix_in_cache_length(circuit.gates[i:])
+                cache_window = self.cache.get_prefix_in_cache_length(
+                    circuit.gates[i:])
                 lookup_duration += datetime.now() - start
 
                 if cache_window == 0:
                     unitary = create_unitary(
                         circuit.gates[i], qubit_num=circuit.qubit_num
                     )
-                    state = np.matmul(unitary, state)
+                    circuit_state = np.matmul(unitary, circuit_state)
 
                     i = i + 1
 
                 else:
-                    cached_unitary = self.cache.get(circuit.gates[i : i + cache_window])
+                    cached_unitary = self.cache.get(
+                        circuit.gates[i: i + cache_window])
 
-                    state = np.matmul(cached_unitary, state)
+                    circuit_state = np.matmul(cached_unitary, circuit_state)
 
                     logging.debug(
-                        f"Using {circuit.gates[i : i + cache_window]} from cache."
+                        f"Using {circuit.gates[i: i + cache_window]} from cache."
                     )
 
                     i = i + cache_window
 
-            circuit.set_state(state)
+            circuit.set_state(circuit_state)
 
-        logging.info(f"Time during merging spent on trie lookup: {lookup_duration}")
+        logging.info(
+            f"Time during merging spent on trie lookup: {lookup_duration}")
+
+    def _simulate_using_cache_set_unitary(self, circuits: List[Circuit]) -> None:
+        lookup_duration = datetime.now() - datetime.now()
+
+        for circuit in circuits:
+            circuit_unitary = create_identity_matrix(dim=2**circuit.qubit_num)
+
+            i = 0
+            while True:
+                if i >= len(circuit.gates):
+                    break
+
+                start = datetime.now()
+                cache_window = self.cache.get_prefix_in_cache_length(
+                    circuit.gates[i:])
+                lookup_duration += datetime.now() - start
+
+                if cache_window == 0:
+                    unitary = create_unitary(
+                        circuit.gates[i], qubit_num=circuit.qubit_num
+                    )
+                    circuit_unitary = np.matmul(unitary, circuit_unitary)
+
+                    i = i + 1
+
+                else:
+                    cached_unitary = self.cache.get(
+                        circuit.gates[i: i + cache_window])
+
+                    circuit_unitary = np.matmul(
+                        cached_unitary, circuit_unitary)
+
+                    logging.debug(
+                        f"Using {circuit.gates[i: i + cache_window]} from cache."
+                    )
+
+                    i = i + cache_window
+
+            circuit.set_unitary(circuit_unitary)
+
+        logging.info(
+            f"Time during merging spent on trie lookup: {lookup_duration}")
 
     @log_duration
-    def simulate_without_cache(self, circuits: List[Circuit]) -> None:
+    def simulate_without_cache(self, circuits: List[Circuit], state: np.ndarray = None, set_unitary: bool = False) -> None:
         logging.info(f"Starting to simulate without using the cache.")
-        for circuit in circuits:
-            if circuit.state is not None:
-                continue
 
-            state = np.zeros(2**circuit.qubit_num, dtype=np.complex128)
-            state[0] = 1
+        if not set_unitary:
+            logging.info(
+                f"Starting to simulate without using the cache, mode: set state.")
+            self._simulate_without_cache_set_state(circuits, state)
+        else:
+            logging.info(
+                f"Starting to simulate without using the cache, mode: set unitary.")
+            logging.info("Ignoring any provided states.")
+            self._simulate_without_cache_set_unitary(circuits)
+
+    def _simulate_without_cache_set_state(self, circuits: List[Circuit], state: np.ndarray = None) -> None:
+        for circuit in circuits:
+            circuit_state = self._init_circuit_state(
+                qubit_num=circuit.qubit_num, default_state=state)
 
             for gate in circuit.gates:
                 unitary = create_unitary(
                     gate, qubit_num=circuit.qubit_num
                 )
-                state = np.matmul(unitary, state)
+                circuit_state = np.matmul(unitary, circuit_state)
 
-            circuit.set_state(state)
+            circuit.set_state(circuit_state)
+
+    def _init_circuit_state(self, qubit_num: int, default_state: np.ndarray = None) -> np.ndarray:
+        if default_state is not None:
+            return default_state.copy()
+
+        state = np.zeros(
+            2**qubit_num, dtype=np.complex128)
+        state[0] = 1
+        return state
+
+    def _simulate_without_cache_set_unitary(self, circuits: List[Circuit]) -> None:
+        for circuit in circuits:
+            circuit_unitary = create_identity_matrix(dim=2**circuit.qubit_num)
+
+            for gate in circuit.gates:
+                unitary = create_unitary(
+                    gate, qubit_num=circuit.qubit_num
+                )
+                circuit_unitary = np.matmul(unitary, circuit_unitary)
+
+            circuit.set_unitary(circuit_unitary)

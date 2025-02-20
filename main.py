@@ -18,8 +18,9 @@ if __name__ == "__main__":
     circuit.apply(CX(0, 1))
 
     simulator = QuaPSim(SimulatorParams(1, 0))
-    simulator.evaluate([circuit])
+    simulator.evaluate([circuit], set_unitary=False)
 
+    print(circuit.unitary)
     print(circuit.state)
     print(circuit.probabilities)
     print(circuit.probability_dict)
