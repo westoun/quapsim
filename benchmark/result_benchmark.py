@@ -35,7 +35,7 @@ def run_result_benchmark(
         quasim_circuits.append(quasim_circuit)
         quapsim_circuits.append(quapsim_circuit)
 
-    quapsim.evaluate(quapsim_circuits)
+    quapsim.evaluate(quapsim_circuits, set_unitary=False)
     quasim.evaluate(quasim_circuits)
 
     for quapsim_circuit, quasim_circuit in zip(quapsim_circuits, quasim_circuits):

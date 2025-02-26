@@ -35,7 +35,7 @@ def run_time_benchmark_quasim_quapsim(
         quapsim_circuits.append(quapsim_circuit)
 
     start = datetime.now()
-    quapsim.evaluate(quapsim_circuits)
+    quapsim.evaluate(quapsim_circuits, set_unitary=False)
     end = datetime.now()
     quapsim_duration = end - start
 
@@ -79,12 +79,12 @@ def run_time_benchmark_quapsim_quapsim(
         quapsim2_circuits.append(quapsim2_circuit)
 
     start = datetime.now()
-    quapsim1.evaluate(quapsim1_circuits)
+    quapsim1.evaluate(quapsim1_circuits, set_unitary=False)
     end = datetime.now()
     quapsim1_duration = end - start
 
     start = datetime.now()
-    quapsim2.evaluate(quapsim2_circuits)
+    quapsim2.evaluate(quapsim2_circuits, set_unitary=False)
     end = datetime.now()
     quapsim2_duration = end - start
 
