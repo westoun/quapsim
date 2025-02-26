@@ -345,12 +345,49 @@ class QuaPSim:
 
     @log_duration
     def _fill_cache(self, ngrams: List[NGram], qubit_num: int) -> None:
+        # Add shorter ngrams first to cache, so that later ngrams can use
+        # them.
+        ngrams.sort(key=lambda ngram: len(ngram.gates))
+
         for ngram in ngrams:
-            unitary = create_unitary(ngram.gates, qubit_num)
+            ngram_unitary = None
+
+            i = 0
+            while True:
+                if i >= len(ngram.gates):
+                    break
+
+                cache_window = self.cache.get_prefix_in_cache_length(
+                    ngram.gates[i:])
+
+                if cache_window == 0:
+                    unitary = create_unitary(
+                        ngram.gates[i], qubit_num=qubit_num
+                    )
+
+                    if ngram_unitary is None:
+                        ngram_unitary = unitary
+                    else:
+                        ngram_unitary = np.matmul(unitary, ngram_unitary)
+
+                    i = i + 1
+
+                else:
+                    cached_unitary = self.cache.get(
+                        ngram.gates[i: i + cache_window])
+
+                    if ngram_unitary is None:
+                        ngram_unitary = cached_unitary
+                    else:
+                        ngram_unitary = np.matmul(
+                            cached_unitary, ngram_unitary)
+
+                    i = i + cache_window
+
             logging.debug(
                 f"Adding {ngram.gates} (with a frequency of {ngram.frequency}) to cache."
             )
-            self.cache.add(ngram.gates, unitary)
+            self.cache.add(ngram.gates, ngram_unitary)
 
     @log_duration
     def simulate_using_cache(self, circuits: List[Circuit], state: np.ndarray = None, set_unitary: bool = False) -> None:
