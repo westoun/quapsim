@@ -233,7 +233,7 @@ class QuaPSim:
 
         logging.debug(f"Starting ngram generation with {len(ngrams)} bigrams.")
 
-        ngrams.sort(key=lambda ngram: ngram.frequency, reverse=True)
+        ngrams.sort(key=lambda ngram: ngram.gain_potential, reverse=True)
 
         start_gate_dict = {}
         end_gate_dict = {}
@@ -241,7 +241,7 @@ class QuaPSim:
         # Because ngrams have been sorted before, the original entries of each
         # dict are automatically sorted.
         for ngram in ngrams:
-            if ngram.frequency <= 1:
+            if ngram.gain_potential < 1:
                 break
 
             start_gate = ngram.gates[0]
@@ -261,7 +261,7 @@ class QuaPSim:
 
             top_ngram = None
             for ngram in ngrams:
-                if ngram.frequency_potential < 2:
+                if ngram.gain_potential < 1:
                     break
 
                 if ngram not in checked_ngrams:
@@ -332,7 +332,8 @@ class QuaPSim:
 
             checked_ngrams.append(top_ngram)
 
-            ngrams.sort(key=lambda ngram: ngram.gain, reverse=True)
+            ngrams.sort(
+                key=lambda ngram: ngram.gain_potential, reverse=True)
 
         return ngrams
 
