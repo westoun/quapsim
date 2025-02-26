@@ -256,7 +256,7 @@ class QuaPSim:
             else:
                 end_gate_dict[end_gate] = [ngram]
 
-        checked_ngrams = []
+        checked_ngrams = set()
         for i in range(self.params.merging_rounds):
 
             top_ngram = None
@@ -330,7 +330,7 @@ class QuaPSim:
                 start_gate_dict[end_gate].sort(
                     key=lambda ngram: ngram.frequency_potential, reverse=True)
 
-            checked_ngrams.append(top_ngram)
+            checked_ngrams.add(top_ngram)
 
             ngrams.sort(
                 key=lambda ngram: ngram.gain_potential, reverse=True)
