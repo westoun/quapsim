@@ -220,13 +220,6 @@ def run_experiment(
         filemode="w",
     )
 
-    logging.info(
-        (
-            f"Starting experiment with cache_size={cache_size}, reordering_steps={reordering_steps}, "
-            f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}"
-        )
-    )
-
     if seed is not None:
         random.seed(seed)
 
@@ -241,9 +234,17 @@ def run_experiment(
 
     GATE_SET = [H, CX, T, S, Identity]
     POPULATION_SIZE = 1000
-    GENERATIONS = 50
+    GENERATIONS = 10
     CHROMOSOME_LENGTH = 50
     ELITISM_COUNT = 50
+
+    logging.info(
+        (
+            f"Starting experiment with cache_size={cache_size}, reordering_steps={reordering_steps}, "
+            f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}, population_size={POPULATION_SIZE}, "
+            f"generations={GENERATIONS}, chromosome_length={CHROMOSOME_LENGTH}"
+        )
+    )
 
     target_states = [
         [0, 0, 0],

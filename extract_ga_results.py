@@ -35,6 +35,9 @@ for log_file_path in log_file_paths:
             "merging_rounds": None,
             "seed": None,
             "tag": None,
+            "population_size": None,
+            "generations": None,
+            "chromosome_length": None
         },
         "generations": []
     }
@@ -70,7 +73,7 @@ for log_file_path in log_file_paths:
                 new_generation = False
 
             experiment_setup = re.search(
-                r"cache_size=([0-9]+), reordering_steps=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None)",
+                r"cache_size=([0-9]+), reordering_steps=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None), population_size=([0-9]+), generations=([0-9]+), chromosome_length=([0-9]+)",
                 line,
             )
             if experiment_setup is not None:
@@ -81,6 +84,9 @@ for log_file_path in log_file_paths:
                 merging_rounds = experiment_setup.group(3)
                 seed = experiment_setup.group(4)
                 tag = experiment_setup.group(5)
+                population_size = experiment_setup.group(6)
+                generations = experiment_setup.group(7)
+                chromosome_length = experiment_setup.group(8)
 
                 experiment["started_at"] = timestamp
 
@@ -88,6 +94,10 @@ for log_file_path in log_file_paths:
                 experiment["params"]["reordering_steps"] = int(
                     reordering_steps)
                 experiment["params"]["merging_rounds"] = int(merging_rounds)
+                experiment["params"]["population_size"] = int(population_size)
+                experiment["params"]["generations"] = int(generations)
+                experiment["params"]["chromosome_length"] = int(
+                    chromosome_length)
 
                 if seed != "None":
                     experiment["params"]["seed"] = int(seed)
