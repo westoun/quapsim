@@ -14,7 +14,7 @@ def duration_to_seconds(duration: str) -> float:
     return seconds + minutes * 60 + hours * 60 * 60
 
 
-log_file_folder = "results"
+log_file_folder = "results_rcs"
 
 log_file_paths = [
     log_file_folder + "/" + path
