@@ -289,5 +289,5 @@ for log_file_path in log_file_paths:
     experiment_data.append(experiment)
 
 
-with open("experiment_results.json", "w") as target_file:
+with open("experiment_rcs_results.json", "w") as target_file:
     json.dump(experiment_data, target_file)
