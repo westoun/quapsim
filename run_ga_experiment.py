@@ -30,6 +30,9 @@ from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
 from quapsim import Circuit as QuapsimCircuit
 from quapsim.gates import Gate as QuapsimGate
 import quapsim.gates
+from benchmark.utils import (
+    compute_redundancy,
+)
 
 
 def construct_oracle_circuit(target_state: List[int]) -> List[IGate]:
@@ -150,6 +153,11 @@ class QuapsimSimulator(ISimulator):
 
         if self.generation % 5 == 0:
             self.simulator.build_cache(quapsim_circuits)
+
+        # Add 1 to generation count since ga4qc starts counting at 1.
+        logging.info(
+            f"Population redundancy in generation {self.generation + 1}: {compute_redundancy(quapsim_circuits)}"
+        )
 
         self.simulator.simulate_using_cache(quapsim_circuits, set_unitary=True)
 

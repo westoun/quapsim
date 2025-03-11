@@ -14,7 +14,7 @@ def duration_to_seconds(duration: str) -> float:
     return seconds + minutes * 60 + hours * 60 * 60
 
 
-log_file_folder = "bob"
+log_file_folder = "results_ga"
 
 log_file_paths = [
     log_file_folder + "/" + path
@@ -45,6 +45,7 @@ for log_file_path in log_file_paths:
             if new_generation:
                 experiment["generations"].append({
                     "i": len(experiment["generations"]),
+                    "population_redundancy": None,
                     "build_gate_frequency_dict": {"duration": None},
                     "optimize_gate_order": {
                         "duration": None,
@@ -186,6 +187,14 @@ for log_file_path in log_file_paths:
             if trie_lookup_duration is not None:
                 experiment["generations"][-1]["simulate_using_cache"]["trie_lookup_duration"] = (
                     duration_to_seconds(trie_lookup_duration.group(1))
+                )
+                continue
+
+            population_redundancy = re.search(
+                r"Population redundancy in generation [0-9]+: ([0-9]+\.[0-9]+)", line)
+            if population_redundancy is not None:
+                experiment["generations"][-1]["population_redundancy"] = float(
+                    population_redundancy.group(1)
                 )
                 continue
 
