@@ -65,6 +65,9 @@ for log_file_path in log_file_paths:
                         "duration": None,
                         "trie_lookup_duration": None,
                     },
+                    "build_cache": {
+                        "duration": None
+                    },
                     "simulate_without_cache": {"duration": None},
                     "mean_fitness": None,
                     "best_fitness": None,
@@ -180,14 +183,12 @@ for log_file_path in log_file_paths:
                 )
                 continue
 
-            simulate_using_cache_step = re.search(
-                r"Using (\[.+\]) from cache.", line)
-            if simulate_using_cache_step is not None:
-                ngram = simulate_using_cache_step.group(1)
-                ngram_length = ngram.count(")")
-
-                experiment["generations"][-1]["simulate_using_cache"]["hit_ngram_lenghts"].append(
-                    ngram_length
+            build_cache_duration = re.search(
+                r"Executing build_cache took ([0-9\.\:]+)\.", line
+            )
+            if build_cache_duration is not None:
+                experiment["generations"][-1]["build_cache"]["duration"] = (
+                    duration_to_seconds(build_cache_duration.group(1))
                 )
                 continue
 
