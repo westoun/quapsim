@@ -67,15 +67,15 @@ class LogFitnessStats(FitnessStatsCallback):
     def handle(
         self, fit_means, fit_mins, fit_maxs, fit_stdevs, generation=None
     ) -> None:
-        logging.debug(
+        logging.info(
             f"Best fitness at generation {generation}: {fit_mins[0]}")
-        logging.debug(
+        logging.info(
             f"Mean fitness at generation {generation}: {fit_means[0]}")
 
 
 class LogBestCircuit(BestCircuitCallback):
     def handle(self, circuits: List[Circuit], generation=None):
-        logging.debug(
+        logging.info(
             f"Best circuit at generation {generation}: {circuits[0]}")
 
 
@@ -206,7 +206,7 @@ def run_experiment(
     tag,
 ):
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s - %(levelname)s: %(message)s",
         filename=f"experiment_{tag}_{str(uuid4())}.log",
         filemode="w",
@@ -233,7 +233,7 @@ def run_experiment(
 
     GATE_SET = [H, CX, T, S, Identity]
     POPULATION_SIZE = 1000
-    GENERATIONS = 500
+    GENERATIONS = 50
     CHROMOSOME_LENGTH = 50
     ELITISM_COUNT = 50
 
@@ -275,7 +275,7 @@ def run_experiment(
     )
 
     ga.on_after_generation(LogFitnessStats())
-    ga.on_completion(LogBestCircuit())
+    ga.on_after_generation(LogBestCircuit())
 
     ga.run(population_size=POPULATION_SIZE, gate_count=CHROMOSOME_LENGTH,
            generations=GENERATIONS, elitism_count=ELITISM_COUNT)
