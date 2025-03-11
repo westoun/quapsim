@@ -23,8 +23,8 @@ from ga4qc.mutation import RandomGateMutation, ParameterChangeMutation
 from ga4qc.crossover import OnePointCrossover
 from ga4qc.selection import ISelection, TournamentSelection
 from ga4qc.circuit import Circuit
-from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, IGate, \
-    OracleConstructor, Oracle
+from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, CZ, CCX, \
+    Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ
 
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
 from quapsim import Circuit as QuapsimCircuit
@@ -36,13 +36,21 @@ from benchmark.utils import (
 
 
 def construct_oracle_circuit(target_state: List[int]) -> List[IGate]:
+    # 4 qubits => 3 ancillas
+
     circuit = []
 
     for i, qubit_state in enumerate(target_state):
         if qubit_state == 0:
             circuit.append(X(i))
 
-    circuit.append(CCZ(0, 1, 2))
+    circuit.append(CCX(0, 1, 4))
+    circuit.append(CCX(2, 3, 5))
+    circuit.append(CCX(4, 5, 6))
+    circuit.append(CZ(6, 0))
+    circuit.append(CCX(4, 5, 6))
+    circuit.append(CCX(2, 3, 5))
+    circuit.append(CCX(0, 1, 4))
 
     for i, qubit_state in enumerate(target_state):
         if qubit_state == 0:
@@ -105,12 +113,38 @@ def ga4qc_to_quapsim(circuit: Circuit) -> List[QuapsimCircuit]:
 def get_quapsim_gate(gate: IGate) -> QuapsimGate:
     if type(gate) is X:
         return quapsim.gates.X(gate.target)
+    if type(gate) is Y:
+        return quapsim.gates.Y(gate.target)
+    if type(gate) is Z:
+        return quapsim.gates.Z(gate.target)
     elif type(gate) is H:
         return quapsim.gates.H(gate.target)
+    elif type(gate) is RX:
+        return quapsim.gates.RX(gate.target, gate.theta)
+    elif type(gate) is RY:
+        return quapsim.gates.RY(gate.target, gate.theta)
+    elif type(gate) is RZ:
+        return quapsim.gates.RZ(gate.target, gate.theta)
+    elif type(gate) is CRX:
+        return quapsim.gates.CRX(control_qubit=gate.controll, target_qubit=gate.target, theta=gate.theta)
+    elif type(gate) is CRY:
+        return quapsim.gates.CRY(control_qubit=gate.controll, target_qubit=gate.target, theta=gate.theta)
+    elif type(gate) is CRZ:
+        return quapsim.gates.CRZ(control_qubit=gate.controll, target_qubit=gate.target, theta=gate.theta)
     elif type(gate) is CX:
         return quapsim.gates.CX(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is CZ:
+        return quapsim.gates.CZ(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is CY:
+        return quapsim.gates.CY(control_qubit=gate.controll, target_qubit=gate.target)
     elif type(gate) is CCZ:
         return quapsim.gates.CCZ(
+            control_qubit1=gate.controll1,
+            control_qubit2=gate.controll2,
+            target_qubit=gate.target
+        )
+    elif type(gate) is CCX:
+        return quapsim.gates.CCX(
             control_qubit1=gate.controll1,
             control_qubit2=gate.controll2,
             target_qubit=gate.target
@@ -232,7 +266,8 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
-    GATE_SET = [H, CX, T, S, Identity]
+    GATE_SET = [H, CX, T, S, CZ, Z, X, Y, CY, CCX, CCZ, Identity,
+                RX, RY, RZ, CRX, CRY, CRZ]
     POPULATION_SIZE = 1000
     GENERATIONS = 10
     CHROMOSOME_LENGTH = 50
@@ -247,14 +282,22 @@ def run_experiment(
     )
 
     target_states = [
-        [0, 0, 0],
-        [0, 0, 1],
-        [0, 1, 0],
-        [0, 1, 1],
-        [1, 0, 0],
-        [1, 0, 1],
-        [1, 1, 0],
-        [1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 1],
+        [0, 0, 1, 0],
+        [0, 0, 1, 1],
+        [0, 1, 0, 0],
+        [0, 1, 0, 1],
+        [0, 1, 1, 0],
+        [0, 1, 1, 1],
+        [1, 0, 0, 0],
+        [1, 0, 0, 1],
+        [1, 0, 1, 0],
+        [1, 0, 1, 1],
+        [1, 1, 0, 0],
+        [1, 1, 0, 1],
+        [1, 1, 1, 0],
+        [1, 1, 1, 1],
     ]
     target_dists = [state_to_distribution(state) for state in target_states]
 
@@ -266,19 +309,19 @@ def run_experiment(
     )
     GATE_SET.append(GroverOracle)
 
-    seeder = RandomSeeder(GATE_SET, gate_count=CHROMOSOME_LENGTH, qubit_num=3)
+    seeder = RandomSeeder(GATE_SET, gate_count=CHROMOSOME_LENGTH, qubit_num=7)
 
     ga = GA(
         seeder=seeder,
         mutations=[
-            RandomGateMutation(GATE_SET, 3,
-                               circ_prob=1, gate_prob=0.3)
+            RandomGateMutation(GATE_SET, qubit_num=7,
+                               circ_prob=1, gate_prob=0.05)
         ],
         crossovers=[OnePointCrossover()],
         processors=[
             QuapsimSimulator(simulator),
             JensenShannonFitness(target_dists=target_dists,
-                                 ancillary_qubit_num=0),
+                                 ancillary_qubit_num=3),
         ],
         selection=TournamentSelection(tourn_size=2),
     )
