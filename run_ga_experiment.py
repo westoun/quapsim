@@ -185,7 +185,7 @@ class QuapsimSimulator(ISimulator):
             quapsim_circuits.extend(flattened_circuits)
             states_per_circuit.append(len(flattened_circuits))
 
-        if self.generation % 5 == 0:
+        if self.generation % 5 == 0 and self.simulator.params.cache_size > 0:
             self.simulator.build_cache(quapsim_circuits)
 
         # Add 1 to generation count since ga4qc starts counting at 1.
@@ -193,7 +193,12 @@ class QuapsimSimulator(ISimulator):
             f"Population redundancy in generation {self.generation + 1}: {compute_redundancy(quapsim_circuits)}"
         )
 
-        self.simulator.simulate_using_cache(quapsim_circuits, set_unitary=True)
+        if self.simulator.params.cache_size > 0:
+            self.simulator.simulate_using_cache(
+                quapsim_circuits, set_unitary=True)
+        else:
+            self.simulator.simulate_without_cache(
+                quapsim_circuits, set_unitary=True)
 
         for circuit in circuits:
             circuit.unitaries = []
