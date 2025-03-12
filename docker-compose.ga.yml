@@ -9,16 +9,10 @@ services:
       echo start
       && python3 run_ga_experiment.py -cs 1000 -rs 0 -mr 200 -s 0 -t caching_enabled
       && python3 run_ga_experiment.py -cs 1000 -rs 0 -mr 200 -s 1 -t caching_enabled
-      && python3 run_ga_experiment.py -cs 1000 -rs 0 -mr 200 -s 2 -t caching_enabled
-      && python3 run_ga_experiment.py -cs 1000 -rs 0 -mr 200 -s 3 -t caching_enabled
-      && python3 run_ga_experiment.py -cs 1000 -rs 20 -mr 200 -s 0 -t caching_with_reordering
-      && python3 run_ga_experiment.py -cs 1000 -rs 20 -mr 200 -s 1 -t caching_with_reordering
-      && python3 run_ga_experiment.py -cs 1000 -rs 20 -mr 200 -s 2 -t caching_with_reordering
-      && python3 run_ga_experiment.py -cs 1000 -rs 20 -mr 200 -s 3 -t caching_with_reordering
       && python3 run_ga_experiment.py -cs 0 -rs 0 -mr 200 -s 0 -t no_caching
       && python3 run_ga_experiment.py -cs 0 -rs 0 -mr 200 -s 1 -t no_caching
-      && python3 run_ga_experiment.py -cs 0 -rs 0 -mr 200 -s 2 -t no_caching
-      && python3 run_ga_experiment.py -cs 0 -rs 0 -mr 200 -s 3 -t no_caching
+      && python3 run_ga_experiment.py -cs 1000 -rs 20 -mr 200 -s 0 -t caching_with_reordering
+      && python3 run_ga_experiment.py -cs 1000 -rs 20 -mr 200 -s 1 -t caching_with_reordering
       "
     volumes:
       - ./:/app/

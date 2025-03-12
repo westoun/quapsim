@@ -269,9 +269,9 @@ def run_experiment(
     simulator = QuaPSim(params, cache)
 
     ga_params = GAParams(
-        population_size=1000,
+        population_size=500,
         chromosome_length=50,
-        generations=500,
+        generations=200,
         qubit_num=7,
         ancillary_qubit_num=3,
         elitism_count=50,
