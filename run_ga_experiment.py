@@ -274,7 +274,7 @@ def run_experiment(
     GATE_SET = [H, CX, T, S, CZ, Z, X, Y, CY, CCX, CCZ, Identity,
                 RX, RY, RZ, CRX, CRY, CRZ]
     POPULATION_SIZE = 1000
-    GENERATIONS = 10
+    GENERATIONS = 500
     CHROMOSOME_LENGTH = 50
     ELITISM_COUNT = 50
 
