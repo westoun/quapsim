@@ -25,6 +25,7 @@ from ga4qc.selection import ISelection, TournamentSelection
 from ga4qc.circuit import Circuit
 from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, CZ, CCX, \
     Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ
+from ga4qc.params import GAParams
 
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
 from quapsim import Circuit as QuapsimCircuit
@@ -166,15 +167,11 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
 
 class QuapsimSimulator(ISimulator):
     simulator: QuaPSim
-    generation: int = -1  # TODO: Remove once generation has been added
-    # to process() signature.
 
     def __init__(self, simulator: QuaPSim):
         self.simulator = simulator
 
-    def process(self, circuits: List[Circuit]) -> None:
-        self.generation += 1
-
+    def process(self, circuits: List[Circuit], generation: int) -> None:
         quapsim_circuits: List[QuapsimCircuit] = []
         states_per_circuit: List[int] = []
 
@@ -185,12 +182,12 @@ class QuapsimSimulator(ISimulator):
             quapsim_circuits.extend(flattened_circuits)
             states_per_circuit.append(len(flattened_circuits))
 
-        if self.generation % 5 == 0 and self.simulator.params.cache_size > 0:
+        # GA4QC starts counting at 1.
+        if (generation - 1) % 5 == 0 and self.simulator.params.cache_size > 0:
             self.simulator.build_cache(quapsim_circuits)
 
-        # Add 1 to generation count since ga4qc starts counting at 1.
         logging.info(
-            f"Population redundancy in generation {self.generation + 1}: {compute_redundancy(quapsim_circuits)}"
+            f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
         )
 
         if self.simulator.params.cache_size > 0:
@@ -271,18 +268,22 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
-    GATE_SET = [H, CX, T, S, CZ, Z, X, Y, CY, CCX, CCZ, Identity,
-                RX, RY, RZ, CRX, CRY, CRZ]
-    POPULATION_SIZE = 1000
-    GENERATIONS = 500
-    CHROMOSOME_LENGTH = 50
-    ELITISM_COUNT = 50
+    ga_params = GAParams(
+        population_size=1000,
+        chromosome_length=50,
+        generations=500,
+        qubit_num=7,
+        ancillary_qubit_num=3,
+        elitism_count=50,
+        gate_set=[H, CX, T, S, CZ, Z, X, Y, CY, CCX, CCZ, Identity,
+                  RX, RY, RZ, CRX, CRY, CRZ]
+    )
 
     logging.info(
         (
             f"Starting experiment with cache_size={cache_size}, reordering_steps={reordering_steps}, "
-            f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}, population_size={POPULATION_SIZE}, "
-            f"generations={GENERATIONS}, chromosome_length={CHROMOSOME_LENGTH}"
+            f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}, population_size={ga_params.population_size}, "
+            f"generations={ga_params.generations}, chromosome_length={ga_params.chromosome_length}"
         )
     )
 
@@ -312,21 +313,22 @@ def run_experiment(
         ],
         name="Oracle"
     )
-    GATE_SET.append(GroverOracle)
+    ga_params.gate_set.append(GroverOracle)
 
-    seeder = RandomSeeder(GATE_SET, gate_count=CHROMOSOME_LENGTH, qubit_num=7)
+    seeder = RandomSeeder(ga_params)
 
     ga = GA(
         seeder=seeder,
         mutations=[
-            RandomGateMutation(GATE_SET, qubit_num=7,
+            RandomGateMutation(ga_params,
                                circ_prob=1, gate_prob=0.05)
         ],
         crossovers=[OnePointCrossover()],
         processors=[
             QuapsimSimulator(simulator),
-            JensenShannonFitness(target_dists=target_dists,
-                                 ancillary_qubit_num=3),
+            JensenShannonFitness(params=ga_params,
+                                 target_dists=target_dists,
+                                 ),
         ],
         selection=TournamentSelection(tourn_size=2),
     )
@@ -334,8 +336,7 @@ def run_experiment(
     ga.on_after_generation(LogFitnessStats())
     ga.on_after_generation(LogBestCircuit())
 
-    ga.run(population_size=POPULATION_SIZE, gate_count=CHROMOSOME_LENGTH,
-           generations=GENERATIONS, elitism_count=ELITISM_COUNT)
+    ga.run(ga_params)
 
 
 if __name__ == "__main__":
