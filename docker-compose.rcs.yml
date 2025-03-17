@@ -137,104 +137,54 @@ services:
       && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
       && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_qubits
       && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       "
