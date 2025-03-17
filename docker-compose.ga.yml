@@ -11,8 +11,6 @@ services:
       && python3 run_ga_experiment.py -cs 1000 -mr 200 -s 1 -t caching_enabled
       && python3 run_ga_experiment.py -cs 0 -mr 200 -s 0 -t no_caching
       && python3 run_ga_experiment.py -cs 0 -mr 200 -s 1 -t no_caching
-      && python3 run_ga_experiment.py -cs 1000 -mr 200 -s 0 -t caching_with_reordering
-      && python3 run_ga_experiment.py -cs 1000 -mr 200 -s 1 -t caching_with_reordering
       "
     volumes:
       - ./:/app/
