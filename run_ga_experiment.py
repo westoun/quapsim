@@ -217,12 +217,6 @@ class QuapsimSimulator(ISimulator):
     help="The amount of unitaries stored in the cache.",
 )
 @click.option(
-    "--reordering-steps",
-    "-rs",
-    type=click.INT,
-    help="The amount of reordering steps used per circuit.",
-)
-@click.option(
     "--merging-rounds",
     "-mr",
     type=click.INT,
@@ -244,7 +238,6 @@ class QuapsimSimulator(ISimulator):
 )
 def run_experiment(
     cache_size,
-    reordering_steps,
     merging_rounds,
     seed,
     tag,
@@ -263,7 +256,6 @@ def run_experiment(
     params = SimulatorParams(
         processes=1,
         cache_size=cache_size,
-        reordering_steps=reordering_steps,
         merging_rounds=merging_rounds,
     )
     simulator = QuaPSim(params, cache)
@@ -281,7 +273,7 @@ def run_experiment(
 
     logging.info(
         (
-            f"Starting experiment with cache_size={cache_size}, reordering_steps={reordering_steps}, "
+            f"Starting experiment with cache_size={cache_size}, "
             f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}, population_size={ga_params.population_size}, "
             f"generations={ga_params.generations}, chromosome_length={ga_params.chromosome_length}"
         )

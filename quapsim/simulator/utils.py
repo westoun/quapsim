@@ -136,29 +136,3 @@ def log_duration(func: Callable):
         return res
 
     return wrapper
-
-
-class GateFrequencyDict:
-    _dict: Dict
-
-    def __init__(self):
-        self._dict = {}
-
-    @property
-    def gates(self) -> List[IGate]:
-        return list(self._dict.keys())
-
-    def index(self, circuits: List[Circuit]) -> "GateFrequencyDict":
-        for circuit in circuits:
-            for gate in circuit.gates:
-                if gate in self._dict:
-                    self._dict[gate] += 1
-                else:
-                    self._dict[gate] = 1
-        return self
-
-    def __getitem__(self, gate: IGate) -> int:
-        if gate in self._dict:
-            return self._dict[gate]
-        else:
-            return -1

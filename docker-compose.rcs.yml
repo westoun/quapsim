@@ -7,371 +7,236 @@ services:
     command: >
       bash -c "
       echo start
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -rs 0 -mr 200 -s 0 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -rs 0 -mr 200 -s 1 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -rs 0 -mr 200 -s 2 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -rs 0 -mr 200 -s 3 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -rs 0 -mr 200 -s 4 -t varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_qubits
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 0 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 1 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 2 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 3 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -rs 0 -mr 200 -s 4 -t varying_gates
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_redundancy
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 100 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 200 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 300 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 400 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 600 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 700 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 800 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 900 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 1000 -mr 200 -s 0 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 100 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 200 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 300 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 400 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 600 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 700 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 800 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 900 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 1000 -mr 200 -s 1 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 100 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 200 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 300 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 400 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 600 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 700 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 800 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 900 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 1000 -mr 200 -s 2 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 100 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 200 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 300 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 400 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 600 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 700 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 800 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 900 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 1000 -mr 200 -s 3 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 0 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 100 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 200 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 300 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 400 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 500 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 600 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 700 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 800 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 900 -mr 200 -s 4 -t reordering_varying_steps
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -rs 1000 -mr 200 -s 4 -t reordering_varying_steps
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -mr 200 -s 0 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -mr 200 -s 1 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -mr 200 -s 2 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -mr 200 -s 3 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.2 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.4 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.5 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.6 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 10000 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.7 -cs 0 -mr 200 -s 4 -t varying_redundancy
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 5 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 6 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 7 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 9 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_qubits
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 0 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 1 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 2 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 3 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 200 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 400 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 600 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 800 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1200 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1400 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1600 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 1800 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 10000 -mr 200 -s 4 -t varying_gates
+      && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.3 -cs 0 -mr 200 -s 4 -t varying_gates
       "
     volumes:
       - ./:/app/
