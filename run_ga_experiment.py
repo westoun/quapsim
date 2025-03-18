@@ -183,7 +183,7 @@ class QuapsimSimulator(ISimulator):
             states_per_circuit.append(len(flattened_circuits))
 
         # GA4QC starts counting at 1.
-        if (generation - 1) % 5 == 0 and self.simulator.params.cache_size > 0:
+        if (generation - 1) % 10 == 0 and self.simulator.params.cache_size > 0:
             self.simulator.build_cache(quapsim_circuits)
 
         logging.info(
