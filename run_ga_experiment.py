@@ -17,14 +17,18 @@ from ga4qc.callback import (
 )
 from ga4qc.processors import (
     JensenShannonFitness,
-    ISimulator
+    ISimulator,
+    AbsoluteUnitaryDistance,
+    WilliamsRankingFitness,
+    RemoveDuplicates
 )
 from ga4qc.mutation import RandomGateMutation, ParameterChangeMutation
 from ga4qc.crossover import OnePointCrossover
 from ga4qc.selection import ISelection, TournamentSelection
 from ga4qc.circuit import Circuit
 from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, CZ, CCX, \
-    Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ
+    Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ, \
+    CLIFFORD_PLUS_T
 from ga4qc.params import GAParams
 
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
@@ -36,43 +40,20 @@ from benchmark.utils import (
 )
 
 
-def construct_oracle_circuit(target_state: List[int]) -> List[IGate]:
-    # 4 qubits => 3 ancillas
+def create_cnx_unitary(qubit_num: int) -> np.ndarray:
+    dim = 2 ** qubit_num
 
-    circuit = []
+    unitary = np.zeros((dim, dim), dtype=np.complex128)
 
-    for i, qubit_state in enumerate(target_state):
-        if qubit_state == 0:
-            circuit.append(X(i))
-
-    circuit.append(CCX(0, 1, 4))
-    circuit.append(CCX(2, 3, 5))
-    circuit.append(CCX(4, 5, 6))
-    circuit.append(CZ(6, 0))
-    circuit.append(CCX(4, 5, 6))
-    circuit.append(CCX(2, 3, 5))
-    circuit.append(CCX(0, 1, 4))
-
-    for i, qubit_state in enumerate(target_state):
-        if qubit_state == 0:
-            circuit.append(X(i))
-
-    return circuit
-
-
-def state_to_distribution(target_state: List[int]) -> List[float]:
-    vectors = []
-    for qubit_state in target_state:
-        if qubit_state == 0:
-            vectors.append([1, 0])
+    for i in range(dim):
+        if i == dim - 1:
+            unitary[i, i - 1] = 1
+        elif i == dim - 2:
+            unitary[i, i + 1] = 1
         else:
-            vectors.append([0, 1])
+            unitary[i, i] = 1
 
-    distribution = vectors[0]
-    for vector in vectors[1:]:
-        distribution = np.kron(distribution, vector)
-
-    return distribution.tolist()
+    return unitary
 
 
 class LogFitnessStats(FitnessStatsCallback):
@@ -176,6 +157,9 @@ class QuapsimSimulator(ISimulator):
         states_per_circuit: List[int] = []
 
         for circuit in circuits:
+            if type(circuit) == list:
+                print(circuit)
+
             flattened_circuits: List[QuapsimCircuit] = ga4qc_to_quapsim(
                 circuit)
 
@@ -260,16 +244,19 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
+    qubit_num = 5
+
     ga_params = GAParams(
         population_size=500,
-        chromosome_length=50,
+        chromosome_length=20,
         generations=200,
-        qubit_num=7,
-        ancillary_qubit_num=3,
-        elitism_count=50,
-        gate_set=[H, CX, T, S, CZ, Z, X, Y, CY, CCX, CCZ, Identity,
-                  RX, RY, RZ, CRX, CRY, CRZ]
+        qubit_num=qubit_num,
+        ancillary_qubit_num=0,
+        elitism_count=10,
+        gate_set=CLIFFORD_PLUS_T + [Identity]
     )
+
+    target_unitary = create_cnx_unitary(qubit_num)
 
     logging.info(
         (
@@ -278,34 +265,6 @@ def run_experiment(
             f"generations={ga_params.generations}, chromosome_length={ga_params.chromosome_length}"
         )
     )
-
-    target_states = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 1],
-        [0, 0, 1, 0],
-        [0, 0, 1, 1],
-        [0, 1, 0, 0],
-        [0, 1, 0, 1],
-        [0, 1, 1, 0],
-        [0, 1, 1, 1],
-        [1, 0, 0, 0],
-        [1, 0, 0, 1],
-        [1, 0, 1, 0],
-        [1, 0, 1, 1],
-        [1, 1, 0, 0],
-        [1, 1, 0, 1],
-        [1, 1, 1, 0],
-        [1, 1, 1, 1],
-    ]
-    target_dists = [state_to_distribution(state) for state in target_states]
-
-    GroverOracle = OracleConstructor(
-        sub_circuits=[
-            construct_oracle_circuit(state) for state in target_states
-        ],
-        name="Oracle"
-    )
-    ga_params.gate_set.append(GroverOracle)
 
     seeder = RandomSeeder(ga_params)
 
@@ -318,9 +277,10 @@ def run_experiment(
         crossovers=[OnePointCrossover()],
         processors=[
             QuapsimSimulator(simulator),
-            JensenShannonFitness(params=ga_params,
-                                 target_dists=target_dists,
-                                 ),
+            AbsoluteUnitaryDistance(
+                params=ga_params,
+                target_unitaries=[target_unitary]
+            )
         ],
         selection=TournamentSelection(tourn_size=2),
     )
