@@ -244,12 +244,12 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
-    qubit_num = 5
+    qubit_num = 7
 
     ga_params = GAParams(
         population_size=500,
-        chromosome_length=20,
-        generations=200,
+        chromosome_length=50,
+        generations=500,
         qubit_num=qubit_num,
         ancillary_qubit_num=0,
         elitism_count=10,
@@ -272,9 +272,9 @@ def run_experiment(
         seeder=seeder,
         mutations=[
             RandomGateMutation(ga_params,
-                               circ_prob=1, gate_prob=0.05)
+                               circ_prob=1, gate_prob=0.02)
         ],
-        crossovers=[OnePointCrossover()],
+        crossovers=[OnePointCrossover(prob=0.5)],
         processors=[
             QuapsimSimulator(simulator),
             AbsoluteUnitaryDistance(
