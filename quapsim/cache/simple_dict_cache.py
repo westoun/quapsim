@@ -63,3 +63,4 @@ class SimpleDictCache(ICache):
     def reset(self) -> None:
         """Clear the cache."""
         self._dict = {}
+        self._trie_root = TrieNode(gate=None)

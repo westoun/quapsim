@@ -57,6 +57,7 @@ class QuaPSim:
     @log_duration
     def build_cache(self, circuits: List[Circuit]) -> None:
         logging.info(f"Starting to build cache.")
+        self.cache.reset()
 
         qubit_num = circuits[0].qubit_num
 
