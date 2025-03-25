@@ -49,192 +49,44 @@ from benchmark.utils import (
 )
 
 
-def get_bounds(params: List[float]) -> List[Tuple[float, float]]:
-    bounds = []
-    for _ in params:
-        bounds.append((-2 * np.pi, 2 * np.pi))
-    return bounds
-
-# Class will be added in future version of ga4qc.
-
-
-class CPhase(IOptimizableGate):
-    controll: int
-    target: int
-    theta: float
-
-    def __init__(self, controll: int = 0, target: int = 1, theta: float = 0.0):
-        self.controll = controll
-        self.target = target
-        self.theta = theta
-
-    def randomize(self, qubit_num: int) -> IGate:
-        assert (
-            qubit_num > 1
-        ), "The CPhase Gate requires at least 2 qubits to operate as intended."
-
-        self.target, self.control = random.sample(range(0, qubit_num), 2)
-
-        # Choose theta randomly, since theta = 0 is often a stationary
-        # point and fails numerical optimizers to progress.
-        self.theta = random.random() * 2 * np.pi - np.pi
-
-        return self
-
-    @property
-    def params(self) -> List[float]:
-        return [self.theta]
-
-    def set_params(self, params: List[float]) -> None:
-        assert len(params) == 1, "The CPhase gate requires exactly one parameter!"
-
-        self.theta = params[0]
-
-    def __repr__(self):
-        return f"CPhase(control={self.controll}, target={self.target}, theta={round(self.theta, 3)})"
-
-
-def create_qft_unitary(qubit_num: int) -> np.ndarray:
+def construct_bell_state_dist(qubit_num: int) -> np.ndarray:
     dim = 2 ** qubit_num
 
-    dft_matrix = np.zeros((dim, dim), dtype=np.complex128)
+    dist = np.zeros(dim)
 
-    w = np.pow(np.e, 2 * np.pi * 1j / dim)
+    dist[0] = 0.5
+    dist[dim - 1] = 0.5
 
-    for i in range(dim):
-        for j in range(dim):
-            dft_matrix[i, j] = np.pow(w, i * j)
-
-    unitary = 1 / np.pow(dim, 0.5) * dft_matrix
-    return unitary
+    return dist
 
 
-def create_cnx_unitary(qubit_num: int) -> np.ndarray:
-    dim = 2 ** qubit_num
-
-    unitary = np.zeros((dim, dim), dtype=np.complex128)
-
-    for i in range(dim):
-        if i == dim - 1:
-            unitary[i, i - 1] = 1
-        elif i == dim - 2:
-            unitary[i, i + 1] = 1
-        else:
-            unitary[i, i] = 1
-
-    return unitary
-
-
-def evaluate(
-    params: List[float], circuit: Circuit, simulator: QuaPSim, fitness: IFitness, generation: int
-) -> float:
-    circuit.reset()
-    update_params(circuit, params)
-    simulate(circuits=[circuit], simulator=simulator)
-    fitness.process([circuit], generation)
-    score = circuit.fitness_values[0]
-    return score
-
-
-def map_circuits(circuits: List[Circuit]) -> List[QuapsimCircuit]:
-    quapsim_circuits: List[QuapsimCircuit] = []
-
-    for circuit in circuits:
-        flattened_circuits: List[QuapsimCircuit] = ga4qc_to_quapsim(
-            circuit)
-
-        quapsim_circuits.extend(flattened_circuits)
-
-    return quapsim_circuits
-
-
-def build_cache(circuits: List[Circuit], simulator: QuaPSim) -> None:
-    quapsim_circuits = map_circuits(circuits)
-    simulator.build_cache(quapsim_circuits)
-
-
-def simulate(circuits: List[Circuit], simulator: QuaPSim) -> None:
-    quapsim_circuits = map_circuits(circuits)
-
-    if simulator.params.cache_size > 0:
-        simulator.simulate_using_cache(
-            quapsim_circuits, set_unitary=True)
-    else:
-        simulator.simulate_without_cache(
-            quapsim_circuits, set_unitary=True)
-
-    for circuit, quapsim_circuit in zip(circuits, quapsim_circuits):
-        circuit.unitaries = [quapsim_circuit.unitary]
-
-
-def log_redundancy(circuits: List[Circuit], generation: int) -> None:
-    quapsim_circuits = map_circuits(circuits)
-    logging.info(
-        f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
-    )
-
-
-class QuapsimNumericalOptimizer(NumericalOptimizer):
+class QuapsimSimulator(ISimulator):
     simulator: QuaPSim
-    fitness: IFitness
-    rounds: int
 
-    def __init__(self, simulator: QuaPSim, fitness: IFitness, rounds: int = 10):
+    def __init__(self, simulator: QuaPSim):
         self.simulator = simulator
-        self.fitness = fitness
-        self.rounds = rounds
 
     def process(self, circuits: List[Circuit], generation: int) -> None:
-        log_redundancy(circuits, generation)
+        quapsim_circuits: List[QuapsimCircuit] = [
+            ga4qc_to_quapsim(circuit) for circuit in circuits
+        ]
 
-        # GA4QC starts counting at 1.
-        # if (generation - 1) % 5 == 0 and self.simulator.params.cache_size > 0:
-        if self.simulator.params.cache_size > 0:
-            build_cache(circuits, self.simulator)
-
-        # Workaround to avoid logging calls from simulator whenever a single
-        # circuit is simulated.
-        logging.disable(logging.CRITICAL)
-        start = datetime.now()
-
-        for circuit in circuits:
-            initial_params = extract_params(circuit)
-
-            if len(initial_params) == 0:
-                simulate(circuits=[circuit], simulator=self.simulator)
-                self.fitness.process([circuit], generation)
-                continue
-
-            bounds = get_bounds(initial_params)
-
-            objective_function = partial(
-                evaluate,
-                circuit=circuit,
-                simulator=self.simulator,
-                fitness=self.fitness,
-                generation=generation
-            )
-
-            optimization_result: OptimizeResult = minimize(
-                objective_function,
-                x0=initial_params,
-                method="Nelder-Mead",
-                bounds=bounds,
-                tol=0,
-                options={"maxiter": self.rounds, "disp": False},
-            )
-
-            best_params = optimization_result.x
-            update_params(circuit, best_params)
-
-        end = datetime.now()
-        duration = end - start
-        logging.disable(logging.NOTSET)
+        logging.info(
+            f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
+        )
 
         if self.simulator.params.cache_size > 0:
-            logging.info(f"Executing simulate_using_cache took {duration}.")
+            self.simulator.build_cache(quapsim_circuits)
+
+        if self.simulator.params.cache_size > 0:
+            self.simulator.simulate_using_cache(
+                quapsim_circuits, set_unitary=True)
         else:
-            logging.info(f"Executing simulate_without_cache took {duration}.")
+            self.simulator.simulate_without_cache(
+                quapsim_circuits, set_unitary=True)
+
+        for circuit, quapsim_circuit in zip(circuits, quapsim_circuits):
+            circuit.unitaries = [quapsim_circuit.unitary]
 
 
 class LogFitnessStats(FitnessStatsCallback):
@@ -253,24 +105,14 @@ class LogBestCircuit(BestCircuitCallback):
             f"Best circuit at generation {generation}: {circuits[0]}")
 
 
-def ga4qc_to_quapsim(circuit: Circuit) -> List[QuapsimCircuit]:
-    quapsim_circuits = []
+def ga4qc_to_quapsim(circuit: Circuit) -> QuapsimCircuit:
+    quapsim_circuit = QuapsimCircuit(circuit.qubit_num)
 
-    for case_i in range(circuit.case_count):
-        quapsim_circuit = QuapsimCircuit(circuit.qubit_num)
+    for gate in circuit.gates:
+        quapsim_gate = get_quapsim_gate(gate)
+        quapsim_circuit.apply(quapsim_gate)
 
-        for gate in circuit.gates:
-            if type(gate) is Oracle:
-                for gate_ in gate.get_gates(case_i):
-                    quapsim_gate = get_quapsim_gate(gate_)
-                    quapsim_circuit.apply(quapsim_gate)
-            else:
-                quapsim_gate = get_quapsim_gate(gate)
-                quapsim_circuit.apply(quapsim_gate)
-
-        quapsim_circuits.append(quapsim_circuit)
-
-    return quapsim_circuits
+    return quapsim_circuit
 
 
 def get_quapsim_gate(gate: IGate) -> QuapsimGate:
@@ -304,8 +146,6 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         return quapsim.gates.Swap(qubit1=gate.target1, qubit2=gate.target2)
     elif type(gate) is CY:
         return quapsim.gates.CY(control_qubit=gate.controll, target_qubit=gate.target)
-    elif type(gate) is CPhase:
-        return quapsim.gates.CPhase(control_qubit=gate.controll, target_qubit=gate.target, theta=gate.theta)
     elif type(gate) is CCZ:
         return quapsim.gates.CCZ(
             control_qubit1=gate.controll1,
@@ -382,23 +222,19 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
-    qubit_num = 6
-
-    # Required gate count of gold solution is
-    # (#qubits/2 + 0.5) * #qubits + #qubits/2
+    qubit_num = 9
 
     ga_params = GAParams(
-        population_size=1000,
-        chromosome_length=30,
-        generations=20,
+        population_size=500,
+        chromosome_length=20,
+        generations=10,
         qubit_num=qubit_num,
         ancillary_qubit_num=0,
-        elitism_count=10,
-        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, RX, RY, RZ, CRX, CRY, CRZ,
-                  Phase, CPhase, Swap]
+        elitism_count=5,
+        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, Swap]
     )
 
-    target_unitary = create_qft_unitary(qubit_num)
+    target_dist = construct_bell_state_dist(qubit_num)
 
     logging.info(
         (
@@ -419,17 +255,15 @@ def run_experiment(
         crossovers=[OnePointCrossover(prob=0.5)],
         processors=[
             # RemoveDuplicates(seeder),
-            QuapsimNumericalOptimizer(
-                simulator=simulator,
-                fitness=AbsoluteUnitaryDistance(
-                    params=ga_params,
-                    target_unitaries=[target_unitary]
-                ),
+            QuapsimSimulator(simulator=simulator),
+            JensenShannonFitness(
+                params=ga_params,
+                target_dists=[target_dist]
             ),
-            # GateCountFitness(),
-            # WeightedSumFitness(weights=[1, 0.01])
+            GateCountFitness(),
+            WeightedSumFitness(weights=[1, 0.001])
         ],
-        selection=TournamentSelection(tourn_size=2, objective_i=0),
+        selection=TournamentSelection(tourn_size=2, objective_i=2),
     )
 
     ga.on_after_generation(LogFitnessStats())
