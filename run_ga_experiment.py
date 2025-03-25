@@ -35,7 +35,7 @@ from ga4qc.mutation import RandomGateMutation, ParameterChangeMutation
 from ga4qc.crossover import OnePointCrossover
 from ga4qc.selection import ISelection, TournamentSelection
 from ga4qc.circuit import Circuit
-from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, CZ, CCX, \
+from ga4qc.circuit.gates import Identity, CX, CS, CT, S, T, H, X, RX, CCZ, CZ, CCX, \
     Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ, \
     CLIFFORD_PLUS_T, Phase, IOptimizableGate, Swap
 from ga4qc.params import GAParams
@@ -146,6 +146,10 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         return quapsim.gates.Swap(qubit1=gate.target1, qubit2=gate.target2)
     elif type(gate) is CY:
         return quapsim.gates.CY(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is CS:
+        return quapsim.gates.CS(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is CT:
+        return quapsim.gates.CT(control_qubit=gate.controll, target_qubit=gate.target)
     elif type(gate) is CCZ:
         return quapsim.gates.CCZ(
             control_qubit1=gate.controll1,
@@ -225,13 +229,13 @@ def run_experiment(
     qubit_num = 9
 
     ga_params = GAParams(
-        population_size=500,
-        chromosome_length=20,
-        generations=10,
+        population_size=1000,
+        chromosome_length=15,
+        generations=200,
         qubit_num=qubit_num,
         ancillary_qubit_num=0,
         elitism_count=5,
-        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, Swap]
+        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, S, T, CS, CT, Swap]
     )
 
     target_dist = construct_bell_state_dist(qubit_num)
