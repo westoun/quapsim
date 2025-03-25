@@ -188,7 +188,8 @@ class QuapsimNumericalOptimizer(NumericalOptimizer):
         log_redundancy(circuits, generation)
 
         # GA4QC starts counting at 1.
-        if (generation - 1) % 10 == 0 and self.simulator.params.cache_size > 0:
+        # if (generation - 1) % 5 == 0 and self.simulator.params.cache_size > 0:
+        if self.simulator.params.cache_size > 0:
             build_cache(circuits, self.simulator)
 
         # Workaround to avoid logging calls from simulator whenever a single
@@ -381,19 +382,19 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
-    qubit_num = 4
+    qubit_num = 6
 
     # Required gate count of gold solution is
-    # (#qubits/2 + 0.5) * #qubits
+    # (#qubits/2 + 0.5) * #qubits + #qubits/2
 
     ga_params = GAParams(
-        population_size=500,
-        chromosome_length=qubit_num**2,
-        generations=200,
+        population_size=1000,
+        chromosome_length=30,
+        generations=20,
         qubit_num=qubit_num,
         ancillary_qubit_num=0,
         elitism_count=10,
-        gate_set=[Identity, H,
+        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, RX, RY, RZ, CRX, CRY, CRZ,
                   Phase, CPhase, Swap]
     )
 
@@ -413,18 +414,17 @@ def run_experiment(
         seeder=seeder,
         mutations=[
             RandomGateMutation(ga_params,
-                               circ_prob=0.3, gate_prob=0.2)
+                               circ_prob=0.3, gate_prob=0.1)
         ],
         crossovers=[OnePointCrossover(prob=0.5)],
         processors=[
-            RemoveDuplicates(seeder),
+            # RemoveDuplicates(seeder),
             QuapsimNumericalOptimizer(
                 simulator=simulator,
                 fitness=AbsoluteUnitaryDistance(
                     params=ga_params,
                     target_unitaries=[target_unitary]
                 ),
-                rounds=5
             ),
             # GateCountFitness(),
             # WeightedSumFitness(weights=[1, 0.01])
