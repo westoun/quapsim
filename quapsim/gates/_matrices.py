@@ -4,7 +4,7 @@ import cmath
 import math
 import numpy as np
 
-I_MATRIX = np.array([[1, 0], [1, 0]], dtype=np.complex128)
+I_MATRIX = np.array([[1, 0], [0, 1]], dtype=np.complex128)
 H_MATRIX = 1.0 / (2.0**0.5) * np.array([[1, 1], [1, -1]], dtype=np.complex128)
 X_MATRIX = np.array([[0, 1], [1, 0]], dtype=np.complex128)
 Z_MATRIX = np.array([[1, 0], [0, -1]], dtype=np.complex128)
