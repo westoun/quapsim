@@ -70,7 +70,8 @@ for log_file_path in log_file_paths:
                     "simulate_without_cache": {"duration": None},
                     "mean_fitness": None,
                     "best_fitness": None,
-                    "best_circuit": None
+                    "best_circuit": None,
+                    "gate_type_dist": {}
                 })
                 new_generation = False
 
@@ -227,6 +228,23 @@ for log_file_path in log_file_paths:
                 experiment["generations"][-1]["best_circuit"] = best_circuit.group(
                     1)
                 new_generation = True
+                continue
+
+            gate_type_distribution = re.search(
+                r"Distribution of gate types: (\{.+\})", line
+            )
+            if gate_type_distribution is not None:
+                type_distribution = json.loads(
+                    gate_type_distribution.group(1).replace("'", "\""))
+
+                for gate_type in type_distribution:
+                    if gate_type in experiment["generations"][-1]["gate_type_dist"]:
+                        experiment["generations"][-1]["gate_type_dist"][gate_type].append(
+                            type_distribution[gate_type])
+                    else:
+                        experiment["generations"][-1]["gate_type_dist"][gate_type] = [
+                            type_distribution[gate_type]]
+
                 continue
 
     experiment_data.append(experiment)
