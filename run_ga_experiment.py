@@ -59,6 +59,26 @@ def construct_bell_state_dist(qubit_num: int) -> np.ndarray:
 
     return dist
 
+def log_gate_types(circuits: List[Circuit]) -> None:
+    gate_type_dict = {}
+
+    total_gate_count = 0
+
+    for circuit in circuits:
+        for gate in circuit.gates:
+            GateType = type(gate).__name__
+            if GateType in gate_type_dict:
+                gate_type_dict[GateType] += 1
+            else:
+                gate_type_dict[GateType] = 1
+
+        total_gate_count += len(circuit.gates)
+
+    for GateType in gate_type_dict:
+        gate_type_dict[GateType] = round(100 * gate_type_dict[GateType] / total_gate_count, 2)
+
+    logging.info(f"Distribution of gate types: {gate_type_dict}")
+
 
 class QuapsimSimulator(ISimulator):
     simulator: QuaPSim
@@ -67,6 +87,8 @@ class QuapsimSimulator(ISimulator):
         self.simulator = simulator
 
     def process(self, circuits: List[Circuit], generation: int) -> None:
+        log_gate_types(circuits)
+
         quapsim_circuits: List[QuapsimCircuit] = [
             ga4qc_to_quapsim(circuit) for circuit in circuits
         ]
@@ -236,6 +258,7 @@ def run_experiment(
         ancillary_qubit_num=0,
         elitism_count=5,
         gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, S, T, CS, CT, Swap]
+        # gate_set=CLIFFORD_PLUS_T + [Identity]
     )
 
     target_dist = construct_bell_state_dist(qubit_num)
@@ -258,16 +281,13 @@ def run_experiment(
         ],
         crossovers=[OnePointCrossover(prob=0.5)],
         processors=[
-            # RemoveDuplicates(seeder),
             QuapsimSimulator(simulator=simulator),
             JensenShannonFitness(
                 params=ga_params,
                 target_dists=[target_dist]
             ),
-            GateCountFitness(),
-            WeightedSumFitness(weights=[1, 0.001])
         ],
-        selection=TournamentSelection(tourn_size=2, objective_i=2),
+        selection=TournamentSelection(tourn_size=2, objective_i=0),
     )
 
     ga.on_after_generation(LogFitnessStats())
