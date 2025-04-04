@@ -59,6 +59,7 @@ def construct_bell_state_dist(qubit_num: int) -> np.ndarray:
 
     return dist
 
+
 def log_gate_types(circuits: List[Circuit]) -> None:
     gate_type_dict = {}
 
@@ -73,9 +74,6 @@ def log_gate_types(circuits: List[Circuit]) -> None:
                 gate_type_dict[GateType] = 1
 
         total_gate_count += len(circuit.gates)
-
-    for GateType in gate_type_dict:
-        gate_type_dict[GateType] = round(100 * gate_type_dict[GateType] / total_gate_count, 2)
 
     logging.info(f"Distribution of gate types: {gate_type_dict}")
 
