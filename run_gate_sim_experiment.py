@@ -38,7 +38,7 @@ for qubit_num in range(MIN_QUBITS, MAX_QUBITS + 1):
         for _ in range(EVALUATIONS_PER_SETUP):
 
             gate_configs = create_random_gate_configs(
-                gate_count=2, qubit_num=qubit_num)
+                gate_count=2, qubit_num=qubit_num, uniform_configuration_choice=False)
             circuit = build_quapsim_circuit(gate_configs, qubit_num=qubit_num)
 
             start = datetime.now()
