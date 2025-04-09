@@ -237,13 +237,7 @@ for log_file_path in log_file_paths:
                 type_distribution = json.loads(
                     gate_type_distribution.group(1).replace("'", "\""))
 
-                for gate_type in type_distribution:
-                    if gate_type in experiment["generations"][-1]["gate_type_dist"]:
-                        experiment["generations"][-1]["gate_type_dist"][gate_type].append(
-                            type_distribution[gate_type])
-                    else:
-                        experiment["generations"][-1]["gate_type_dist"][gate_type] = [
-                            type_distribution[gate_type]]
+                experiment["generations"][-1]["gate_type_dist"] = type_distribution
 
                 continue
 
