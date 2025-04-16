@@ -45,9 +45,10 @@ DOUBLE_CONTROLLED_GATES = [
     "CCZ",
 ]
 
-# Specify how many distinct parameter values each 
+# Specify how many distinct parameter values each
 # parameterized circuit can possibly take on.
-PARAMETER_AMOUNT: int = 200 
+PARAMETER_AMOUNT: int = 200
+
 
 def adjust_redundancy(
     circuits: List[QuapsimCircuit], target: float
@@ -65,11 +66,13 @@ def adjust_redundancy(
         source_circuit, target_circuit = sample(circuits, k=2)
 
         source_start_i = randint(0, len(source_circuit.gates) - 2)
-        source_end_i = randint(source_start_i + 1, min(source_start_i + max_sequence_length + 1 , len(source_circuit.gates) - 1)) + 1
+        source_end_i = randint(source_start_i + 1, min(source_start_i +
+                               max_sequence_length + 1, len(source_circuit.gates) - 1)) + 1
 
         sequence_length = source_end_i - source_start_i
 
-        target_start_i = randint(0, len(target_circuit.gates) - sequence_length)
+        target_start_i = randint(
+            0, len(target_circuit.gates) - sequence_length)
         target_end_i = target_start_i + sequence_length
 
         target_circuit.gates[target_start_i:target_end_i] = source_circuit.gates[
@@ -99,6 +102,7 @@ def create_random_gate_configs(
     gate_count: int = 10,
     qubit_num: int = 4,
     entangle_first: bool = False,
+    uniform_configuration_choice: bool = True
 ) -> List[Tuple]:
     gate_configs: List[Tuple] = []
 
@@ -120,7 +124,8 @@ def create_random_gate_configs(
     single_parameterized_gate_type_count = (
         len(SINGLE_PARAMETERIZED_GATES) * PARAMETER_AMOUNT * qubit_num
     )
-    controlled_gate_type_count = len(CONTROLLED_GATES) * qubit_num * (qubit_num - 1)
+    controlled_gate_type_count = len(
+        CONTROLLED_GATES) * qubit_num * (qubit_num - 1)
     controlled_parameterized_gate_type_count = (
         len(CONTROLLED_PARAMETERIZED_GATES)
         * PARAMETER_AMOUNT
@@ -128,7 +133,8 @@ def create_random_gate_configs(
         * (qubit_num - 1)
     )
     double_controlled_gate_type_count = (
-        len(DOUBLE_CONTROLLED_GATES) * qubit_num * (qubit_num - 1) * (qubit_num - 2)
+        len(DOUBLE_CONTROLLED_GATES) * qubit_num *
+        (qubit_num - 1) * (qubit_num - 2)
     )
 
     # The amount of unique gate configurations
@@ -148,27 +154,35 @@ def create_random_gate_configs(
         )
         create_random_gate_configs._logged_total = True
 
-    # First pick a gate set based on the amount of unique
-    # gate types within the set in relation to the total amount
-    # of gate types. Then, within a set, each gate type occurrs
-    # equally often.
-    candidate_sets: List[List[str]] = choices(
-        population=[
-            SINGLE_GATES,
-            SINGLE_PARAMETERIZED_GATES,
-            CONTROLLED_GATES,
-            CONTROLLED_PARAMETERIZED_GATES,
-            DOUBLE_CONTROLLED_GATES,
-        ],
-        weights=[
-            single_gate_type_count / total_gate_type_count,
-            single_parameterized_gate_type_count / total_gate_type_count,
-            controlled_gate_type_count / total_gate_type_count,
-            controlled_parameterized_gate_type_count / total_gate_type_count,
-            double_controlled_gate_type_count / total_gate_type_count,
-        ],
-        k=gate_count - existing_gates,
-    )
+    if uniform_configuration_choice:
+        # First pick a gate set based on the amount of unique
+        # gate types within the set in relation to the total amount
+        # of gate types. Then, within a set, each gate type occurrs
+        # equally often.
+        candidate_sets: List[List[str]] = choices(
+            population=[
+                SINGLE_GATES,
+                SINGLE_PARAMETERIZED_GATES,
+                CONTROLLED_GATES,
+                CONTROLLED_PARAMETERIZED_GATES,
+                DOUBLE_CONTROLLED_GATES,
+            ],
+            weights=[
+                single_gate_type_count / total_gate_type_count,
+                single_parameterized_gate_type_count / total_gate_type_count,
+                controlled_gate_type_count / total_gate_type_count,
+                controlled_parameterized_gate_type_count / total_gate_type_count,
+                double_controlled_gate_type_count / total_gate_type_count,
+            ],
+            k=gate_count - existing_gates,
+        )
+    else:
+        full_gate_set = SINGLE_GATES + SINGLE_PARAMETERIZED_GATES + \
+            CONTROLLED_GATES + CONTROLLED_PARAMETERIZED_GATES + DOUBLE_CONTROLLED_GATES
+        candidate_sets: List[List[str]] = [
+            full_gate_set
+            for _ in range(gate_count - existing_gates)
+        ]
 
     for gate_set in candidate_sets:
         gate_type = choice(gate_set)
@@ -220,51 +234,62 @@ def create_random_gate_configs(
         elif gate_type == "RX":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
         elif gate_type == "RY":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
         elif gate_type == "RZ":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
         elif gate_type == "CRX":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
-            gate_configs.append((gate_type, control_qubit, target_qubit, theta))
+            gate_configs.append(
+                (gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CRY":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
-            gate_configs.append((gate_type, control_qubit, target_qubit, theta))
+            gate_configs.append(
+                (gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CPhase":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
-            gate_configs.append((gate_type, control_qubit, target_qubit, theta))
+            gate_configs.append(
+                (gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CRZ":
             target_qubit, control_qubit = sample(range(0, qubit_num), 2)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
-            gate_configs.append((gate_type, control_qubit, target_qubit, theta))
+            gate_configs.append(
+                (gate_type, control_qubit, target_qubit, theta))
 
         elif gate_type == "CCX":
             target_qubit, control_qubit1, control_qubit2 = sample(
@@ -287,7 +312,8 @@ def create_random_gate_configs(
         elif gate_type == "PHASE":
             target_qubit = randint(0, qubit_num - 1)
 
-            theta = randint(0, PARAMETER_AMOUNT - 1) * (4 * np.pi) / (PARAMETER_AMOUNT)
+            theta = randint(0, PARAMETER_AMOUNT - 1) * \
+                (4 * np.pi) / (PARAMETER_AMOUNT)
 
             gate_configs.append((gate_type, target_qubit, theta))
 
@@ -370,7 +396,8 @@ def build_quasim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuasimCir
                 gate_config[2],
                 gate_config[3],
             )
-            quasim_circuit.apply(QuasimGates.CRX(control_qubit, target_qubit, theta))
+            quasim_circuit.apply(QuasimGates.CRX(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CRY":
             control_qubit, target_qubit, theta = (
@@ -378,7 +405,8 @@ def build_quasim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuasimCir
                 gate_config[2],
                 gate_config[3],
             )
-            quasim_circuit.apply(QuasimGates.CRY(control_qubit, target_qubit, theta))
+            quasim_circuit.apply(QuasimGates.CRY(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CPhase":
             control_qubit, target_qubit, theta = (
@@ -386,7 +414,8 @@ def build_quasim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuasimCir
                 gate_config[2],
                 gate_config[3],
             )
-            quasim_circuit.apply(QuasimGates.CPhase(control_qubit, target_qubit, theta))
+            quasim_circuit.apply(QuasimGates.CPhase(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CRZ":
             control_qubit, target_qubit, theta = (
@@ -394,7 +423,8 @@ def build_quasim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuasimCir
                 gate_config[2],
                 gate_config[3],
             )
-            quasim_circuit.apply(QuasimGates.CRZ(control_qubit, target_qubit, theta))
+            quasim_circuit.apply(QuasimGates.CRZ(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CCX":
             control_qubit1, control_qubit2, target_qubit = (
@@ -498,7 +528,8 @@ def build_quapsim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuapsimC
                 gate_config[2],
                 gate_config[3],
             )
-            quapsim_circuit.apply(QuapsimGates.CRX(control_qubit, target_qubit, theta))
+            quapsim_circuit.apply(QuapsimGates.CRX(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CRY":
             control_qubit, target_qubit, theta = (
@@ -506,7 +537,8 @@ def build_quapsim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuapsimC
                 gate_config[2],
                 gate_config[3],
             )
-            quapsim_circuit.apply(QuapsimGates.CRY(control_qubit, target_qubit, theta))
+            quapsim_circuit.apply(QuapsimGates.CRY(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CPhase":
             control_qubit, target_qubit, theta = (
@@ -524,7 +556,8 @@ def build_quapsim_circuit(gate_configs: List[Tuple], qubit_num: int) -> QuapsimC
                 gate_config[2],
                 gate_config[3],
             )
-            quapsim_circuit.apply(QuapsimGates.CRZ(control_qubit, target_qubit, theta))
+            quapsim_circuit.apply(QuapsimGates.CRZ(
+                control_qubit, target_qubit, theta))
 
         elif gate_type == "CCX":
             control_qubit1, control_qubit2, target_qubit = (

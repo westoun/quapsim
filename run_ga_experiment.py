@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import click
+from datetime import datetime
+from functools import partial
 import logging
 import numpy as np
 import random
+from scipy.optimize import minimize, OptimizeResult
+from typing import List, Tuple
 from uuid import uuid4
-from typing import List
 
 from ga4qc.ga import GA
 from ga4qc.seeder import RandomSeeder
@@ -15,16 +18,26 @@ from ga4qc.callback import (
     BestCircuitCallback,
     UniqueCircuitCountCallback,
 )
+from ga4qc.circuit import Circuit, update_params, extract_params
 from ga4qc.processors import (
+    IFitness,
     JensenShannonFitness,
-    ISimulator
+    ISimulator,
+    AbsoluteUnitaryDistance,
+    WilliamsRankingFitness,
+    WeightedSumFitness,
+    RemoveDuplicates,
+    ICircuitProcessor,
+    GateCountFitness,
+    NumericalOptimizer
 )
 from ga4qc.mutation import RandomGateMutation, ParameterChangeMutation
 from ga4qc.crossover import OnePointCrossover
 from ga4qc.selection import ISelection, TournamentSelection
 from ga4qc.circuit import Circuit
-from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, CZ, CCX, \
-    Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ
+from ga4qc.circuit.gates import Identity, CX, CS, CT, S, T, H, X, RX, CCZ, CZ, CCX, \
+    Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ, \
+    CLIFFORD_PLUS_T, Phase, IOptimizableGate, Swap
 from ga4qc.params import GAParams
 
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
@@ -36,43 +49,64 @@ from benchmark.utils import (
 )
 
 
-def construct_oracle_circuit(target_state: List[int]) -> List[IGate]:
-    # 4 qubits => 3 ancillas
+def construct_bell_state_dist(qubit_num: int) -> np.ndarray:
+    dim = 2 ** qubit_num
 
-    circuit = []
+    dist = np.zeros(dim)
 
-    for i, qubit_state in enumerate(target_state):
-        if qubit_state == 0:
-            circuit.append(X(i))
+    dist[0] = 0.5
+    dist[dim - 1] = 0.5
 
-    circuit.append(CCX(0, 1, 4))
-    circuit.append(CCX(2, 3, 5))
-    circuit.append(CCX(4, 5, 6))
-    circuit.append(CZ(6, 0))
-    circuit.append(CCX(4, 5, 6))
-    circuit.append(CCX(2, 3, 5))
-    circuit.append(CCX(0, 1, 4))
-
-    for i, qubit_state in enumerate(target_state):
-        if qubit_state == 0:
-            circuit.append(X(i))
-
-    return circuit
+    return dist
 
 
-def state_to_distribution(target_state: List[int]) -> List[float]:
-    vectors = []
-    for qubit_state in target_state:
-        if qubit_state == 0:
-            vectors.append([1, 0])
+def log_gate_types(circuits: List[Circuit]) -> None:
+    gate_type_dict = {}
+
+    total_gate_count = 0
+
+    for circuit in circuits:
+        for gate in circuit.gates:
+            GateType = type(gate).__name__
+            if GateType in gate_type_dict:
+                gate_type_dict[GateType] += 1
+            else:
+                gate_type_dict[GateType] = 1
+
+        total_gate_count += len(circuit.gates)
+
+    logging.info(f"Distribution of gate types: {gate_type_dict}")
+
+
+class QuapsimSimulator(ISimulator):
+    simulator: QuaPSim
+
+    def __init__(self, simulator: QuaPSim):
+        self.simulator = simulator
+
+    def process(self, circuits: List[Circuit], generation: int) -> None:
+        log_gate_types(circuits)
+
+        quapsim_circuits: List[QuapsimCircuit] = [
+            ga4qc_to_quapsim(circuit) for circuit in circuits
+        ]
+
+        logging.info(
+            f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
+        )
+
+        if self.simulator.params.cache_size > 0:
+            self.simulator.build_cache(quapsim_circuits)
+
+        if self.simulator.params.cache_size > 0:
+            self.simulator.simulate_using_cache(
+                quapsim_circuits, set_unitary=True)
         else:
-            vectors.append([0, 1])
+            self.simulator.simulate_without_cache(
+                quapsim_circuits, set_unitary=True)
 
-    distribution = vectors[0]
-    for vector in vectors[1:]:
-        distribution = np.kron(distribution, vector)
-
-    return distribution.tolist()
+        for circuit, quapsim_circuit in zip(circuits, quapsim_circuits):
+            circuit.unitaries = [quapsim_circuit.unitary]
 
 
 class LogFitnessStats(FitnessStatsCallback):
@@ -91,24 +125,14 @@ class LogBestCircuit(BestCircuitCallback):
             f"Best circuit at generation {generation}: {circuits[0]}")
 
 
-def ga4qc_to_quapsim(circuit: Circuit) -> List[QuapsimCircuit]:
-    quapsim_circuits = []
+def ga4qc_to_quapsim(circuit: Circuit) -> QuapsimCircuit:
+    quapsim_circuit = QuapsimCircuit(circuit.qubit_num)
 
-    for case_i in range(circuit.case_count):
-        quapsim_circuit = QuapsimCircuit(circuit.qubit_num)
+    for gate in circuit.gates:
+        quapsim_gate = get_quapsim_gate(gate)
+        quapsim_circuit.apply(quapsim_gate)
 
-        for gate in circuit.gates:
-            if type(gate) is Oracle:
-                for gate_ in gate.get_gates(case_i):
-                    quapsim_gate = get_quapsim_gate(gate_)
-                    quapsim_circuit.apply(quapsim_gate)
-            else:
-                quapsim_gate = get_quapsim_gate(gate)
-                quapsim_circuit.apply(quapsim_gate)
-
-        quapsim_circuits.append(quapsim_circuit)
-
-    return quapsim_circuits
+    return quapsim_circuit
 
 
 def get_quapsim_gate(gate: IGate) -> QuapsimGate:
@@ -126,6 +150,8 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         return quapsim.gates.RY(gate.target, gate.theta)
     elif type(gate) is RZ:
         return quapsim.gates.RZ(gate.target, gate.theta)
+    elif type(gate) is Phase:
+        return quapsim.gates.Phase(gate.target, gate.theta)
     elif type(gate) is CRX:
         return quapsim.gates.CRX(control_qubit=gate.controll, target_qubit=gate.target, theta=gate.theta)
     elif type(gate) is CRY:
@@ -136,8 +162,14 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         return quapsim.gates.CX(control_qubit=gate.controll, target_qubit=gate.target)
     elif type(gate) is CZ:
         return quapsim.gates.CZ(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is Swap:
+        return quapsim.gates.Swap(qubit1=gate.target1, qubit2=gate.target2)
     elif type(gate) is CY:
         return quapsim.gates.CY(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is CS:
+        return quapsim.gates.CS(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is CT:
+        return quapsim.gates.CT(control_qubit=gate.controll, target_qubit=gate.target)
     elif type(gate) is CCZ:
         return quapsim.gates.CCZ(
             control_qubit1=gate.controll1,
@@ -155,58 +187,12 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
     elif type(gate) is T:
         return quapsim.gates.T(gate.target)
     elif type(gate) is Identity:
-        # Workaround because quapsim does not implement an identity
-        # gate as of now.
-        return quapsim.gates.Phase(gate.target, theta=2 * np.pi)
+        return quapsim.gates.Identity(gate.target)
     else:
         raise NotImplementedError(
             f"The gate of type {type(gate)} does not "
             "have a corresponding mapping in quapsim specified."
         )
-
-
-class QuapsimSimulator(ISimulator):
-    simulator: QuaPSim
-
-    def __init__(self, simulator: QuaPSim):
-        self.simulator = simulator
-
-    def process(self, circuits: List[Circuit], generation: int) -> None:
-        quapsim_circuits: List[QuapsimCircuit] = []
-        states_per_circuit: List[int] = []
-
-        for circuit in circuits:
-            flattened_circuits: List[QuapsimCircuit] = ga4qc_to_quapsim(
-                circuit)
-
-            quapsim_circuits.extend(flattened_circuits)
-            states_per_circuit.append(len(flattened_circuits))
-
-        # GA4QC starts counting at 1.
-        if (generation - 1) % 5 == 0 and self.simulator.params.cache_size > 0:
-            self.simulator.build_cache(quapsim_circuits)
-
-        logging.info(
-            f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
-        )
-
-        if self.simulator.params.cache_size > 0:
-            self.simulator.simulate_using_cache(
-                quapsim_circuits, set_unitary=True)
-        else:
-            self.simulator.simulate_without_cache(
-                quapsim_circuits, set_unitary=True)
-
-        for circuit in circuits:
-            circuit.unitaries = []
-
-            states_count = states_per_circuit.pop(0)
-
-            sel_quapsim_circuits = quapsim_circuits[:states_count]
-            quapsim_circuits = quapsim_circuits[states_count:]
-
-            for quapsim_circuit in sel_quapsim_circuits:
-                circuit.unitaries.append(quapsim_circuit.unitary)
 
 
 @click.command()
@@ -215,12 +201,6 @@ class QuapsimSimulator(ISimulator):
     "-cs",
     type=click.INT,
     help="The amount of unitaries stored in the cache.",
-)
-@click.option(
-    "--reordering-steps",
-    "-rs",
-    type=click.INT,
-    help="The amount of reordering steps used per circuit.",
 )
 @click.option(
     "--merging-rounds",
@@ -244,7 +224,6 @@ class QuapsimSimulator(ISimulator):
 )
 def run_experiment(
     cache_size,
-    reordering_steps,
     merging_rounds,
     seed,
     tag,
@@ -263,57 +242,32 @@ def run_experiment(
     params = SimulatorParams(
         processes=1,
         cache_size=cache_size,
-        reordering_steps=reordering_steps,
         merging_rounds=merging_rounds,
     )
     simulator = QuaPSim(params, cache)
 
+    qubit_num = 9
+
     ga_params = GAParams(
-        population_size=500,
-        chromosome_length=50,
+        population_size=1000,
+        chromosome_length=15,
         generations=200,
-        qubit_num=7,
-        ancillary_qubit_num=3,
-        elitism_count=50,
-        gate_set=[H, CX, T, S, CZ, Z, X, Y, CY, CCX, CCZ, Identity,
-                  RX, RY, RZ, CRX, CRY, CRZ]
+        qubit_num=qubit_num,
+        ancillary_qubit_num=0,
+        elitism_count=5,
+        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, S, T, CS, CT, Swap]
+        # gate_set=CLIFFORD_PLUS_T + [Identity]
     )
+
+    target_dist = construct_bell_state_dist(qubit_num)
 
     logging.info(
         (
-            f"Starting experiment with cache_size={cache_size}, reordering_steps={reordering_steps}, "
+            f"Starting experiment with cache_size={cache_size}, "
             f"merging_rounds={merging_rounds}, seed={seed}, tag={tag}, population_size={ga_params.population_size}, "
             f"generations={ga_params.generations}, chromosome_length={ga_params.chromosome_length}"
         )
     )
-
-    target_states = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 1],
-        [0, 0, 1, 0],
-        [0, 0, 1, 1],
-        [0, 1, 0, 0],
-        [0, 1, 0, 1],
-        [0, 1, 1, 0],
-        [0, 1, 1, 1],
-        [1, 0, 0, 0],
-        [1, 0, 0, 1],
-        [1, 0, 1, 0],
-        [1, 0, 1, 1],
-        [1, 1, 0, 0],
-        [1, 1, 0, 1],
-        [1, 1, 1, 0],
-        [1, 1, 1, 1],
-    ]
-    target_dists = [state_to_distribution(state) for state in target_states]
-
-    GroverOracle = OracleConstructor(
-        sub_circuits=[
-            construct_oracle_circuit(state) for state in target_states
-        ],
-        name="Oracle"
-    )
-    ga_params.gate_set.append(GroverOracle)
 
     seeder = RandomSeeder(ga_params)
 
@@ -321,16 +275,17 @@ def run_experiment(
         seeder=seeder,
         mutations=[
             RandomGateMutation(ga_params,
-                               circ_prob=1, gate_prob=0.05)
+                               circ_prob=0.3, gate_prob=0.1)
         ],
-        crossovers=[OnePointCrossover()],
+        crossovers=[OnePointCrossover(prob=0.5)],
         processors=[
-            QuapsimSimulator(simulator),
-            JensenShannonFitness(params=ga_params,
-                                 target_dists=target_dists,
-                                 ),
+            QuapsimSimulator(simulator=simulator),
+            JensenShannonFitness(
+                params=ga_params,
+                target_dists=[target_dist]
+            ),
         ],
-        selection=TournamentSelection(tourn_size=2),
+        selection=TournamentSelection(tourn_size=2, objective_i=0),
     )
 
     ga.on_after_generation(LogFitnessStats())

@@ -35,7 +35,6 @@ for log_file_path in log_file_paths:
             "qubit_num": None,
             "redundancy": None,
             "cache_size": None,
-            "reordering_steps": None,
             "merging_rounds": None,
             "seed": None,
             "tag": None,
@@ -76,7 +75,7 @@ for log_file_path in log_file_paths:
                 timestamp = " ".join(line.split(" ")[:2])
 
                 experiment_setup = re.search(
-                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), reordering_steps=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None)",
+                    r"circuit_count=([0-9]+), gate_count=([0-9]+), qubit_num=([0-9]+), redundancy=([0-9\.]+|None), cache_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None)",
                     line,
                 )
 
@@ -85,10 +84,9 @@ for log_file_path in log_file_paths:
                 qubit_num = experiment_setup.group(3)
                 redundancy = experiment_setup.group(4)
                 cache_size = experiment_setup.group(5)
-                reordering_steps = experiment_setup.group(6)
-                merging_rounds = experiment_setup.group(7)
-                seed = experiment_setup.group(8)
-                tag = experiment_setup.group(9)
+                merging_rounds = experiment_setup.group(6)
+                seed = experiment_setup.group(7)
+                tag = experiment_setup.group(8)
 
                 experiment["started_at"] = timestamp
 
@@ -100,8 +98,6 @@ for log_file_path in log_file_paths:
                     experiment["params"]["redundancy"] = float(redundancy)
 
                 experiment["params"]["cache_size"] = int(cache_size)
-                experiment["params"]["reordering_steps"] = int(
-                    reordering_steps)
                 experiment["params"]["merging_rounds"] = int(merging_rounds)
 
                 if seed != "None":

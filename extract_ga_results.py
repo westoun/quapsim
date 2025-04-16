@@ -31,7 +31,6 @@ for log_file_path in log_file_paths:
         "started_at": None,
         "params": {
             "cache_size": None,
-            "reordering_steps": None,
             "merging_rounds": None,
             "seed": None,
             "tag": None,
@@ -71,31 +70,29 @@ for log_file_path in log_file_paths:
                     "simulate_without_cache": {"duration": None},
                     "mean_fitness": None,
                     "best_fitness": None,
-                    "best_circuit": None
+                    "best_circuit": None,
+                    "gate_type_dist": {}
                 })
                 new_generation = False
 
             experiment_setup = re.search(
-                r"cache_size=([0-9]+), reordering_steps=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None), population_size=([0-9]+), generations=([0-9]+), chromosome_length=([0-9]+)",
+                r"cache_size=([0-9]+), merging_rounds=([0-9]+), seed=([0-9]+|None), tag=([a-zA-Z_\-]+|None), population_size=([0-9]+), generations=([0-9]+), chromosome_length=([0-9]+)",
                 line,
             )
             if experiment_setup is not None:
                 timestamp = " ".join(line.split(" ")[:2])
 
                 cache_size = experiment_setup.group(1)
-                reordering_steps = experiment_setup.group(2)
-                merging_rounds = experiment_setup.group(3)
-                seed = experiment_setup.group(4)
-                tag = experiment_setup.group(5)
-                population_size = experiment_setup.group(6)
-                generations = experiment_setup.group(7)
-                chromosome_length = experiment_setup.group(8)
+                merging_rounds = experiment_setup.group(2)
+                seed = experiment_setup.group(3)
+                tag = experiment_setup.group(4)
+                population_size = experiment_setup.group(5)
+                generations = experiment_setup.group(6)
+                chromosome_length = experiment_setup.group(7)
 
                 experiment["started_at"] = timestamp
 
                 experiment["params"]["cache_size"] = int(cache_size)
-                experiment["params"]["reordering_steps"] = int(
-                    reordering_steps)
                 experiment["params"]["merging_rounds"] = int(merging_rounds)
                 experiment["params"]["population_size"] = int(population_size)
                 experiment["params"]["generations"] = int(generations)
@@ -231,6 +228,17 @@ for log_file_path in log_file_paths:
                 experiment["generations"][-1]["best_circuit"] = best_circuit.group(
                     1)
                 new_generation = True
+                continue
+
+            gate_type_distribution = re.search(
+                r"Distribution of gate types: (\{.+\})", line
+            )
+            if gate_type_distribution is not None:
+                type_distribution = json.loads(
+                    gate_type_distribution.group(1).replace("'", "\""))
+
+                experiment["generations"][-1]["gate_type_dist"] = type_distribution
+
                 continue
 
     experiment_data.append(experiment)

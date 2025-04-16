@@ -10,6 +10,7 @@ from ._matrices import (
     Y_MATRIX,
     S_MATRIX,
     Z_MATRIX,
+    T_MATRIX,
     RX_MATRIX,
     RY_MATRIX,
     RZ_MATRIX,
@@ -56,6 +57,16 @@ class CS(CGate):
     """
 
     matrix: np.ndarray = S_MATRIX
+
+
+class CT(CGate):
+    """Controlled T gate.
+
+    Applies the T gate to the target_qubit
+    if the control_qubit is in a state of |1>.
+    """
+
+    matrix: np.ndarray = T_MATRIX
 
 
 class CX(CGate):

@@ -5,6 +5,7 @@ from typing import List
 
 from .interface import IGate
 from ._matrices import (
+    I_MATRIX,
     H_MATRIX,
     X_MATRIX,
     Y_MATRIX,
@@ -36,12 +37,19 @@ class Gate(IGate):
         return f"{gate_name}(target={self.target_qubit})"
 
 
+class Identity(Gate):
+    """Identity gate."""
+
+    matrix: np.ndarray = I_MATRIX
+
+
 class S(Gate):
     """S gate.
 
     Introduces a phase of pi/2."""
 
     matrix: np.ndarray = S_MATRIX
+
 
 class T(Gate):
     """T gate.

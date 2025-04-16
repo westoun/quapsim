@@ -12,7 +12,6 @@ from .params import SimulatorParams, DEFAULT_PARAMS
 from quapsim.cache import ICache
 
 from .utils import (
-    GateFrequencyDict,
     log_duration,
     NGram,
     compute_potential_gain,
@@ -58,158 +57,26 @@ class QuaPSim:
     @log_duration
     def build_cache(self, circuits: List[Circuit]) -> None:
         logging.info(f"Starting to build cache.")
+        self.cache.reset()
 
         qubit_num = circuits[0].qubit_num
 
-        gate_frequency_dict = self._build_gate_frequency_dict(circuits)
-
-        self._optimize_gate_order(circuits, gate_frequency_dict)
-
-        ngrams = self._generate_seed_bigrams(circuits, gate_frequency_dict)
+        ngrams = self._generate_seed_bigrams(circuits)
         ngrams = self._consolidate_ngrams(ngrams)
         ngrams = self._select_ngrams_to_cache(ngrams)
 
         self._fill_cache(ngrams, qubit_num)
 
     @log_duration
-    def _build_gate_frequency_dict(self, circuits: List[Circuit]) -> GateFrequencyDict:
-        return GateFrequencyDict().index(circuits)
-
-    @log_duration
-    def _optimize_gate_order(
-        self, circuits: List[Circuit], gate_frequency_dict: GateFrequencyDict
-    ) -> None:
-        if self.params.reordering_steps == 0:
-            return
-
-        logging.debug(
-            f"Population redundancy before optimization {compute_redundancy(circuits)}."
-        )
-
-        for circuit in circuits:
-            frequency_values = np.array(
-                [gate_frequency_dict[gate] for gate in circuit.gates]
-            )
-            order = frequency_values.argsort()
-            ranks = order.argsort()
-
-            # Cast back to list to simplify reordering operations
-            # later on.
-            frequency_values: List = frequency_values.tolist()
-            ranks: List = ranks.tolist()
-
-            for i in range(self.params.reordering_steps):
-
-                if i > len(circuit.gates) - 1:
-                    logging.warning(
-                        f"More reordering steps have been specified than "
-                        f"gates contained in the current circuit ({self.params.reordering_steps} vs {len(circuit.gates)}). "
-                        "Skipping remaining steps."
-                    )
-                    break
-
-                current_idx = ranks.index(len(circuit.gates) - 1 - i)
-                current_gate = circuit.gates[current_idx]
-
-                # determine left index of beam
-                left_beam_idx = 0
-                for left_idx in reversed(range(current_idx)):
-                    comparison_gate = circuit.gates[left_idx]
-
-                    if (
-                        len(
-                            [
-                                qubit
-                                for qubit in current_gate.qubits
-                                if qubit in comparison_gate.qubits
-                            ]
-                        )
-                        > 0
-                    ):
-                        left_beam_idx = left_idx
-                        break
-
-                # determine right index of beam
-                right_beam_idx = len(circuit.gates) - 1
-                for j in reversed(range(len(circuit.gates) - current_idx - 1)):
-                    right_idx = len(circuit.gates) - 1 - j
-
-                    comparison_gate = circuit.gates[right_idx]
-
-                    if (
-                        len(
-                            [
-                                qubit
-                                for qubit in current_gate.qubits
-                                if qubit in comparison_gate.qubits
-                            ]
-                        )
-                        > 0
-                    ):
-                        right_beam_idx = right_idx + 1
-                        break
-
-                # select next highest frequ gate
-                current_frequency = gate_frequency_dict[current_gate]
-
-                min_frequency_distance = np.inf
-                min_frequency_idx = None
-
-                for comparison_idx in range(left_beam_idx, right_beam_idx):
-                    if comparison_idx == current_idx:
-                        continue
-
-                    frequency_distance = abs(
-                        current_frequency - frequency_values[comparison_idx]
-                    )
-
-                    if frequency_distance < min_frequency_distance:
-                        min_frequency_distance = frequency_distance
-                        min_frequency_idx = comparison_idx
-
-                # update gate order
-                if min_frequency_idx is None:
-                    continue
-
-                if min_frequency_idx < current_idx:
-                    circuit.gates.insert(
-                        min_frequency_idx + 1, circuit.gates.pop(current_idx)
-                    )
-                    frequency_values.insert(
-                        min_frequency_idx +
-                        1, frequency_values.pop(current_idx)
-                    )
-                    ranks.insert(min_frequency_idx + 1, ranks.pop(current_idx))
-                else:
-                    circuit.gates.insert(
-                        min_frequency_idx - 1, circuit.gates.pop(current_idx)
-                    )
-                    frequency_values.insert(
-                        min_frequency_idx -
-                        1, frequency_values.pop(current_idx)
-                    )
-                    ranks.insert(min_frequency_idx - 1, ranks.pop(current_idx))
-
-        logging.debug(
-            f"Population redundancy after optimization {compute_redundancy(circuits)}."
-        )
-
-    @log_duration
     def _generate_seed_bigrams(
         self,
         circuits: List[Circuit],
-        gate_frequency_dict: GateFrequencyDict,
     ) -> List[NGram]:
         bigrams: Dict = {}
         for document_id, circuit in enumerate(circuits):
             for location in range(len(circuit.gates) - 1):
                 gate = circuit.gates[location]
                 successor_gate = circuit.gates[location + 1]
-                if (
-                    gate_frequency_dict[gate] < 2
-                    or gate_frequency_dict[successor_gate] < 2
-                ):
-                    continue
 
                 key = f"{gate.__repr__()}_{successor_gate.__repr__()}"
 
