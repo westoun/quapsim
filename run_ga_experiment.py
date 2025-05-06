@@ -1,41 +1,31 @@
 #!/usr/bin/env python3
 
 import click
-from datetime import datetime
-from functools import partial
 import logging
 import numpy as np
+import numpy as np
 import random
-from scipy.optimize import minimize, OptimizeResult
-from typing import List, Tuple
+from random import choice
+from typing import List, Tuple, Union, Type
 from uuid import uuid4
 
 from ga4qc.ga import GA
-from ga4qc.seeder import RandomSeeder
+from ga4qc.seeder import RandomSeeder, ISeeder
 from ga4qc.callback import (
     ICallback,
     FitnessStatsCallback,
     BestCircuitCallback,
     UniqueCircuitCountCallback,
 )
-from ga4qc.circuit import Circuit, update_params, extract_params
+from ga4qc.circuit import Circuit
 from ga4qc.processors import (
-    IFitness,
-    JensenShannonFitness,
     ISimulator,
-    AbsoluteUnitaryDistance,
-    WilliamsRankingFitness,
-    WeightedSumFitness,
-    RemoveDuplicates,
-    ICircuitProcessor,
-    GateCountFitness,
-    NumericalOptimizer
+    AbsoluteUnitaryDistance
 )
-from ga4qc.mutation import RandomGateMutation, ParameterChangeMutation
+from ga4qc.mutation import RandomGateMutation, ParameterChangeMutation, IMutation
 from ga4qc.crossover import OnePointCrossover
 from ga4qc.selection import ISelection, TournamentSelection
-from ga4qc.circuit import Circuit
-from ga4qc.circuit.gates import Identity, CX, CS, CT, S, T, H, X, RX, CCZ, CZ, CCX, \
+from ga4qc.circuit.gates import Identity, CX, S, T, H, X, RX, CCZ, CZ, CCX, \
     Z, Y, IGate, OracleConstructor, Oracle, CY, RY, RZ, CRX, CRY, CRZ, \
     CLIFFORD_PLUS_T, Phase, IOptimizableGate, Swap
 from ga4qc.params import GAParams
@@ -47,17 +37,6 @@ import quapsim.gates
 from benchmark.utils import (
     compute_redundancy,
 )
-
-
-def construct_bell_state_dist(qubit_num: int) -> np.ndarray:
-    dim = 2 ** qubit_num
-
-    dist = np.zeros(dim)
-
-    dist[0] = 0.5
-    dist[dim - 1] = 0.5
-
-    return dist
 
 
 def log_gate_types(circuits: List[Circuit]) -> None:
@@ -77,36 +56,58 @@ def log_gate_types(circuits: List[Circuit]) -> None:
 
     logging.info(f"Distribution of gate types: {gate_type_dict}")
 
+# Class will be added in future version of ga4qc.
 
-class QuapsimSimulator(ISimulator):
-    simulator: QuaPSim
 
-    def __init__(self, simulator: QuaPSim):
-        self.simulator = simulator
+class CPhase(IOptimizableGate):
+    controll: int
+    target: int
+    theta: float
 
-    def process(self, circuits: List[Circuit], generation: int) -> None:
-        log_gate_types(circuits)
+    def __init__(self, controll: int = 0, target: int = 1, theta: float = 0.0):
+        self.controll = controll
+        self.target = target
+        self.theta = theta
 
-        quapsim_circuits: List[QuapsimCircuit] = [
-            ga4qc_to_quapsim(circuit) for circuit in circuits
-        ]
+    def randomize(self, qubit_num: int) -> IGate:
+        assert (
+            qubit_num > 1
+        ), "The CPhase Gate requires at least 2 qubits to operate as intended."
 
-        logging.info(
-            f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
-        )
+        self.target, self.controll = random.sample(range(0, qubit_num), 2)
 
-        if self.simulator.params.cache_size > 0:
-            self.simulator.build_cache(quapsim_circuits)
+        # Choose theta randomly, since theta = 0 is often a stationary
+        # point and fails numerical optimizers to progress.
+        self.theta = random.random() * 2 * np.pi - np.pi
 
-        if self.simulator.params.cache_size > 0:
-            self.simulator.simulate_using_cache(
-                quapsim_circuits, set_unitary=True)
-        else:
-            self.simulator.simulate_without_cache(
-                quapsim_circuits, set_unitary=True)
+        return self
 
-        for circuit, quapsim_circuit in zip(circuits, quapsim_circuits):
-            circuit.unitaries = [quapsim_circuit.unitary]
+    @property
+    def params(self) -> List[float]:
+        return [self.theta]
+
+    def set_params(self, params: List[float]) -> None:
+        assert len(params) == 1, "The CPhase gate requires exactly one parameter!"
+
+        self.theta = params[0]
+
+    def __repr__(self):
+        return f"CPhase(control={self.controll}, target={self.target}, theta={round(self.theta, 3)})"
+
+
+def create_qft_unitary(qubit_num: int) -> np.ndarray:
+    dim = 2 ** qubit_num
+
+    dft_matrix = np.zeros((dim, dim), dtype=np.complex128)
+
+    w = np.pow(np.e, 2 * np.pi * 1j / dim)
+
+    for i in range(dim):
+        for j in range(dim):
+            dft_matrix[i, j] = np.pow(w, i * j)
+
+    unitary = 1 / np.pow(dim, 0.5) * dft_matrix
+    return unitary
 
 
 class LogFitnessStats(FitnessStatsCallback):
@@ -125,16 +126,6 @@ class LogBestCircuit(BestCircuitCallback):
             f"Best circuit at generation {generation}: {circuits[0]}")
 
 
-def ga4qc_to_quapsim(circuit: Circuit) -> QuapsimCircuit:
-    quapsim_circuit = QuapsimCircuit(circuit.qubit_num)
-
-    for gate in circuit.gates:
-        quapsim_gate = get_quapsim_gate(gate)
-        quapsim_circuit.apply(quapsim_gate)
-
-    return quapsim_circuit
-
-
 def get_quapsim_gate(gate: IGate) -> QuapsimGate:
     if type(gate) is X:
         return quapsim.gates.X(gate.target)
@@ -150,8 +141,6 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         return quapsim.gates.RY(gate.target, gate.theta)
     elif type(gate) is RZ:
         return quapsim.gates.RZ(gate.target, gate.theta)
-    elif type(gate) is Phase:
-        return quapsim.gates.Phase(gate.target, gate.theta)
     elif type(gate) is CRX:
         return quapsim.gates.CRX(control_qubit=gate.controll, target_qubit=gate.target, theta=gate.theta)
     elif type(gate) is CRY:
@@ -162,14 +151,10 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         return quapsim.gates.CX(control_qubit=gate.controll, target_qubit=gate.target)
     elif type(gate) is CZ:
         return quapsim.gates.CZ(control_qubit=gate.controll, target_qubit=gate.target)
-    elif type(gate) is Swap:
-        return quapsim.gates.Swap(qubit1=gate.target1, qubit2=gate.target2)
     elif type(gate) is CY:
         return quapsim.gates.CY(control_qubit=gate.controll, target_qubit=gate.target)
-    elif type(gate) is CS:
-        return quapsim.gates.CS(control_qubit=gate.controll, target_qubit=gate.target)
-    elif type(gate) is CT:
-        return quapsim.gates.CT(control_qubit=gate.controll, target_qubit=gate.target)
+    elif type(gate) is Swap:
+        return quapsim.gates.Swap(qubit1=gate.target1, qubit2=gate.target2)
     elif type(gate) is CCZ:
         return quapsim.gates.CCZ(
             control_qubit1=gate.controll1,
@@ -184,6 +169,10 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
         )
     elif type(gate) is S:
         return quapsim.gates.S(gate.target)
+    elif type(gate) is Phase:
+        return quapsim.gates.Phase(gate.target, gate.theta)
+    elif type(gate) is CPhase:
+        return quapsim.gates.CPhase(gate.controll, gate.target, gate.theta)
     elif type(gate) is T:
         return quapsim.gates.T(gate.target)
     elif type(gate) is Identity:
@@ -193,6 +182,111 @@ def get_quapsim_gate(gate: IGate) -> QuapsimGate:
             f"The gate of type {type(gate)} does not "
             "have a corresponding mapping in quapsim specified."
         )
+
+
+class QuapsimSimulator(ISimulator):
+    simulator: QuaPSim
+
+    def __init__(self, simulator: QuaPSim):
+        self.simulator = simulator
+
+    def process(self, circuits: List[Circuit], generation: int) -> None:
+        quapsim_circuits: List[QuapsimCircuit] = [
+            ga4qc_to_quapsim(circuit) for circuit in circuits
+        ]
+
+        logging.info(
+            f"Population redundancy in generation {generation}: {compute_redundancy(quapsim_circuits)}"
+        )
+
+        log_gate_types(quapsim_circuits)
+
+        if self.simulator.params.cache_size > 0:
+            self.simulator.build_cache(quapsim_circuits)
+            self.simulator.simulate_using_cache(
+                quapsim_circuits, set_unitary=True)
+        else:
+            self.simulator.simulate_without_cache(
+                quapsim_circuits, set_unitary=True)
+
+        for circuit, quapsim_circuit in zip(circuits, quapsim_circuits):
+            circuit.unitaries = [
+                quapsim_circuit.unitary
+            ]
+
+
+def ga4qc_to_quapsim(circuit: Circuit) -> QuapsimCircuit:
+    quapsim_circuit = QuapsimCircuit(circuit.qubit_num)
+
+    for gate in circuit.gates:
+        quapsim_gate = get_quapsim_gate(gate)
+        quapsim_circuit.apply(quapsim_gate)
+
+    return quapsim_circuit
+
+
+ALLOWED_THETAS = [
+    2 * np.pi / 2 ** i for i in range(5 + 1)
+]
+
+
+def random_gate(gate_types: Type[IGate], qubit_num: int) -> IGate:
+    GateType = choice(gate_types)
+    gate = GateType().randomize(qubit_num)
+
+    if issubclass(gate.__class__, IOptimizableGate):
+        theta = random.choice(ALLOWED_THETAS)
+        gate.set_params([theta])
+
+    return gate
+
+
+class RandomSeeder2(ISeeder):
+    params: GAParams
+
+    def __init__(self, params: GAParams):
+        self.params = params
+
+    def seed(self, population_size: int) -> List[Circuit]:
+        population = []
+
+        for _ in range(population_size):
+            gates = []
+
+            for _ in range(self.params.chromosome_length):
+                gate = random_gate(self.params.gate_set, self.params.qubit_num)
+                gates.append(gate)
+
+            circuit = Circuit(gates, self.params.qubit_num)
+
+            population.append(circuit)
+
+        return population
+
+
+class RandomGateMutation2(IMutation):
+
+    prob: float
+    gate_prob: float
+
+    ga_params: GAParams
+
+    def __init__(
+        self,
+        params: GAParams,
+        circ_prob: float = 1.0,
+        gate_prob: float = 0.1,
+    ):
+        self.ga_params = params
+
+        self.prob = circ_prob
+        self.gate_prob = gate_prob
+
+    def mutate(self, circuit: Circuit, generation: int) -> None:
+        for i, gate in enumerate(circuit.gates):
+            if random.random() < self.gate_prob:
+                circuit.gates[i] = random_gate(
+                    self.ga_params.gate_set, self.ga_params.qubit_num)
 
 
 @click.command()
@@ -246,20 +340,22 @@ def run_experiment(
     )
     simulator = QuaPSim(params, cache)
 
-    qubit_num = 9
+    qubit_num = 4  # 6
+
+    # Required gate count of gold solution is
+    # (#qubits/2 + 0.5) * #qubits + #qubits/2
 
     ga_params = GAParams(
-        population_size=1000,
+        population_size=5000,
         chromosome_length=15,
-        generations=200,
+        generations=10000,
         qubit_num=qubit_num,
         ancillary_qubit_num=0,
-        elitism_count=5,
-        gate_set=[Identity, H, X, Y, Z, CX, CY, CZ, S, T, CS, CT, Swap]
-        # gate_set=CLIFFORD_PLUS_T + [Identity]
+        elitism_count=10,
+        gate_set=[Identity, H, CPhase, Swap, Phase, X, Y, Z, CX, CY, CZ]
     )
 
-    target_dist = construct_bell_state_dist(qubit_num)
+    target_unitary = create_qft_unitary(qubit_num)
 
     logging.info(
         (
@@ -269,20 +365,20 @@ def run_experiment(
         )
     )
 
-    seeder = RandomSeeder(ga_params)
+    seeder = RandomSeeder2(ga_params)
 
     ga = GA(
         seeder=seeder,
         mutations=[
-            RandomGateMutation(ga_params,
-                               circ_prob=0.3, gate_prob=0.1)
+            RandomGateMutation2(ga_params,
+                                circ_prob=1, gate_prob=0.3)
         ],
-        crossovers=[OnePointCrossover(prob=0.5)],
+        crossovers=[OnePointCrossover(0.5)],
         processors=[
-            QuapsimSimulator(simulator=simulator),
-            JensenShannonFitness(
+            QuapsimSimulator(simulator),
+            AbsoluteUnitaryDistance(
                 params=ga_params,
-                target_dists=[target_dist]
+                target_unitaries=[target_unitary]
             ),
         ],
         selection=TournamentSelection(tourn_size=2, objective_i=0),
@@ -291,7 +387,12 @@ def run_experiment(
     ga.on_after_generation(LogFitnessStats())
     ga.on_after_generation(LogBestCircuit())
 
-    ga.run(ga_params)
+    # Avoid myrrad of warnings after recent macos update
+    # https://github.com/numpy/numpy/issues/28687
+    import warnings
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore')
+        ga.run(ga_params)
 
 
 if __name__ == "__main__":
