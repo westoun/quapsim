@@ -201,8 +201,10 @@ class QuapsimSimulator(ISimulator):
 
         log_gate_types(quapsim_circuits)
 
-        if self.simulator.params.cache_size > 0:
+        if self.simulator.params.cache_size > 0 and (generation - 1 ) % 10 == 0:
             self.simulator.build_cache(quapsim_circuits)
+
+        if self.simulator.params.cache_size > 0:
             self.simulator.simulate_using_cache(
                 quapsim_circuits, set_unitary=True)
         else:
@@ -371,7 +373,7 @@ def run_experiment(
         seeder=seeder,
         mutations=[
             RandomGateMutation2(ga_params,
-                                circ_prob=1, gate_prob=0.3)
+                                circ_prob=1, gate_prob=0.02)
         ],
         crossovers=[OnePointCrossover(0.5)],
         processors=[
