@@ -2,6 +2,7 @@
 
 import numpy as np
 from typing import List, Union
+import warnings
 
 from .interface import IGate
 from .single_qubit_gates import Gate, X
@@ -47,7 +48,8 @@ def create_unitary_of_gate(gate: IGate, qubit_num: int) -> np.ndarray:
             qubit_num,
         )
     else:
-        raise NotImplementedError(f"Unknown gate type for {gate} ({type(gate)})")
+        raise NotImplementedError(
+            f"Unknown gate type for {gate} ({type(gate)})")
 
 
 def create_identity_matrix(dim: int = 2) -> np.ndarray:
@@ -61,6 +63,7 @@ def create_swap_unitary(qubit1: int, qubit2: int, qubit_num: int) -> np.ndarray:
     cnot1 = create_controlled_matrix(X_MATRIX, qubit1, qubit2, qubit_num)
     cnot2 = create_controlled_matrix(X_MATRIX, qubit2, qubit1, qubit_num)
 
+    
     unitary = np.matmul(cnot1, unitary)
     unitary = np.matmul(cnot2, unitary)
     unitary = np.matmul(cnot1, unitary)
@@ -129,7 +132,8 @@ def create_controlled_matrix(
             elif i == target_qubit:
                 target_matrix = np.kron(target_matrix, base_matrix)
             else:
-                target_matrix = np.kron(target_matrix, create_identity_matrix(2))
+                target_matrix = np.kron(
+                    target_matrix, create_identity_matrix(2))
 
     # projector matrix at position of control qubit
     # base matrix at position of target qubit
@@ -165,7 +169,8 @@ def create_double_controlled_matrix(
             elif i == control_qubit2:
                 control_matrix00 = np.kron(control_matrix00, PROJECTOR_0)
             else:
-                control_matrix00 = np.kron(control_matrix00, create_identity_matrix(2))
+                control_matrix00 = np.kron(
+                    control_matrix00, create_identity_matrix(2))
 
     control_matrix01 = None
     for i in range(qubit_num):
@@ -183,7 +188,8 @@ def create_double_controlled_matrix(
             elif i == control_qubit2:
                 control_matrix01 = np.kron(control_matrix01, PROJECTOR_1)
             else:
-                control_matrix01 = np.kron(control_matrix01, create_identity_matrix(2))
+                control_matrix01 = np.kron(
+                    control_matrix01, create_identity_matrix(2))
 
     control_matrix10 = None
     for i in range(qubit_num):
@@ -201,7 +207,8 @@ def create_double_controlled_matrix(
             elif i == control_qubit2:
                 control_matrix10 = np.kron(control_matrix10, PROJECTOR_0)
             else:
-                control_matrix10 = np.kron(control_matrix10, create_identity_matrix(2))
+                control_matrix10 = np.kron(
+                    control_matrix10, create_identity_matrix(2))
 
     target_matrix = None
     for i in range(qubit_num):
@@ -223,7 +230,8 @@ def create_double_controlled_matrix(
             elif i == target_qubit:
                 target_matrix = np.kron(target_matrix, base_matrix)
             else:
-                target_matrix = np.kron(target_matrix, create_identity_matrix(2))
+                target_matrix = np.kron(
+                    target_matrix, create_identity_matrix(2))
 
     matrix = control_matrix00 + control_matrix01 + control_matrix10 + target_matrix
     return matrix
