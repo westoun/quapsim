@@ -313,6 +313,16 @@ class QuaPSim:
     def _simulate_using_cache_set_unitary(self, circuits: List[Circuit]) -> None:
         lookup_duration = datetime.now() - datetime.now()
 
+        # TODO: Remove
+        # Print cache entries
+        logging.info(f"Cached ngrams: {list(self.cache._dict.keys())}")
+
+        # TODO: Remove
+        from quapsim.cache.utils import create_key
+        cache_hits_by_ngram = {
+
+        }
+
         for circuit in circuits:
             circuit_unitary = create_identity_matrix(dim=2**circuit.qubit_num)
 
@@ -341,6 +351,14 @@ class QuaPSim:
                     circuit_unitary = np.matmul(
                         cached_unitary, circuit_unitary)
 
+                    # TODO: Remove
+                    cache_entry = create_key(
+                        circuit.gates[i: i + cache_window])
+                    if cache_entry in cache_hits_by_ngram:
+                        cache_hits_by_ngram[cache_entry] += 1
+                    else:
+                        cache_hits_by_ngram[cache_entry] = 1
+
                     logging.debug(
                         f"Using {circuit.gates[i: i + cache_window]} from cache."
                     )
@@ -348,6 +366,9 @@ class QuaPSim:
                     i = i + cache_window
 
             circuit.set_unitary(circuit_unitary)
+
+        # TODO: Remove
+        logging.info(f"Cache hits by ngram: {cache_hits_by_ngram}")
 
         logging.info(
             f"Time during merging spent on trie lookup: {lookup_duration}")
