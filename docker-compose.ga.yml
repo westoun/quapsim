@@ -17,6 +17,26 @@ services:
       && python3 run_ga_experiment.py -cs 0 -mr 100 -s 3 -t no_caching
       && python3 run_ga_experiment.py -cs 500 -mr 100 -s 4 -t caching_enabled
       && python3 run_ga_experiment.py -cs 0 -mr 100 -s 4 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 5 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 5 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 6 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 6 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 7 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 7 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 8 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 8 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 9 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 9 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 10 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 10 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 11 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 11 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 12 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 12 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 13 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 13 -t no_caching
+      && python3 run_ga_experiment.py -cs 500 -mr 100 -s 14 -t caching_enabled
+      && python3 run_ga_experiment.py -cs 0 -mr 100 -s 14 -t no_caching
       "
     volumes:
       - ./:/app/
