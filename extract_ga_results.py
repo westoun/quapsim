@@ -260,7 +260,7 @@ for log_file_path in log_file_paths:
                 cache_hits = json.loads(
                     cache_hit_frequencies.group(1).replace("'", "\""))
 
-                experiment["generations"][-1]["cache_hits"] = cache_hits
+                experiment["generations"][-1]["cache_hits_by_ngram"] = cache_hits
 
                 continue
 
