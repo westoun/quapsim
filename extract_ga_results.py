@@ -71,7 +71,9 @@ for log_file_path in log_file_paths:
                     "mean_fitness": None,
                     "best_fitness": None,
                     "best_circuit": None,
-                    "gate_type_dist": {}
+                    "gate_type_dist": {},
+                    "cached_ngrams": None,
+                    "cache_hits_by_ngram": None
                 })
                 new_generation = False
 
@@ -238,6 +240,27 @@ for log_file_path in log_file_paths:
                     gate_type_distribution.group(1).replace("'", "\""))
 
                 experiment["generations"][-1]["gate_type_dist"] = type_distribution
+
+                continue
+
+            cached_ngrams = re.search(
+                r"Cached ngrams: (\[.+\])", line
+            )
+            if cached_ngrams is not None:
+                cached_ngrams_list = json.loads(
+                    cached_ngrams.group(1).replace("'", "\""))
+
+                experiment["generations"][-1]["cached_ngrams"] = cached_ngrams_list
+
+                continue
+
+            cache_hit_frequencies = re.search(
+                r"Cache hits by ngram: (\{.+\})", line)
+            if cache_hit_frequencies is not None:
+                cache_hits = json.loads(
+                    cache_hit_frequencies.group(1).replace("'", "\""))
+
+                experiment["generations"][-1]["cache_hits"] = cache_hits
 
                 continue
 
