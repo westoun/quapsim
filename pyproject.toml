@@ -1,0 +1,54 @@
+
+# Need Poetry, because setuptools cannot handle extra sources, it seems
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+#[project]
+name = "quapsim"
+version = "0.1.0"
+description = "Cache-based Simulation for faster Quantum Circuit Synthesis and Compilation"
+license = "MIT"
+authors = [
+    "Christoph Stein <christoph.stein@jku.at>"
+]
+readme = "README.md"
+homepage = "https://github.com/westoun/quapsim"
+repository = "https://github.com/westoun/quapsim"
+documentation = "https://github.com/westoun/quapsim"
+keywords = ["quantum circuit simulation", "genetic algorithm", "quantum software engineering", "quantum circuit synthesis", "search heuristics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed"
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/westoun/quapsim/issues"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "2.2"
+
+# Tests
+pytest = {version = "*", optional = true }
+
+[tool.poetry.extras]
+test = ["pytest"]
+
+[tool.black]
+line-length=127
+
+[tool.pylint.format]
+max-line-length = "127"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3

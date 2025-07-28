@@ -1,12 +1,13 @@
 # Source: https://github.com/github/gitignore/blob/main/Python.gitignore
 
 *.json
+*.png
 
 .DS_Store
 
 data/
 tmp/
-results*/
+# results*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
