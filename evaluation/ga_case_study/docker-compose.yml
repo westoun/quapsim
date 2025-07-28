@@ -1,12 +1,11 @@
 version: "3.4"
 services:
   quapsim:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: quapsim
     command: >
       bash -c "
       echo start
+      && cd evaluation/ga_case_study
       && python3 run_ga_experiment.py -cs 500 -mr 100 -s 0 -t caching_enabled
       && python3 run_ga_experiment.py -cs 0 -mr 100 -s 0 -t no_caching
       && python3 run_ga_experiment.py -cs 500 -mr 100 -s 1 -t caching_enabled
@@ -39,4 +38,4 @@ services:
       && python3 run_ga_experiment.py -cs 0 -mr 100 -s 14 -t no_caching
       "
     volumes:
-      - ./:/app/
+      - ./results:/app/evaluation/ga_case_study/results

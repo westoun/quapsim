@@ -1,4 +1,5 @@
 click==8.1.8
+deap==1.4.2
 numpy==2.1.3
 quasim==1.0.0
 scipy==1.14.1

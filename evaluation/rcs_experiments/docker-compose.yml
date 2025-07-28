@@ -1,13 +1,11 @@
 version: "3.4"
 services:
   quapsim:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: quapsim
     command: >
       bash -c "
       echo start
-      && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 10000 -mr 200 -s 0 -t varying_redundancy
+      && cd evaluation/rcs_experiments
       && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.0 -cs 0 -mr 200 -s 0 -t varying_redundancy
       && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 10000 -mr 200 -s 0 -t varying_redundancy
       && python3 run_rcs_experiment.py -c 1000 -g 1000 -q 8 -r 0.1 -cs 0 -mr 200 -s 0 -t varying_redundancy
@@ -1451,4 +1449,4 @@ services:
       && python3 run_rcs_experiment.py -c 1000 -g 2000 -q 8 -r 0.7 -cs 0 -mr 200 -s 14 -t varying_gates
       "
     volumes:
-      - ./:/app/
+      - ./results:/app/evaluation/rcs_experiments/results

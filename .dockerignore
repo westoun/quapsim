@@ -1,7 +1,19 @@
 __pycache__/
 venv/
 tmp/
-results*/
+results/
+
+evaluation/ga_case_study/results/*.log
+evaluation/ga_case_study/results/*.png
+evaluation/ga_case_study/*.json
+evaluation/ga_case_study/*.ipynb
+
+evaluation/rcs_experiments/results/*.log
+evaluation/rcs_experiments/results/*.png
+evaluation/rcs_experiments/*.json
+evaluation/rcs_experiments/*.ipynb
 
 *.log 
 *.ipynb
+*.json
+*.png
