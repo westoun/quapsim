@@ -1,7 +1,7 @@
 # QuaPSim: Qua(ntum Simulation for) P(opulations made) Sim(ple)
 
 This repository contains the source code to the paper
-_"Cache-based Simulation for faster Quantum Circuit Synthesis and Compilation"_
+_"Cache-based Simulation for faster Quantum Circuit Synthesis"_
 by Stein, Klikovits, and Wimmer from the [Institute of Business Informatics - Software Engineering](https://se.jku.at/) at the [Johannes Kepler University](https://www.jku.at/en), Linz.
 
 ## Installation
