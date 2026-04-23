@@ -1,31 +1,37 @@
 
 from copy import deepcopy
-from statistics import mean, stdev
+import numpy as np
 import random
+from statistics import mean, stdev
 from typing import List, Type, Tuple
-from tqdm import tqdm
 
 from dataclasses import dataclass
 from quapsim.gates import IGate
 from quapsim import QuaPSim
 
 
-from utils.random_ import random_circuit
-from mutation import ReplaceGateMutation
-from crossover import TwoPointCrossover
-from selection import ISelection
-from fitness import Fitness
+from .utils.random_ import random_circuit
+from .utils.logging_ import log_epoch_results
+from .mutation import ReplaceGateMutation
+from .crossover import TwoPointCrossover
+from .selection import ISelection, RouletteSelection, \
+    TournamentSelection, NSGA2Selection
+from .fitness import Fitness
+
 
 @dataclass
 class GaParams:
-    qubit_num: int 
+    qubit_num: int
     gate_count: int
     population_size: int
-    mutation_prob: float 
+    mutation_prob: float
     crossover_prob: float
     max_generations: int
     simulator: QuaPSim
+    target_unitary: np.ndarray
     selection_strategy: str
+    results_path: str
+
 
 class GeneticAlgorithm:
     params: GaParams
@@ -40,10 +46,21 @@ class GeneticAlgorithm:
         self.mutation = ReplaceGateMutation(params.qubit_num)
         self.crossover = TwoPointCrossover()
         self.simulator = params.simulator
-        self.fitness = Fitness()
+        self.fitness = Fitness(
+            target_unitary=params.target_unitary
+        )
 
         # init different selection strategies
-
+        if params.selection_strategy == "tournament":
+            self.selection = TournamentSelection(
+                n=params.population_size, tournament_size=2)
+        elif params.selection_strategy == "roulette":
+            pass
+        elif params.selection_strategy == "nsga":
+            pass
+        else:
+            raise NotImplementedError(
+                f"No implementation found for selection strategy '{params.selection_strategy}'")
 
     def run(self):
         # log params
@@ -57,7 +74,7 @@ class GeneticAlgorithm:
         ]
 
         elite = []
-        for generation in tqdm(range(1, self.params.max_generations + 1), leave=False, desc="Generation"):
+        for generation in range(1, self.params.max_generations + 1):
             offspring = [deepcopy(circuit) for circuit in population]
 
             if generation > 1:
@@ -85,7 +102,10 @@ class GeneticAlgorithm:
 
             elite = [population[0]]
 
-            # Note: Fitness of best circuit is not necessarily the best 
+            log_epoch_results(
+                generation, fitness_scores[0], target_path=self.params.results_path)
+
+            # Note: Fitness of best circuit is not necessarily the best
             # fitness for each category, if NSGA-X is used.
 
             # Log results.

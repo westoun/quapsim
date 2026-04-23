@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from quapsim.gates import IGate
-from utils.random_ import random_gate
+from .utils.random_ import random_gate
 
 
 class ReplaceGateMutation():
