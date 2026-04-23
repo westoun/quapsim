@@ -2,7 +2,7 @@ import os
 from typing import Tuple
 
 
-def log_epoch_results(generation: int, best_fitness: Tuple[float], target_path: str) -> None:
+def log_epoch_results(generation: int, best_fitness: Tuple[float], population_redundancy: float, target_path: str) -> None:
 
     add_header = not os.path.exists(target_path)
 
@@ -14,11 +14,15 @@ def log_epoch_results(generation: int, best_fitness: Tuple[float], target_path: 
             for i in range(len(best_fitness)):
                 header += f"; fitness #{i}"
 
+            header += "; population redundancy"
+
             target_file.write(header + "\n")
 
         line = f"{generation}"
 
         for value in best_fitness:
             line += f"; {value}"
+
+        line += f"; {population_redundancy}"
 
         target_file.write(line + "\n")
