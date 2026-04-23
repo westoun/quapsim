@@ -31,7 +31,7 @@ class TournamentSelection(ISelection):
     def select(self, circuits: List[Circuit], fitness_scores: List[Tuple]) -> List[Circuit]:
         assert len(circuits) == len(fitness_scores)
 
-        selection = []
+        selection: List[Tuple[Circuit, Tuple]] = []
 
         for _ in range(self.n):
             candidate_indices: List[int] = sample(
@@ -43,7 +43,15 @@ class TournamentSelection(ISelection):
             winner_idx = scores.index(winner_score)
 
             winner = circuits[winner_idx]
-            selection.append(deepcopy(winner))
+            winner_fitness = fitness_scores[winner_idx]
+
+            selection.append((deepcopy(winner), winner_fitness))
+
+        selection.sort(key=lambda item: item[1][0])
+
+        selection = [
+            circuit for (circuit, fitness) in selection
+        ]
 
         return selection
 
