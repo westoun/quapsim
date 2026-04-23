@@ -86,16 +86,20 @@ class TournamentSelection(ISelection):
         # with variable reuse.
         elite, elite_fitness = get_best_circuit(circuits, fitness_scores)
 
+        distance_scores = [
+            scores[0] for scores in fitness_scores
+        ]
+
         selection: List[Tuple[Circuit, Tuple]] = []
 
         for _ in range(self.n):
             candidate_indices: List[int] = sample(
                 population=range(len(circuits)), k=self.tournament_size)
 
-            scores = [fitness_scores[i][0] for i in candidate_indices]
+            candidate_scores = [distance_scores[i] for i in candidate_indices]
 
-            winner_score = min(scores)
-            winner_idx = scores.index(winner_score)
+            winner_score = min(candidate_scores)
+            winner_idx = distance_scores.index(winner_score)
 
             winner = circuits[winner_idx]
             winner_fitness = fitness_scores[winner_idx]
