@@ -18,6 +18,7 @@ from quapsim.simulator.utils import (
 
 from ga import GaParams, GeneticAlgorithm
 
+
 def create_qft_unitary(qubit_num: int) -> np.ndarray:
     dim = 2 ** qubit_num
 
@@ -47,6 +48,14 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
     help="The amount of merging rounds used to build the cache.",
 )
 @click.option(
+    "--selection-strategy",
+    "-ss",
+    type=click.STRING,
+    default="roulette",
+    help=("The selection strategy to be used within the GA (must be 'roulette', 'tournament', or 'nsga'). "
+          "Default is 'roulette'."),
+)
+@click.option(
     "--seed",
     "-s",
     type=click.INT,
@@ -63,6 +72,7 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
 def run_experiment(
     cache_size,
     merging_rounds,
+    selection_strategy,
     seed,
     tag,
 ):
@@ -97,11 +107,11 @@ def run_experiment(
         population_size=5000,
         mutation_prob=0.02,
         crossover_prob=0.5,
-        max_generations=1_000,
+        max_generations=100,
         simulator=simulator,
         target_unitary=target_unitary,
-        selection_strategy="tournament",
-        results_path="results/experiment_tag_fitness.csv"
+        selection_strategy=selection_strategy,
+        results_path=f"results/experiment_{tag}_fitness.csv"
     )
 
     ga = GeneticAlgorithm(

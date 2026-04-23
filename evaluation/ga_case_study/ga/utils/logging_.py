@@ -12,7 +12,7 @@ def log_epoch_results(generation: int, best_fitness: Tuple[float], target_path: 
             header = "generation"
 
             for i in range(len(best_fitness)):
-                header += f"; fitness {i}"
+                header += f"; fitness #{i}"
 
             target_file.write(header + "\n")
 
