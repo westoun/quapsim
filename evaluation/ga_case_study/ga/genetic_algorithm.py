@@ -7,6 +7,7 @@ from typing import List, Type, Tuple
 
 from dataclasses import dataclass
 from quapsim.gates import IGate
+from quapsim import Circuit
 from quapsim import QuaPSim
 
 
@@ -55,7 +56,9 @@ class GeneticAlgorithm:
             self.selection = TournamentSelection(
                 n=params.population_size, tournament_size=2)
         elif params.selection_strategy == "roulette":
-            pass
+            self.selection = RouletteSelection(
+                n=params.population_size
+            )
         elif params.selection_strategy == "nsga":
             pass
         else:
@@ -98,7 +101,7 @@ class GeneticAlgorithm:
 
             fitness_scores: List[Tuple] = self.fitness.score(offspring)
 
-            population = self.selection.select(offspring, fitness_scores)
+            population, fitness_scores = self.selection.select(offspring, fitness_scores)
 
             elite = [population[0]]
 
