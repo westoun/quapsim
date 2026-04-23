@@ -40,7 +40,7 @@ class TournamentSelection(ISelection):
             scores = [fitness_scores[i][0] for i in candidate_indices]
 
             winner_score = min(scores)
-            winner_idx = fitness_scores.index(winner_score)
+            winner_idx = scores.index(winner_score)
 
             winner = circuits[winner_idx]
             selection.append(deepcopy(winner))
