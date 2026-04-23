@@ -121,12 +121,11 @@ def random_gate(qubit_num: int, param_count: int = 10, uniform_configuration_cho
         return _random_gate_uniform_by_gatetype(qubit_num, param_count)
 
 
-def random_circuit(qubit_num: int, gate_count: int, param_count: int) -> Circuit:
-    gates = []
+def random_circuit(qubit_num: int, gate_count: int, param_count: int = PARAM_COUNT) -> Circuit:
+    circuit = Circuit(qubit_num)
 
     for _ in range(gate_count):
         gate = random_gate(qubit_num, param_count)
-        gates.append(gate)
+        circuit.apply(gate)
 
-    circuit = Circuit(gates, qubit_num)
     return circuit
