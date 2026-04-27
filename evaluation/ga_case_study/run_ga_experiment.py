@@ -51,8 +51,8 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
     "--rebuild-frequency",
     "-rf",
     type=click.INT,
-    default=1,
-    help="The rebuild frequency of the cache. Default is every generation.",
+    default=10,
+    help="The rebuild frequency of the cache. Default is every 10 generations.",
 )
 @click.option(
     "--selection-strategy",
