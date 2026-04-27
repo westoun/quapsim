@@ -1,1 +1,1 @@
-from .genetic_algorithm import GeneticAlgorithm, GaParams
+from .genetic_algorithm import GeneticAlgorithm, ExperimentParams

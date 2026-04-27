@@ -8,7 +8,7 @@ from typing import List, Type, Tuple
 from dataclasses import dataclass
 from quapsim.gates import IGate
 from quapsim import Circuit
-from quapsim import QuaPSim
+from quapsim import QuaPSim, SimpleDictCache
 from quapsim.simulator.utils import compute_redundancy
 
 
@@ -20,38 +20,29 @@ from .crossover import TwoPointCrossover
 from .selection import ISelection, RouletteSelection, \
     TournamentSelection, NSGA2Selection
 from .fitness import Fitness
-
-
-@dataclass
-class GaParams:
-    qubit_num: int
-    gate_count: int
-    population_size: int
-    mutation_prob: float
-    crossover_prob: float
-    max_generations: int
-    simulator: QuaPSim
-    target_unitary: np.ndarray
-    selection_strategy: str
-    results_path: str
+from .params import ExperimentParams
 
 
 class GeneticAlgorithm:
-    params: GaParams
+    params: ExperimentParams
     mutation: ReplaceGateMutation
     crossover: TwoPointCrossover
     simulator: QuaPSim
     fitness: Fitness
     selection: ISelection
 
-    def __init__(self, params: GaParams):
+    def __init__(self, params: ExperimentParams):
         self.params = params
+
         self.mutation = ReplaceGateMutation(params.qubit_num)
         self.crossover = TwoPointCrossover()
-        self.simulator = params.simulator
         self.fitness = Fitness(
             target_unitary=params.target_unitary
         )
+
+        cache = SimpleDictCache()
+
+        self.simulator = QuaPSim(params.simulator_params, cache=cache)
 
         # init different selection strategies
         if params.selection_strategy == "tournament":

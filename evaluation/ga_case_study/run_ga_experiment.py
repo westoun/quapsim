@@ -16,7 +16,7 @@ from quapsim.simulator.utils import (
     compute_redundancy,
 )
 
-from ga import GaParams, GeneticAlgorithm
+from ga import ExperimentParams, GeneticAlgorithm
 
 
 def create_qft_unitary(qubit_num: int) -> np.ndarray:
@@ -87,13 +87,11 @@ def run_experiment(
         random.seed(seed)
         np.random.seed(seed)
 
-    cache = SimpleDictCache()
-    params = SimulatorParams(
+    simulator_params = SimulatorParams(
         processes=1,
         cache_size=cache_size,
         merging_rounds=merging_rounds,
     )
-    simulator = QuaPSim(params, cache)
 
     qubit_num = 4  # 6
 
@@ -101,21 +99,21 @@ def run_experiment(
     # (#qubits/2 + 0.5) * #qubits + #qubits/2
     target_unitary = create_qft_unitary(qubit_num)
 
-    ga_params = GaParams(
+    experiment_params = ExperimentParams(
         qubit_num=qubit_num,
         gate_count=15,
         population_size=5000,
         mutation_prob=0.02,
         crossover_prob=0.5,
         max_generations=100,
-        simulator=simulator,
+        simulator_params=simulator_params,
         target_unitary=target_unitary,
         selection_strategy=selection_strategy,
         results_path=f"results/experiment_{tag}.csv"
     )
 
     ga = GeneticAlgorithm(
-        params=ga_params
+        params=experiment_params
     )
 
     # Avoid myrrad of warnings after recent macos update
