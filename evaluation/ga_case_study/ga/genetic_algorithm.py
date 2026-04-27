@@ -13,7 +13,8 @@ from quapsim.simulator.utils import compute_redundancy
 
 
 from .utils.random_ import random_circuit
-from .utils.logging_ import log_epoch_results, GaResults
+from .utils.logging_ import log_epoch_results, GaResults, SimulatorResults, \
+    fetch_simulator_results, reset_simulator_log, remove_simulator_log
 from .mutation import ReplaceGateMutation
 from .crossover import TwoPointCrossover
 from .selection import ISelection, RouletteSelection, \
@@ -109,19 +110,22 @@ class GeneticAlgorithm:
 
             population_redundancy = compute_redundancy(population)
 
+            # Note: Fitness of best circuit is not necessarily the best
+            # fitness for each category, if NSGA-X is used.
             ga_results = GaResults(
                 best_fitness=fitness_scores[0],
                 population_redundancy=population_redundancy
             )
+
+            simulator_results = fetch_simulator_results()
+
             log_epoch_results(
                 generation,
                 ga_results=ga_results,
+                simulator_results=simulator_results,
                 target_path=self.params.results_path
             )
 
-            # Note: Fitness of best circuit is not necessarily the best
-            # fitness for each category, if NSGA-X is used.
+            reset_simulator_log()
 
-            # Log results.
-
-        # Remove log file to avoid disk blowup.
+        remove_simulator_log()

@@ -77,7 +77,7 @@ def run_experiment(
     tag,
 ):
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s - %(levelname)s: %(message)s",
         filename=f"results/experiment_{tag}_{str(uuid4())}.log",
         filemode="w",
@@ -111,7 +111,7 @@ def run_experiment(
         simulator=simulator,
         target_unitary=target_unitary,
         selection_strategy=selection_strategy,
-        results_path=f"results/experiment_{tag}_fitness.csv"
+        results_path=f"results/experiment_{tag}.csv"
     )
 
     ga = GeneticAlgorithm(
