@@ -89,7 +89,8 @@ class GeneticAlgorithm:
                             offspring[i].gates[j] = self.mutation.mutate(
                                 gate)
 
-            self.simulator.evaluate(offspring)
+            self._evaluate(generation, offspring)
+
             offspring.extend(elite)
 
             fitness_scores: List[Tuple] = self.fitness.score(offspring)
@@ -120,3 +121,18 @@ class GeneticAlgorithm:
             reset_simulator_log()
 
         remove_simulator_log()
+
+    def _evaluate(self, generation: int, population: List[Circuit]) -> None:
+        if self.params.simulator_params.cache_size > 0:
+
+            if (generation - 1) % self.params.cache_rebuild_frequency == 0:
+                self.simulator.build_cache(population)
+
+            self.simulator.simulate_using_cache(
+                population, set_unitary=True
+            )
+
+        else:
+            self.simulator.simulate_without_cache(
+                population, set_unitary=True
+            )

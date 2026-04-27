@@ -14,6 +14,7 @@ class ExperimentParams:
     crossover_prob: float
     max_generations: int
     simulator_params: SimulatorParams
+    cache_rebuild_frequency: int
     target_unitary: np.ndarray
     selection_strategy: str
     results_path: str

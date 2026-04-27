@@ -48,6 +48,13 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
     help="The amount of merging rounds used to build the cache.",
 )
 @click.option(
+    "--rebuild-frequency",
+    "-rf",
+    type=click.INT,
+    default=1,
+    help="The rebuild frequency of the cache. Default is every generation.",
+)
+@click.option(
     "--selection-strategy",
     "-ss",
     type=click.STRING,
@@ -72,6 +79,7 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
 def run_experiment(
     cache_size,
     merging_rounds,
+    rebuild_frequency,
     selection_strategy,
     seed,
     tag,
@@ -107,6 +115,7 @@ def run_experiment(
         crossover_prob=0.5,
         max_generations=100,
         simulator_params=simulator_params,
+        cache_rebuild_frequency=rebuild_frequency,
         target_unitary=target_unitary,
         selection_strategy=selection_strategy,
         results_path=f"results/experiment_{tag}.csv"
