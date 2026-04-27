@@ -14,7 +14,8 @@ from quapsim.simulator.utils import compute_redundancy
 
 from .utils.random_ import random_circuit
 from .utils.logging_ import log_epoch_results, GaResults, SimulatorResults, \
-    fetch_simulator_results, reset_simulator_log, remove_simulator_log
+    fetch_simulator_results, reset_simulator_log, remove_simulator_log, \
+    log_experiment_params, log_end_date
 from .mutation import ReplaceGateMutation
 from .crossover import TwoPointCrossover
 from .selection import ISelection, RouletteSelection, \
@@ -60,6 +61,7 @@ class GeneticAlgorithm:
 
     def run(self):
         # log params
+        log_experiment_params(self.params)
 
         population = [
             random_circuit(
@@ -115,12 +117,13 @@ class GeneticAlgorithm:
                 generation,
                 ga_results=ga_results,
                 simulator_results=simulator_results,
-                target_path=self.params.results_path
+                target_path_prefix=self.params.results_path_prefix
             )
 
             reset_simulator_log()
 
         remove_simulator_log()
+        log_end_date(self.params)
 
     def _evaluate(self, generation: int, population: List[Circuit]) -> None:
         if self.params.simulator_params.cache_size > 0:

@@ -1,9 +1,13 @@
 from dataclasses import dataclass
+from datetime import datetime
+import json
 import logging
 import os
 import re
 from statistics import mean
-from typing import Tuple
+from typing import Tuple, Any
+
+from ga.params import ExperimentParams
 
 
 def duration_to_seconds(duration: str) -> float:
@@ -105,7 +109,8 @@ def reset_simulator_log() -> None:
         log_file.write("")
 
 
-def log_epoch_results(generation: int, ga_results: GaResults, simulator_results: SimulatorResults, target_path: str) -> None:
+def log_epoch_results(generation: int, ga_results: GaResults, simulator_results: SimulatorResults, target_path_prefix: str) -> None:
+    target_path = f"{target_path_prefix}_results.csv"
 
     add_header = not os.path.exists(target_path)
 
@@ -130,3 +135,54 @@ def log_epoch_results(generation: int, ga_results: GaResults, simulator_results:
         line += f"; {simulator_results.cache_hits}; {simulator_results.bigram_hit_count}; {simulator_results.avg_cache_hit_length}"
 
         target_file.write(line + "\n")
+
+
+def save_to_json(obj, path: str) -> None:
+    with open(path, "w") as config_file:
+        json.dump(obj, config_file)
+
+
+def load_from_json(path: str) -> Any:
+    with open(path, "r") as config_file:
+        return json.load(config_file)
+
+
+def get_timestamp() -> str:
+    return str(datetime.now())
+
+
+def log_experiment_params(params: ExperimentParams) -> None:
+    target_path = f"{params.results_path_prefix}_config.json"
+
+    config = {
+        "meta": {
+            "start": get_timestamp(),
+            "results_path_prefix": params.results_path_prefix,
+            "seed": params.seed,
+        },
+        "qubit_num": params.qubit_num,
+        "gate_count": params.gate_count,
+        "ga_params": {
+            "population_size": params.population_size,
+            "mutation_prob": params.mutation_prob,
+            "crossover_prob": params.crossover_prob,
+            "max_generations": params.max_generations,
+            "selection_strategy": params.selection_strategy,
+        },
+        "caching_params": {
+            "cache_rebuild_frequency": params.cache_rebuild_frequency,
+            "cache_size": params.simulator_params.cache_size,
+            "merging_rounds": params.simulator_params.merging_rounds
+        },
+    }
+
+    save_to_json(config, target_path)
+
+
+def log_end_date(params: ExperimentParams) -> None:
+    target_path = f"{params.results_path_prefix}_config.json"
+    config = load_from_json(target_path)
+
+    config["meta"]["end"] = get_timestamp()
+
+    save_to_json(config, target_path)

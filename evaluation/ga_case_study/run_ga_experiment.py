@@ -118,7 +118,8 @@ def run_experiment(
         cache_rebuild_frequency=rebuild_frequency,
         target_unitary=target_unitary,
         selection_strategy=selection_strategy,
-        results_path=f"results/experiment_{tag}.csv"
+        seed=seed,
+        results_path_prefix=f"results/experiment_{tag}"
     )
 
     ga = GeneticAlgorithm(

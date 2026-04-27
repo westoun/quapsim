@@ -13,8 +13,9 @@ class ExperimentParams:
     mutation_prob: float
     crossover_prob: float
     max_generations: int
+    selection_strategy: str
     simulator_params: SimulatorParams
     cache_rebuild_frequency: int
     target_unitary: np.ndarray
-    selection_strategy: str
-    results_path: str
+    seed: int
+    results_path_prefix: str
