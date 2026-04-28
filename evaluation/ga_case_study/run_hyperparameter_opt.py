@@ -55,9 +55,8 @@ def estimate_ga_performance(mut_prob: float,
                             gate_count: int,
                             selection_strategy: str,
                             synthesis_target: str,
-                            seed_count: int) -> float:
-
-    log_file_prefix = f"results/hyperparameter_opt"
+                            seed_count: int,
+                            log_file_prefix: str) -> float:
 
     best_fitness_per_seed = []
 
@@ -179,12 +178,17 @@ def run_optimization(
 
     start_timestamp = get_timestamp()
 
+    # Add uuid to prefix to avoid multiple hyperparameter experiments
+    # assessing the same files, creating race conditions.
+    log_file_prefix = f"results/hyperparameter_opt_{str(uuid4())}"
+
     black_box_func = partial(estimate_ga_performance,
                              qubit_num=qubit_num,
                              gate_count=gate_count,
                              selection_strategy=selection_strategy,
                              synthesis_target=synthesis_target,
-                             seed_count=seed_count)
+                             seed_count=seed_count,
+                             log_file_prefix=log_file_prefix)
 
     optimizer = BayesianOptimization(
         f=black_box_func,
