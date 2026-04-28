@@ -52,6 +52,7 @@ def log_experiment_params(params: ExperimentParams) -> None:
         },
         "qubit_num": params.qubit_num,
         "gate_count": params.gate_count,
+        "target": params.synthesis_target,
         "ga_params": {
             "population_size": params.population_size,
             "mutation_prob": params.mutation_prob,

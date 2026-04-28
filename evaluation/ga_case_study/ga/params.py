@@ -19,3 +19,4 @@ class ExperimentParams:
     target_unitary: np.ndarray
     seed: int
     results_path_prefix: str
+    synthesis_target: str

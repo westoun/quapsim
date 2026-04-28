@@ -7,6 +7,7 @@ import random
 from random import choice
 from typing import List, Tuple, Union, Type
 from uuid import uuid4
+import warnings
 
 from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
 from quapsim import Circuit as QuapsimCircuit
@@ -16,7 +17,13 @@ from quapsim.simulator.utils import (
     compute_redundancy,
 )
 
+from ga.utils.random_ import random_circuit
 from ga import ExperimentParams, GeneticAlgorithm
+
+
+def create_random_unitary(qubit_num: int, gate_count: int) -> np.ndarray:
+    random_circuit_ = random_circuit(qubit_num, gate_count)
+    return random_circuit_.unitary
 
 
 def create_qft_unitary(qubit_num: int) -> np.ndarray:
@@ -55,12 +62,33 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
     help="The rebuild frequency of the cache. Default is every 10 generations.",
 )
 @click.option(
+    "--qubit-num",
+    "-qn",
+    type=click.INT,
+    default=6,
+    help="The number of qubits per circuit. Default is 6.",
+)
+@click.option(
+    "--gate-count",
+    "-gc",
+    type=click.INT,
+    default=20,
+    help="The number of gates per circuit. Default is 20.",
+)
+@click.option(
     "--selection-strategy",
     "-ss",
     type=click.STRING,
     default="roulette",
     help=("The selection strategy to be used within the GA (must be 'roulette', 'tournament', or 'nsga'). "
           "Default is 'roulette'."),
+)
+@click.option(
+    "--synthesis-target",
+    "-st",
+    type=click.STRING,
+    default="random",
+    help="The target of the synthesis (must be 'random' or 'qft'). Default is 'qft'."
 )
 @click.option(
     "--seed",
@@ -80,7 +108,10 @@ def run_experiment(
     cache_size,
     merging_rounds,
     rebuild_frequency,
+    qubit_num,
+    gate_count,
     selection_strategy,
+    synthesis_target,
     seed,
     tag,
 ):
@@ -95,31 +126,40 @@ def run_experiment(
         random.seed(seed)
         np.random.seed(seed)
 
+    if synthesis_target == "random":
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore')
+            target_unitary = create_random_unitary(
+                qubit_num=qubit_num, gate_count=gate_count)
+
+    elif synthesis_target == "qft":
+        # Required gate count of gold solution is
+        # (#qubits/2 + 0.5) * #qubits + #qubits/2
+        target_unitary = create_qft_unitary(qubit_num)
+    else:
+        raise NotImplementedError(
+            f"Unknown synthesis target: '{synthesis_target}'")
+
     simulator_params = SimulatorParams(
         processes=1,
         cache_size=cache_size,
         merging_rounds=merging_rounds,
     )
 
-    qubit_num = 4  # 6
-
-    # Required gate count of gold solution is
-    # (#qubits/2 + 0.5) * #qubits + #qubits/2
-    target_unitary = create_qft_unitary(qubit_num)
-
     experiment_params = ExperimentParams(
         qubit_num=qubit_num,
-        gate_count=15,
+        gate_count=gate_count,
         population_size=5000,
         mutation_prob=0.02,
         crossover_prob=0.5,
-        max_generations=100,
+        max_generations=20,
         simulator_params=simulator_params,
         cache_rebuild_frequency=rebuild_frequency,
         target_unitary=target_unitary,
         selection_strategy=selection_strategy,
         seed=seed,
-        results_path_prefix=f"results/experiment_{tag}"
+        results_path_prefix=f"results/experiment_{tag}",
+        synthesis_target=synthesis_target
     )
 
     ga = GeneticAlgorithm(
@@ -128,7 +168,6 @@ def run_experiment(
 
     # Avoid myrrad of warnings after recent macos update
     # https://github.com/numpy/numpy/issues/28687
-    import warnings
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore')
         ga.run()

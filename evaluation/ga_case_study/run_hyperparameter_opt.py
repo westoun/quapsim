@@ -17,6 +17,7 @@ from quapsim import SimulatorParams
 from ga import ExperimentParams, GeneticAlgorithm
 from ga.utils.logging_ import fetch_best_fitness, remove_ga_log, \
     get_timestamp
+from run_ga_experiment import create_qft_unitary, create_random_unitary
 
 
 def log_optimization_results(
@@ -26,6 +27,7 @@ def log_optimization_results(
         best_fitness: float,
         cross_prob: float,
         mut_prob: float,
+        synthesis_target: str,
         seed_count: int,
         start_timestamp: str,
         end_timestamp: str,
@@ -36,30 +38,15 @@ def log_optimization_results(
     with open(target_path, "a") as target_file:
 
         if add_header:
-            header = "qubit_num; gate_count; selection_strategy; "
+            header = "synthesis_target; qubit_num; gate_count; selection_strategy; "
             header += "best_fitness; cross_prob; mut_prob; "
             header += "seed_count; start_timestamp; end_timestamp"
             target_file.write(header + "\n")
 
-        line = f"{qubit_num}; {gate_count}; {selection_strategy}; "
+        line = f"{synthesis_target}; {qubit_num}; {gate_count}; {selection_strategy}; "
         line += f"{best_fitness}; {cross_prob}; {mut_prob}; "
         line += f"{seed_count}; {start_timestamp}; {end_timestamp}"
         target_file.write(line + "\n")
-
-
-def create_qft_unitary(qubit_num: int) -> np.ndarray:
-    dim = 2 ** qubit_num
-
-    dft_matrix = np.zeros((dim, dim), dtype=np.complex128)
-
-    w = np.pow(np.e, 2 * np.pi * 1j / dim)
-
-    for i in range(dim):
-        for j in range(dim):
-            dft_matrix[i, j] = np.pow(w, i * j)
-
-    unitary = 1 / np.pow(dim, 0.5) * dft_matrix
-    return unitary
 
 
 def estimate_ga_performance(mut_prob: float,
@@ -67,9 +54,10 @@ def estimate_ga_performance(mut_prob: float,
                             qubit_num: int,
                             gate_count: int,
                             selection_strategy: str,
+                            synthesis_target: str,
                             seed_count: int) -> float:
 
-    log_file_prefix = f"results/hyperparameter_opt_{str(uuid4())}"
+    log_file_prefix = f"results/hyperparameter_opt"
 
     best_fitness_per_seed = []
 
@@ -90,11 +78,23 @@ def estimate_ga_performance(mut_prob: float,
         with open(log_file_path, "w") as log_file:
             log_file.write("")
 
+        if synthesis_target == "random":
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore')
+                target_unitary = create_random_unitary(
+                    qubit_num=qubit_num, gate_count=gate_count)
+
+        elif synthesis_target == "qft":
+            # Required gate count of gold solution is
+            # (#qubits/2 + 0.5) * #qubits + #qubits/2
+            target_unitary = create_qft_unitary(qubit_num)
+        else:
+            raise NotImplementedError(
+                f"Unknown synthesis target: '{synthesis_target}'")
+
         simulator_params = SimulatorParams(
             cache_size=0
         )
-
-        target_unitary = create_qft_unitary(qubit_num)
 
         experiment_params = ExperimentParams(
             qubit_num=qubit_num,
@@ -108,7 +108,8 @@ def estimate_ga_performance(mut_prob: float,
             target_unitary=target_unitary,
             selection_strategy=selection_strategy,
             seed=seed,
-            results_path_prefix=log_file_prefix
+            results_path_prefix=log_file_prefix,
+            synthesis_target=synthesis_target
         )
 
         ga = GeneticAlgorithm(
@@ -155,6 +156,13 @@ def estimate_ga_performance(mut_prob: float,
           "Default is 'roulette'."),
 )
 @click.option(
+    "--synthesis-target",
+    "-st",
+    type=click.STRING,
+    default="random",
+    help="The target of the synthesis (must be 'random' or 'qft'). Default is 'qft'."
+)
+@click.option(
     "--seed-count",
     "-sc",
     type=click.INT,
@@ -165,13 +173,18 @@ def run_optimization(
         qubit_num: int,
         gate_count: int,
         selection_strategy: str,
+        synthesis_target: str,
         seed_count: int
 ):
 
     start_timestamp = get_timestamp()
 
-    black_box_func = partial(estimate_ga_performance, qubit_num=qubit_num, gate_count=gate_count,
-                             selection_strategy=selection_strategy, seed_count=seed_count)
+    black_box_func = partial(estimate_ga_performance,
+                             qubit_num=qubit_num,
+                             gate_count=gate_count,
+                             selection_strategy=selection_strategy,
+                             synthesis_target=synthesis_target,
+                             seed_count=seed_count)
 
     optimizer = BayesianOptimization(
         f=black_box_func,
@@ -184,7 +197,7 @@ def run_optimization(
 
     optimizer.maximize(
         init_points=5,
-        n_iter=15
+        n_iter=15,
     )
 
     best_fitness = -1 * optimizer.max["target"]
@@ -200,6 +213,7 @@ def run_optimization(
         best_fitness=best_fitness,
         cross_prob=cross_prob,
         mut_prob=mut_prob,
+        synthesis_target=synthesis_target,
         seed_count=seed_count,
         start_timestamp=start_timestamp,
         end_timestamp=end_timestamp,
