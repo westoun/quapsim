@@ -69,13 +69,15 @@ def estimate_ga_performance(mut_prob: float,
                             selection_strategy: str,
                             seed_count: int) -> float:
 
+    log_file_prefix = f"results/hyperparameter_opt_{str(uuid4())}"
+
     best_fitness_per_seed = []
 
     for seed in range(seed_count):
         random.seed(seed)
         np.random.seed(seed)
 
-        log_file_path = f"results/hyperparameter_opt.log"
+        log_file_path = f"{log_file_prefix}.log"
         logging.basicConfig(
             level=logging.DEBUG,
             format="%(asctime)s - %(levelname)s: %(message)s",
@@ -100,13 +102,13 @@ def estimate_ga_performance(mut_prob: float,
             population_size=5000,
             mutation_prob=mut_prob,
             crossover_prob=cross_prob,
-            max_generations=10,  # TODO: Change to 100
+            max_generations=100,
             simulator_params=simulator_params,
             cache_rebuild_frequency=1,
             target_unitary=target_unitary,
             selection_strategy=selection_strategy,
             seed=seed,
-            results_path_prefix=f"results/hyperparameter_opt"
+            results_path_prefix=log_file_prefix
         )
 
         ga = GeneticAlgorithm(
@@ -181,8 +183,8 @@ def run_optimization(
     )
 
     optimizer.maximize(
-        init_points=2,  # TODO: Change to 5.
-        n_iter=3,  # TODO: Change to 15
+        init_points=5,
+        n_iter=15
     )
 
     best_fitness = -1 * optimizer.max["target"]
