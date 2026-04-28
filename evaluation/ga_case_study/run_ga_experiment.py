@@ -4,18 +4,10 @@ import click
 import logging
 import numpy as np
 import random
-from random import choice
-from typing import List, Tuple, Union, Type
 from uuid import uuid4
 import warnings
 
-from quapsim import QuaPSim, SimulatorParams, SimpleDictCache
-from quapsim import Circuit as QuapsimCircuit
-from quapsim.gates import Gate as QuapsimGate
-import quapsim.gates
-from quapsim.simulator.utils import (
-    compute_redundancy,
-)
+from quapsim import SimulatorParams
 
 from ga.utils.random_ import random_circuit
 from ga import ExperimentParams, GeneticAlgorithm
