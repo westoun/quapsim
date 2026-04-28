@@ -76,3 +76,39 @@ def log_end_date(params: ExperimentParams) -> None:
     config["meta"]["end"] = get_timestamp()
 
     save_to_json(config, target_path)
+
+
+def fetch_best_fitness(params: ExperimentParams) -> Tuple:
+    results_path = f"{params.results_path_prefix}_results.csv"
+
+    with open(results_path, "r") as results_file:
+
+        lines = results_file.readlines()
+
+        fitness_col_ids = []
+
+        col_names = lines[0].split("; ")
+        for j, col_name in enumerate(col_names):
+            if "fitness" in col_name:
+                fitness_col_ids.append(j)
+
+        fitness_values = []
+
+        last_entries = lines[-1].split("; ")
+        for col_id in fitness_col_ids:
+            col_entry = last_entries[col_id]
+
+            col_entry = col_entry.strip()
+
+            fitness_score = float(col_entry)
+            fitness_values.append(fitness_score)
+
+        return fitness_values
+
+
+def remove_ga_log(params: ExperimentParams) -> None:
+    config_path = f"{params.results_path_prefix}_config.json"
+    results_path = f"{params.results_path_prefix}_results.csv"
+
+    os.remove(config_path)
+    os.remove(results_path)
