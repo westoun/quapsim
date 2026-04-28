@@ -83,6 +83,22 @@ def create_qft_unitary(qubit_num: int) -> np.ndarray:
     help="The target of the synthesis (must be 'random' or 'qft'). Default is 'qft'."
 )
 @click.option(
+    "--crossover_prob",
+    "-cp",
+    "crossover_prob",
+    type=click.FLOAT,
+    default=0.5,
+    help="The probability of performing crossover between two individuals.",
+)
+@click.option(
+    "--mutation_prob",
+    "-mp",
+    "mutation_prob",
+    type=click.FLOAT,
+    default=0.02,
+    help="The probability of mutating a single gate.",
+)
+@click.option(
     "--seed",
     "-s",
     type=click.INT,
@@ -104,6 +120,8 @@ def run_experiment(
     gate_count,
     selection_strategy,
     synthesis_target,
+    crossover_prob,
+    mutation_prob,
     seed,
     tag,
 ):
@@ -142,8 +160,8 @@ def run_experiment(
         qubit_num=qubit_num,
         gate_count=gate_count,
         population_size=5000,
-        mutation_prob=0.02,
-        crossover_prob=0.5,
+        mutation_prob=mutation_prob,
+        crossover_prob=crossover_prob,
         max_generations=20,
         simulator_params=simulator_params,
         cache_rebuild_frequency=rebuild_frequency,
