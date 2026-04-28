@@ -15,7 +15,36 @@ import warnings
 from quapsim import SimulatorParams
 
 from ga import ExperimentParams, GeneticAlgorithm
-from ga.utils.logging_ import fetch_best_fitness, remove_ga_log
+from ga.utils.logging_ import fetch_best_fitness, remove_ga_log, \
+    get_timestamp
+
+
+def log_optimization_results(
+        qubit_num: int,
+        gate_count: int,
+        selection_strategy: str,
+        best_fitness: float,
+        cross_prob: float,
+        mut_prob: float,
+        seed_count: int,
+        start_timestamp: str,
+        end_timestamp: str,
+        target_path: str) -> None:
+
+    add_header = not path.exists(target_path)
+
+    with open(target_path, "a") as target_file:
+
+        if add_header:
+            header = "qubit_num; gate_count; selection_strategy; "
+            header += "best_fitness; cross_prob; mut_prob; "
+            header += "seed_count; start_timestamp; end_timestamp"
+            target_file.write(header + "\n")
+
+        line = f"{qubit_num}; {gate_count}; {selection_strategy}; "
+        line += f"{best_fitness}; {cross_prob}; {mut_prob}; "
+        line += f"{seed_count}; {start_timestamp}; {end_timestamp}"
+        target_file.write(line + "\n")
 
 
 def create_qft_unitary(qubit_num: int) -> np.ndarray:
@@ -137,6 +166,8 @@ def run_optimization(
         seed_count: int
 ):
 
+    start_timestamp = get_timestamp()
+
     black_box_func = partial(estimate_ga_performance, qubit_num=qubit_num, gate_count=gate_count,
                              selection_strategy=selection_strategy, seed_count=seed_count)
 
@@ -150,13 +181,28 @@ def run_optimization(
     )
 
     optimizer.maximize(
-        init_points=5,  # TODO: Change to 5.
-        n_iter=5,  # TODO: Change to 15
+        init_points=2,  # TODO: Change to 5.
+        n_iter=3,  # TODO: Change to 15
     )
 
-    # print(-1 * optimizer.max)
+    best_fitness = -1 * optimizer.max["target"]
+    cross_prob = optimizer.max["params"]["cross_prob"]
+    mut_prob = optimizer.max["params"]["mut_prob"]
 
-    # write best solution to file if not exists.
+    end_timestamp = get_timestamp()
+
+    log_optimization_results(
+        qubit_num=qubit_num,
+        gate_count=gate_count,
+        selection_strategy=selection_strategy,
+        best_fitness=best_fitness,
+        cross_prob=cross_prob,
+        mut_prob=mut_prob,
+        seed_count=seed_count,
+        start_timestamp=start_timestamp,
+        end_timestamp=end_timestamp,
+        target_path="results/hyperparameter_tuning_results.csv"
+    )
 
 
 if __name__ == "__main__":
