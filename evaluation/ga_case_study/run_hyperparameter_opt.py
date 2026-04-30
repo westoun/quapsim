@@ -58,6 +58,8 @@ def estimate_ga_performance(mut_prob: float,
                             seed_count: int,
                             log_file_prefix: str) -> float:
 
+    start_timestamp = get_timestamp()
+
     best_fitness_per_seed = []
 
     for seed in range(seed_count):
@@ -125,6 +127,22 @@ def estimate_ga_performance(mut_prob: float,
         best_fitness_per_seed.append(fitness_scores[0])
 
         remove_ga_log(experiment_params)
+
+    end_timestamp = get_timestamp()
+
+    log_optimization_results(
+        qubit_num=qubit_num,
+        gate_count=gate_count,
+        selection_strategy=selection_strategy,
+        best_fitness=median(best_fitness_per_seed),
+        cross_prob=cross_prob,
+        mut_prob=mut_prob,
+        synthesis_target=synthesis_target,
+        seed_count=seed_count,
+        start_timestamp=start_timestamp,
+        end_timestamp=end_timestamp,
+        target_path=f"{log_file_prefix}_opt_step_results.csv"
+    )
 
     # Return -1 * median since bayesian opt framework was
     # designed for maximization problems.
