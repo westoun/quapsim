@@ -100,7 +100,7 @@ def estimate_ga_performance(mut_prob: float,
         experiment_params = ExperimentParams(
             qubit_num=qubit_num,
             gate_count=gate_count,
-            population_size=5000,
+            population_size=1000,
             mutation_prob=mut_prob,
             crossover_prob=cross_prob,
             max_generations=100,
