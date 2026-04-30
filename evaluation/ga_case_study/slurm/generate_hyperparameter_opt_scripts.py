@@ -4,7 +4,7 @@ qubit_nums = [4, 6, 8]
 gate_counts = [10, 15, 20, 25, 30]
 selection_strategies = ["roulette"]
 synthesis_targets = ["random"]
-seed_count = 20
+seed_count = 5
 
 with open("evaluation/ga_case_study/slurm/hyperparameter_search.sh", "w") as target_file:
 
