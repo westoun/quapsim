@@ -125,10 +125,13 @@ def run_experiment(
     seed,
     tag,
 ):
+    
+    target_path_prefix = f"results/experiment_{tag}_{str(uuid4())}"
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)s: %(message)s",
-        filename=f"results/experiment_{tag}_{str(uuid4())}.log",
+        filename=f"{target_path_prefix}.log",
         filemode="w",
     )
 
@@ -168,7 +171,7 @@ def run_experiment(
         target_unitary=target_unitary,
         selection_strategy=selection_strategy,
         seed=seed,
-        results_path_prefix=f"results/experiment_{tag}",
+        results_path_prefix=target_path_prefix,
         synthesis_target=synthesis_target
     )
 
