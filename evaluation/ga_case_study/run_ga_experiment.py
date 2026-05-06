@@ -165,7 +165,7 @@ def run_experiment(
         population_size=1000,
         mutation_prob=mutation_prob,
         crossover_prob=crossover_prob,
-        max_generations=10_000,
+        max_generations=5_000,
         simulator_params=simulator_params,
         cache_rebuild_frequency=rebuild_frequency,
         target_unitary=target_unitary,
