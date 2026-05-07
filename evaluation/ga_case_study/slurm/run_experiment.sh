@@ -3,7 +3,7 @@
 #SBATCH --output=logs/slurm.%j.%x.out
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH --time=10-00:00:00
+#SBATCH --time=4-00:00:00
 
 echo "Activate Python and virtualenv"
 cd /home/ws/ws16/quapsim/evaluation/ga_case_study
