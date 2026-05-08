@@ -94,7 +94,8 @@ def estimate_ga_performance(mut_prob: float,
                 f"Unknown synthesis target: '{synthesis_target}'")
 
         simulator_params = SimulatorParams(
-            cache_size=0
+            cache_size=100,
+            merging_rounds=100
         )
 
         experiment_params = ExperimentParams(
@@ -105,7 +106,7 @@ def estimate_ga_performance(mut_prob: float,
             crossover_prob=cross_prob,
             max_generations=100,
             simulator_params=simulator_params,
-            cache_rebuild_frequency=1,
+            cache_rebuild_frequency=10,
             target_unitary=target_unitary,
             selection_strategy=selection_strategy,
             seed=seed,
