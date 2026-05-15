@@ -39,11 +39,20 @@ class RouletteSelection(ISelection):
         distance_scores = [
             scores[0] for scores in fitness_scores
         ]
-        max_distance = max(distance_scores)
 
-        similarity_scores = [
-            max_distance - distance for distance in distance_scores
-        ]
+        max_distance = max(distance_scores)
+        min_distance = min(distance_scores)
+
+        # Avoid getting value error in random selection if max_distance equals 
+        # min_distance. (Total of weights must be greater than zero).
+        if abs(max_distance - min_distance) < 0.001: 
+            similarity_scores = [
+                1 for _ in distance_scores
+            ] 
+        else:
+            similarity_scores = [
+                max_distance - distance for distance in distance_scores
+            ]
 
         # Combine circuits and their fitnesses here, to simplify
         # sorting of selected solutions.
